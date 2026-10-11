@@ -15,11 +15,11 @@ Luna brings queues, notes, listing review, image tools, inventory comparison and
 - Statistics and spreadsheet-export logic, with Unlisted kept separate from total work.
 - A consistent light interface, accessible dropdowns and reduced-motion support.
 
-This is the **public-safe edition of Luna 2.0.1**. Company spreadsheet connections, catalog endpoints, internal target sites, AI transport implementations and backend deployments are deliberately absent. Features that depend on those services are unavailable in this edition. This release does not connect to any organization's systems, provide access to work data, or include credentials.
+This is the **public-safe edition of Luna 2.0.2**. Company spreadsheet connections, catalog endpoints, internal target sites, AI transport implementations and backend deployments are deliberately absent. Features that depend on those services are unavailable in this edition. This release does not connect to any organization's systems, provide access to work data, or include credentials.
 
 ## Install in Chrome
 
-1. Download the latest `Luna-2.0.1-public.zip` from [Releases](https://github.com/Ali-Abu-Fadalah/Luna/releases).
+1. Download the latest `Luna-2.0.2-public.zip` from [Releases](https://github.com/Ali-Abu-Fadalah/Luna/releases).
 2. Extract the ZIP to a folder you can keep on your computer.
 3. Open `chrome://extensions` and turn on **Developer mode**.
 4. Choose **Load unpacked** and select the extracted `luna` folder—the folder containing `manifest.json`.

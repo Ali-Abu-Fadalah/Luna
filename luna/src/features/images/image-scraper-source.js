@@ -141,6 +141,40 @@
     const source = imageSources(image)[0] || "";
     return dubiCarsLargeImages.get(dubiCarsPhotoKey(source)) || source;
   };
+  const embeddedDubizzleImages = () => {
+    if (!/(^|\.)dubizzle\.com$/i.test(location.hostname)) return [];
+    const found = [];
+    const seen = new Set();
+    const add = (value) => {
+      if (typeof value !== "string" || !/dbz-images\.dubizzle\.com/i.test(value)) return;
+      const url = originalSizeUrl(value);
+      const key = canonicalKey(url);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      found.push({ alt: "", url });
+    };
+    const visit = (value, depth = 0) => {
+      if (!value || typeof value !== "object" || depth > 12) return;
+      if (Array.isArray(value)) {
+        value.forEach((entry) => visit(entry, depth + 1));
+        return;
+      }
+      Object.entries(value).forEach(([key, entry]) => {
+        if (key === "photos" && Array.isArray(entry)) entry.forEach(add);
+        visit(entry, depth + 1);
+      });
+    };
+    document
+      .querySelectorAll("script[type='application/json'],script#__NEXT_DATA__")
+      .forEach((script) => {
+        try {
+          visit(JSON.parse(script.textContent));
+        } catch (error) {
+          return;
+        }
+      });
+    return found;
+  };
   const waitForDotSelection = async (dot) => {
     for (let attempt = 0; attempt < 20; attempt += 1) {
       if (dot.classList.contains("active")) return true;
@@ -274,6 +308,7 @@
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   indexDubiCarsLargeImages();
+  const dubizzleImages = embeddedDubizzleImages();
   const rotatingCarouselImages = await collectRotatingCarouselImages();
 
   const roots = new Set();
@@ -336,9 +371,11 @@
     .filter((candidate) => candidate.images.length)
     .sort((left, right) => right.score - left.score || right.images.length - left.images.length);
 
-  let images = rotatingCarouselImages.length
-    ? [...rotatingCarouselImages, ...(scored[0]?.images || [])]
-    : scored[0]?.images || [];
+  let images = dubizzleImages.length
+    ? [...dubizzleImages, ...rotatingCarouselImages, ...(scored[0]?.images || [])]
+    : rotatingCarouselImages.length
+      ? [...rotatingCarouselImages, ...(scored[0]?.images || [])]
+      : scored[0]?.images || [];
   if (images.length < 3) {
     const fallback = [];
     const addFallback = (value, alt = "") => {

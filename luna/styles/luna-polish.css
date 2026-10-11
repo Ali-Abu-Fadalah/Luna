@@ -2102,26 +2102,27 @@ body {
   }
 }
 
-/* Compact Work Queue rhythm: independent columns avoid tall fields stretching their neighbors. */
-.app-shell .queue-form-grid.queue-form-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: 9px;
-}
-
-.queue-form-column {
+/* Work Queue keeps the vehicle identity easy to scan before the supporting details. */
+.queue-listed-layout {
   display: grid;
   min-width: 0;
-  align-content: start;
   gap: 12px;
 }
 
-.queue-form-column > label {
+.queue-listed-layout > label,
+.app-shell .queue-detail-grid > label {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 5px;
+}
+
+.app-shell .queue-form-grid.queue-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  align-items: start;
+  gap: 12px 9px;
 }
 
 .queue-trim-control {
@@ -2255,7 +2256,7 @@ body {
 }
 
 @media (max-width: 310px) {
-  .app-shell .queue-form-grid.queue-form-columns {
+  .app-shell .queue-form-grid.queue-detail-grid {
     grid-template-columns: 1fr;
   }
 

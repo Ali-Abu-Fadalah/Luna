@@ -6,7 +6,7 @@ Luna's public release is separated from private organization configuration and d
 
 Use GitHub's private vulnerability-reporting feature if it is available on this repository. If it is unavailable, contact the repository owner through a private channel before sending details. Do not put credentials, spreadsheet URLs, customer data, proof containing real records, or exploitable private-system information into a public issue.
 
-Include the Luna version, the affected component, reproduction steps using synthetic data, and the impact you observed. The current supported public release is 2.0.1.
+Include the Luna version, the affected component, reproduction steps using synthetic data, and the impact you observed. The current supported public release is 2.0.2.
 
 ## Before publishing a change
 

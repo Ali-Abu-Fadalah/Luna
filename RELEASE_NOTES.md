@@ -1,4 +1,10 @@
-Luna 2.0.1 is a public-safe update to the calm Chrome side panel for organizing and reviewing vehicle-listing work.
+Luna 2.0.2 is a public-safe update to the calm Chrome side panel for organizing and reviewing vehicle-listing work.
+
+## Cleaner Work Queue, complete Dubizzle galleries
+
+Work Queue now gives Make & Model its own full row, followed by a full-width, copyable Trim control. The remaining details stay in a clean two-column grid below.
+
+On Dubizzle, Luna now reads the complete listing gallery supplied with the page. Image collection no longer depends on manually opening the hidden photos first.
 
 ## Correct model and trim matching
 
@@ -20,6 +26,6 @@ Company spreadsheet deployments, catalog connections, internal site addresses, p
 
 ## Install
 
-Download **Luna-2.0.1-public.zip**, extract it, and select its **luna** folder through Chrome's **Load unpacked** control at `chrome://extensions`. Developer mode must be enabled. Chrome 116 or later is required; no build step is needed.
+Download **Luna-2.0.2-public.zip**, extract it, and select its **luna** folder through Chrome's **Load unpacked** control at `chrome://extensions`. Developer mode must be enabled. Chrome 116 or later is required; no build step is needed.
 
 The matching **.sha256** file lets you verify the download. See the repository's README, privacy notice and security policy for permissions, limitations and safe reporting.

@@ -966,8 +966,44 @@
               <article class="queue-card queue-form-card">
                 <p id="queue-listed-fields-kicker" class="card-kicker">Listed fields · P:W</p>
                 <div id="queue-motors-listed-fields">
-                  <div class="queue-form-grid queue-form-columns">
-                    <div class="queue-form-column">
+                  <div class="queue-listed-layout">
+                    <label class="queue-live-label queue-model-field"
+                      >Make &amp; Model
+                      <span id="queue-ayshei-model-status" data-source="none" hidden></span>
+                      <input
+                        id="queue-listed-make-model"
+                        type="search"
+                        autocomplete="off"
+                        spellcheck="false"
+                        placeholder="Search live Ayshei models"
+                      />
+                      <span id="queue-ayshei-model-message" hidden></span>
+                      <span
+                        id="queue-ayshei-model-results"
+                        class="queue-live-results"
+                        role="listbox"
+                        aria-label="Work Queue Make and Model results"
+                      ></span>
+                    </label>
+                    <label class="queue-live-label queue-trim-field"
+                      >Trim
+                      <span id="queue-ayshei-trim-status" data-source="none" hidden></span>
+                      <span class="queue-trim-control">
+                        <input
+                          id="queue-listed-trim-copy"
+                          class="queue-trim-copy"
+                          type="text"
+                          readonly
+                          aria-label="Selected trim, copyable text"
+                          placeholder="Choose model first"
+                        />
+                        <select id="queue-listed-trim" disabled data-luna-select="">
+                          <option value="">Choose a live trim</option>
+                        </select>
+                      </span>
+                      <span id="queue-ayshei-trim-message" hidden></span>
+                    </label>
+                    <div class="queue-form-grid queue-detail-grid">
                       <label
                         >Category
                         <select id="queue-listed-category" data-luna-select="">
@@ -977,23 +1013,9 @@
                           <option value="NEW">NEW</option>
                         </select>
                       </label>
-                      <label class="queue-live-label"
-                        >Trim
-                        <span id="queue-ayshei-trim-status" data-source="none" hidden></span>
-                        <span class="queue-trim-control">
-                          <input
-                            id="queue-listed-trim-copy"
-                            class="queue-trim-copy"
-                            type="text"
-                            readonly
-                            aria-label="Selected trim, copyable text"
-                            placeholder="Choose model first"
-                          />
-                          <select id="queue-listed-trim" disabled data-luna-select="">
-                            <option value="">Choose a live trim</option>
-                          </select>
-                        </span>
-                        <span id="queue-ayshei-trim-message" hidden></span>
+                      <label
+                        >Condition
+                        <input id="queue-listed-condition" type="text" value="VERY_GOOD" readonly />
                       </label>
                       <label
                         >Color
@@ -1028,6 +1050,14 @@
                           </select></span
                         >
                       </label>
+                      <label id="queue-listed-transmission-field"
+                        >Transmission
+                        <select id="queue-listed-transmission" data-luna-select="">
+                          <option value="">Choose transmission</option>
+                          <option value="AUTOMATIC">AUTOMATIC</option>
+                          <option value="MANUAL">MANUAL</option>
+                        </select>
+                      </label>
                       <label id="queue-listed-specs-field"
                         >Specs
                         <select id="queue-listed-specs" data-luna-select="">
@@ -1040,38 +1070,6 @@
                           <option value="Japanese">Japanese</option>
                           <option value="Korean">Korean</option>
                           <option value="Other">Other</option>
-                        </select>
-                      </label>
-                    </div>
-                    <div class="queue-form-column">
-                      <label class="queue-live-label"
-                        >Make &amp; Model
-                        <span id="queue-ayshei-model-status" data-source="none" hidden></span>
-                        <input
-                          id="queue-listed-make-model"
-                          type="search"
-                          autocomplete="off"
-                          spellcheck="false"
-                          placeholder="Search live Ayshei models"
-                        />
-                        <span id="queue-ayshei-model-message" hidden></span>
-                        <span
-                          id="queue-ayshei-model-results"
-                          class="queue-live-results"
-                          role="listbox"
-                          aria-label="Work Queue Make and Model results"
-                        ></span>
-                      </label>
-                      <label
-                        >Condition
-                        <input id="queue-listed-condition" type="text" value="VERY_GOOD" readonly />
-                      </label>
-                      <label id="queue-listed-transmission-field"
-                        >Transmission
-                        <select id="queue-listed-transmission" data-luna-select="">
-                          <option value="">Choose transmission</option>
-                          <option value="AUTOMATIC">AUTOMATIC</option>
-                          <option value="MANUAL">MANUAL</option>
                         </select>
                       </label>
                     </div>
@@ -2538,7 +2536,7 @@
         </section>
       </main>
 
-      <footer>Luna 2.0.1</footer>
+      <footer>Luna 2.0.2</footer>
     </div>
 
     <dialog id="luna-module-dialog" class="luna-dialog" aria-label="All Luna sections">

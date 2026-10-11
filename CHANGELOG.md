@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 — Work Queue and Dubizzle gallery
+
+- Work Queue now places the full-width model and trim controls above an aligned two-column details grid.
+- Dubizzle image collection reads the listing's embedded gallery so every available listing image is collected before the gallery is opened.
+
 ## 2.0.1 — Model matching correction
 
 - Work Queue Auto Fill now keeps a full live model variant when an advertised identifier could otherwise be mistaken for a trim, such as `Land Rover Defender 110`.
