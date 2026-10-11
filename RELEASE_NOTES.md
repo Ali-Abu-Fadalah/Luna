@@ -1,4 +1,4 @@
-Luna 2.0.0 is our first public release: a calm Chrome side panel for organizing and reviewing vehicle-listing work.
+Luna 2.0.1 is a public-safe update to the calm Chrome side panel for organizing and reviewing vehicle-listing work.
 
 ## A calmer workspace
 
@@ -14,6 +14,6 @@ Company spreadsheet deployments, catalog connections, internal site addresses, p
 
 ## Install
 
-Download **Luna-2.0.0-public.zip**, extract it, and select its **luna** folder through Chrome's **Load unpacked** control at `chrome://extensions`. Developer mode must be enabled. Chrome 116 or later is required; no build step is needed.
+Download **Luna-2.0.1-public.zip**, extract it, and select its **luna** folder through Chrome's **Load unpacked** control at `chrome://extensions`. Developer mode must be enabled. Chrome 116 or later is required; no build step is needed.
 
 The matching **.sha256** file lets you verify the download. See the repository's README, privacy notice and security policy for permissions, limitations and safe reporting.

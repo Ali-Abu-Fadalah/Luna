@@ -195,6 +195,30 @@ globalThis.LunaVehicleDetailCore = (() => {
       return true;
     });
   };
+  const contiguousTokenIndex = (needles, haystack) =>
+    needles.length
+      ? haystack.findIndex((_, index) =>
+          needles.every((token, offset) => token === haystack[index + offset])
+        )
+      : -1;
+  const modelRefinesExplicit = (candidate, capture) => {
+    const explicitTokens = identityTokens(factValue(capture, "model"));
+    const modelTokens = identityTokens(candidate?.model);
+    // A live model may include what the vendor calls a trim. Require the complete,
+    // contiguous name in the ad title, not scattered numbers or description text.
+    const titleTokens = identityTokens(
+      clean(capture?.title).replace(
+        /\b\d[\d,.]*\s*(?:km|kms|kilomet(?:er|re)s?|miles?|cc|hp|bhp)\b/gi,
+        " "
+      )
+    );
+    return Boolean(
+      explicitTokens.length &&
+        modelTokens.length > explicitTokens.length &&
+        explicitTokens.every((token, index) => token === modelTokens[index]) &&
+        contiguousTokenIndex(modelTokens, titleTokens) >= 0
+    );
+  };
   const rankModelCandidates = (candidates, capture) => {
     const identity = canonicalPhrase(evidenceText(capture, { includeContext: false }));
     const pageTokens = identityTokens(identity);
@@ -202,14 +226,15 @@ globalThis.LunaVehicleDetailCore = (() => {
     const explicitModel = canonicalPhrase(factValue(capture, "model"));
     const all = Array.isArray(candidates) ? candidates : [];
     const specificExplicit = explicitModel && !/\b(?:class|series)\b/.test(explicitModel);
-    const exactExplicit = specificExplicit
+    const compatibleExplicit = specificExplicit
       ? all.filter(
           (candidate) =>
             (!explicitMake || canonicalMake(candidate?.make) === explicitMake) &&
-            key(canonicalPhrase(candidate?.model)) === key(explicitModel)
+            (key(canonicalPhrase(candidate?.model)) === key(explicitModel) ||
+              modelRefinesExplicit(candidate, capture))
         )
       : [];
-    return (specificExplicit ? exactExplicit : all)
+    return (specificExplicit ? compatibleExplicit : all)
       .map((candidate, index) => {
         const candidateMake = canonicalMake(candidate?.make);
         const candidateModel = canonicalPhrase(candidate?.model);
@@ -238,10 +263,16 @@ globalThis.LunaVehicleDetailCore = (() => {
           candidateModel.length +
           (Number(candidate?.modelCode) > 0 ? 20 : 0) -
           (genericSeries ? 100 : 0);
-        return { candidate, index, score };
+        const specificity = modelRefinesExplicit(candidate, capture) ? modelTokens.length : 0;
+        return { candidate, index, score, specificity };
       })
       .filter(Boolean)
-      .sort((left, right) => right.score - left.score || left.index - right.index)
+      .sort(
+        (left, right) =>
+          right.specificity - left.specificity ||
+          right.score - left.score ||
+          left.index - right.index
+      )
       .map((entry) => entry.candidate);
   };
   const nearestModelCandidates = (candidates, capture) => {
@@ -309,6 +340,31 @@ globalThis.LunaVehicleDetailCore = (() => {
       ? matches[0]
       : null;
   };
+  const captureForModelTrim = (capture, model) => {
+    if (!modelRefinesExplicit(model, capture)) return capture;
+    const modelTokens = identityTokens(model.model);
+    const suffix = modelTokens.slice(identityTokens(factValue(capture, "model")).length);
+    const trimTokens = identityTokens(factValue(capture, "trim"));
+    if (!suffix.every((token, index) => token === trimTokens[index])) return capture;
+    const withoutModel = (text) => {
+      const tokens = identityTokens(text);
+      const index = contiguousTokenIndex(modelTokens, tokens);
+      return index < 0
+        ? text
+        : [...tokens.slice(0, index), ...tokens.slice(index + modelTokens.length)].join(" ");
+    };
+    return {
+      ...capture,
+      facts: {
+        ...capture.facts,
+        model: { ...capture.facts.model, value: "" },
+        trim: { ...capture.facts.trim, value: trimTokens.slice(suffix.length).join(" ") }
+      },
+      title: withoutModel(capture.title),
+      summary: withoutModel(capture.summary),
+      context: withoutModel(capture.context)
+    };
+  };
   const fallbackTrim = (candidates, capture) => {
     const all = (Array.isArray(candidates) ? candidates : []).filter((candidate) =>
       key(candidate?.label)
@@ -374,16 +430,15 @@ globalThis.LunaVehicleDetailCore = (() => {
         /\b(?:used|new|car|cars|vehicle|for\s+sale|sale|dubai|uae|dubicars|dubizzle)\b/gi,
         " "
       )
-      .replace(/\b\d[\d,.]*\b/g, " ")
       .replace(/\s+/g, " ")
       .trim();
     const tokens = strippedTitle.split(" ").filter(Boolean);
     const values = [
       `${make} ${model}`,
+      strippedTitle,
       model,
       make,
-      ...[2, 3, 4].map((count) => tokens.slice(0, count).join(" ")),
-      strippedTitle,
+      ...[2, 3, 4, 5, 6].map((count) => tokens.slice(0, count).join(" ")),
       title
     ]
       .map((value) => clean(value, 80))
@@ -436,6 +491,7 @@ globalThis.LunaVehicleDetailCore = (() => {
   return Object.freeze({
     analyzeImport,
     canonicalMake,
+    captureForModelTrim,
     exactModel,
     exactTrim,
     fallbackTrim,

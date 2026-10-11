@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 — Model matching correction
+
+- Work Queue Auto Fill now keeps a full live model variant when an advertised identifier could otherwise be mistaken for a trim, such as `Land Rover Defender 110`.
+- Model discovery completes its bounded set of evidence-based searches before selecting a catalog match.
+- The identifier consumed by the selected model is removed from trim evidence, so trim matching only considers trims available for that full model.
+
 ## 2.0.0 — Public-safe release
 
 Luna's first public release brings its Soft Eclipse interface and local review tools into a standalone Chrome side panel.

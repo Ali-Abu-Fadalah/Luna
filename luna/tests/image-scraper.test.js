@@ -366,7 +366,7 @@ assert.match(
   /@media \(max-width: 420px\)[\s\S]*\.image-scraper-item-actions \.is-remove[\s\S]*grid-column:\s*1 \/ -1/
 );
 assert.doesNotMatch(css, /overflow-x:\s*auto/);
-assert.equal(manifest.version, "2.0.0");
+assert.equal(manifest.version, "2.0.1");
 assert.ok(manifest.optional_host_permissions.includes("https://*/*"));
 
 console.log("Image scraper tests passed.");

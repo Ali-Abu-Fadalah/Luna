@@ -352,6 +352,61 @@ const mercedesCandidates = [
   { label: "Mercedes C-Class", make: "Mercedes", makeCode: 44, model: "C-Class", modelCode: 0 },
   { label: "Mercedes C300", make: "Mercedes", makeCode: 44, model: "C300", modelCode: 703 }
 ];
+const defenderModels = ["Defender", "Defender 90", "Defender 110", "Defender 130"].map(
+  (model, index) => ({
+    label: `Land Rover ${model}`,
+    make: "Land Rover",
+    makeCode: 50,
+    model,
+    modelCode: 100 + index
+  })
+);
+const defenderCapture = {
+  facts: {
+    make: { value: "Land Rover" },
+    model: { value: "Defender" },
+    trim: { value: "110" }
+  },
+  title: "Land Rover Defender 110 HSE 2024"
+};
+assert.equal(core.modelFromEvidence(defenderModels, defenderCapture).model, "Defender 110");
+for (const variant of ["90", "110", "130"]) {
+  assert.equal(
+    core.modelFromEvidence(defenderModels, {
+      ...defenderCapture,
+      title: `Land Rover Defender${variant} HSE 2024`
+    }).model,
+    `Defender ${variant}`
+  );
+}
+for (const title of ["Land Rover Defender 110,000 km", "Land Rover Defender only 110 km"]) {
+  assert.equal(
+    core.modelFromEvidence(defenderModels, { ...defenderCapture, title }).model,
+    "Defender"
+  );
+}
+assert.equal(
+  core.modelFromEvidence(defenderModels, {
+    ...defenderCapture,
+    title: "Land Rover Defender 2024",
+    summary: "We also sell Defender 110",
+    context: "Related cars: Land Rover Defender 110"
+  }).model,
+  "Defender"
+);
+const defenderTrimCapture = core.captureForModelTrim(defenderCapture, defenderModels[2]);
+assert.equal(defenderCapture.facts.trim.value, "110");
+assert.equal(defenderTrimCapture.facts.trim.value, "");
+assert.equal(
+  core.trimFromEvidence(
+    [
+      { label: "110", trimCode: 1 },
+      { label: "HSE", trimCode: 2 }
+    ],
+    defenderTrimCapture
+  ).label,
+  "HSE"
+);
 const mercedesCapture = {
   facts: { make: { value: "Mercedes-Benz" }, model: { value: "C-Class" } },
   title: "Mercedes-Benz C-Class C300"

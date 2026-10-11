@@ -1076,6 +1076,8 @@ globalThis.LunaWorkQueue = (() => {
     const models = [];
     const modelKeys = new Set();
     let lookupFailure = "";
+    // Complete the bounded search plan: a vendor's family name can have a
+    // more-specific live catalog variant returned by a later query.
     for (const keyword of globalThis.LunaVehicleDetailCore.modelSearchTerms(capture)) {
       try {
         const modelData = await globalThis.LunaAyshei.searchModels(keyword);
@@ -1086,7 +1088,6 @@ globalThis.LunaWorkQueue = (() => {
             models.push(candidate);
           }
         });
-        if (globalThis.LunaVehicleDetailCore.exactModel(models, facts.make, facts.model)) break;
       } catch (error) {
         lookupFailure ||= error.message;
       }
@@ -1137,15 +1138,23 @@ globalThis.LunaWorkQueue = (() => {
       }
     }
     const modelTrimFallback = false;
-    let selectedTrim = globalThis.LunaVehicleDetailCore.trimFromEvidence(trims, capture);
+    const trimCapture = globalThis.LunaVehicleDetailCore.captureForModelTrim(
+      capture,
+      selectedModel
+    );
+    const trimFacts = {
+      ...factsFromCapture(trimCapture),
+      model: selectedModel?.model || facts.model
+    };
+    let selectedTrim = globalThis.LunaVehicleDetailCore.trimFromEvidence(trims, trimCapture);
     let trimAi = null;
     let trimFallback = false;
     if (selectedModel && !selectedTrim && trims.length) {
-      trimAi = await resolveWithGroq("trim", facts, trims, capture.imageUrl);
+      trimAi = await resolveWithGroq("trim", trimFacts, trims, capture.imageUrl);
       selectedTrim =
         trimAi?.selected && trimAi.result?.autoFillEligible === true
           ? trimAi.selected
-          : globalThis.LunaVehicleDetailCore.fallbackTrim(trims, capture);
+          : globalThis.LunaVehicleDetailCore.fallbackTrim(trims, trimCapture);
       trimFallback = Boolean(
         selectedTrim && (!trimAi?.selected || trimAi.result?.autoFillEligible !== true)
       );
