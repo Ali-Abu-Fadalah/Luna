@@ -1,0 +1,2621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Luna</title>
+    <link rel="stylesheet" href="styles/sidepanel.css" />
+    <link rel="stylesheet" href="src/features/inventory/inventory-checker.css" />
+    <link rel="stylesheet" href="src/features/listings/listings-scraper.css" />
+    <link rel="stylesheet" href="src/features/images/image-scraper.css" />
+    <link rel="stylesheet" href="src/features/manual-ad/manual-ad-assistant.css" />
+    <link rel="stylesheet" href="src/features/jenkins/jenkins-assistant.css" />
+    <link rel="stylesheet" href="styles/luna-polish.css" />
+    <link rel="stylesheet" href="styles/luna-neumorphism.css" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="public-edition">
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-home" viewbox="0 0 24 24">
+        <path d="M4 11.5 12 5l8 6.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"></path>
+        <path d="M9.5 20v-5.5h5V20"></path>
+      </symbol>
+      <symbol id="icon-sheet" viewbox="0 0 24 24">
+        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+        <path d="M4 9h16M9 4v16M14.5 9v11"></path>
+      </symbol>
+      <symbol id="icon-queue" viewbox="0 0 24 24">
+        <path
+          d="m4.5 7 1.6 1.6L9 5.7M11 7h8M4.5 13l1.6 1.6L9 11.7M11 13h8M4.5 19l1.6 1.6L9 17.7M11 19h8"
+        ></path>
+      </symbol>
+      <symbol id="icon-lookup" viewbox="0 0 24 24">
+        <circle cx="10.5" cy="10.5" r="5.5"></circle>
+        <path d="m14.5 14.5 5 5M18 4v4M16 6h4"></path>
+      </symbol>
+      <symbol id="icon-inventory" viewbox="0 0 24 24">
+        <path d="m4.5 8 7.5-4 7.5 4-7.5 4zM4.5 8v8l7.5 4 7.5-4V8M12 12v8"></path>
+      </symbol>
+      <symbol id="icon-scraper" viewbox="0 0 24 24">
+        <rect x="4" y="5" width="16" height="14" rx="2"></rect>
+        <circle cx="8.5" cy="9" r="1.5"></circle>
+        <path d="m6 17 4.2-4.3 3 2.8 2.2-2.2L18 16"></path>
+      </symbol>
+      <symbol id="icon-jenkins" viewbox="0 0 24 24">
+        <rect x="3.5" y="5" width="17" height="14" rx="2"></rect>
+        <path d="m7 9 2.5 2.5L7 14M12 15h5"></path>
+      </symbol>
+      <symbol id="icon-settings" viewbox="0 0 24 24">
+        <path d="M5 7h14M5 17h14M8 4v6M16 14v6"></path>
+        <circle cx="8" cy="7" r="2"></circle>
+        <circle cx="16" cy="17" r="2"></circle>
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <div class="lunar-atmosphere" aria-hidden="true">
+        <span class="ambient-wash"></span><span class="ambient-horizon"></span>
+      </div>
+      <header class="brand luna-header">
+        <button
+          type="button"
+          class="luna-home-button"
+          data-luna-section="home"
+          aria-label="Luna Home"
+        >
+          <div class="brand-mark" aria-hidden="true">
+            <svg class="luna-emblem" viewbox="0 0 48 48">
+              <defs>
+                <mask id="luna-crescent-mask">
+                  <rect width="48" height="48" fill="black"></rect>
+                  <circle cx="22" cy="25" r="13" fill="white"></circle>
+                  <circle cx="29" cy="19" r="12" fill="black"></circle>
+                </mask>
+              </defs>
+              <ellipse
+                class="luna-emblem-orbit"
+                cx="24"
+                cy="24"
+                rx="19"
+                ry="12"
+                transform="rotate(-34 24 24)"
+              ></ellipse>
+              <circle
+                class="luna-emblem-moon"
+                cx="22"
+                cy="25"
+                r="13"
+                mask="url(#luna-crescent-mask)"
+              ></circle>
+              <circle class="luna-emblem-star" cx="38" cy="12" r="1.8"></circle>
+            </svg>
+          </div>
+          <span>Luna</span>
+        </button>
+        <div class="luna-header-actions">
+          <div
+            id="header-status"
+            class="header-status"
+            data-overall-state="loading"
+            aria-label="Luna status"
+          >
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="header-overall-status">Checking</span>
+          </div>
+          <button
+            class="nav-item luna-settings-button"
+            type="button"
+            data-section="settings"
+            aria-label="Settings"
+            title="Settings"
+          >
+            <span class="nav-icon" aria-hidden="true"
+              ><svg><use href="#icon-settings"></use></svg
+            ></span></button
+          ><button
+            id="luna-menu-open"
+            class="luna-icon-button"
+            type="button"
+            aria-label="All Luna sections"
+            title="All sections"
+          >
+            <svg viewbox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <nav class="navigation luna-primary-nav" aria-label="Main navigation">
+        <button
+          class="nav-item luna-group-button"
+          type="button"
+          data-section="home"
+          aria-current="page"
+          data-group="home"
+        >
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-home"></use></svg
+          ></span>
+          <span>Home</span></button
+        ><button type="button" class="luna-group-button" data-group="work">Work</button
+        ><button type="button" class="luna-group-button" data-group="tools">Tools</button
+        ><button
+          class="nav-item luna-group-button"
+          type="button"
+          data-section="sheet-statistics"
+          data-group="insights"
+        >
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-sheet"></use></svg
+          ></span>
+          <span>Insights</span>
+        </button>
+      </nav>
+      <nav class="luna-module-nav" aria-label="Tools sections" data-luna-group-nav="tools" hidden>
+        <button class="nav-item" type="button" data-section="scraper-images">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-scraper"></use></svg
+          ></span>
+          <span>Listings</span></button
+        ><button class="nav-item" type="button" data-section="inventory-checker">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-inventory"></use></svg
+          ></span>
+          <span>Inventory</span></button
+        ><button class="nav-item" type="button" data-section="jenkins-assistant">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-jenkins"></use></svg
+          ></span>
+          <span>Jenkins</span>
+        </button>
+      </nav>
+      <nav class="luna-module-nav" aria-label="Work sections" data-luna-group-nav="work" hidden>
+        <button class="nav-item" type="button" data-section="work-queue">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-queue"></use></svg
+          ></span>
+          <span>Work Queue</span></button
+        ><button class="nav-item" type="button" data-section="manual-ad-assistant">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-scraper"></use></svg
+          ></span>
+          <span>Manual Ad</span>
+        </button>
+      </nav>
+
+      <main class="content" aria-live="polite">
+        <h2 id="section-title" tabindex="-1">Home</h2>
+        <section class="home-dashboard" aria-label="Home overview">
+          <article class="welcome-card home-intro">
+            <div class="welcome-copy">
+              <h3 id="home-summary-title">Checking your workspace status.</h3>
+              <p id="home-summary-message">
+                Luna is checking the selected services and saved Work Queue.
+              </p>
+            </div>
+
+            <div class="lunar-art" aria-hidden="true">
+              <span class="lunar-halo"></span>
+              <svg class="lunar-sculpture" viewbox="0 0 260 260" focusable="false">
+                <defs>
+                  <radialgradient id="lunar-obsidian" cx="76%" cy="24%" r="80%">
+                    <stop stop-color="#c8d6e2"></stop>
+                    <stop offset=".48" stop-color="#8091a4"></stop>
+                    <stop offset="1" stop-color="#4c596b"></stop>
+                  </radialgradient>
+                  <lineargradient id="lunar-pearl" x1="0" y1="0" x2="1" y2="1">
+                    <stop stop-color="#fcfcfd"></stop>
+                    <stop offset=".32" stop-color="#c8e0f4"></stop>
+                    <stop offset=".64" stop-color="#a4bace"></stop>
+                    <stop offset="1" stop-color="#f5e0e8"></stop>
+                  </lineargradient>
+                  <lineargradient id="lunar-edge" x1="0" y1="0" x2="1" y2="1">
+                    <stop stop-color="#ffffff"></stop>
+                    <stop offset=".47" stop-color="#a5bed4"></stop>
+                    <stop offset="1" stop-color="#617489" stop-opacity=".2"></stop>
+                  </lineargradient>
+                  <mask id="lunar-cut">
+                    <rect width="260" height="260" fill="white"></rect>
+                    <circle cx="159" cy="111" r="80" fill="black"></circle>
+                  </mask>
+                </defs>
+                <g class="lunar-orbits" fill="none" stroke="#8195ab">
+                  <circle cx="130" cy="130" r="109" opacity=".13"></circle>
+                  <circle cx="130" cy="130" r="96" opacity=".2"></circle>
+                  <path d="M130 21a109 109 0 0 1 109 109" opacity=".45"></path>
+                  <circle cx="232" cy="91" r="3" fill="#9abbd8" stroke="none"></circle>
+                </g>
+                <g class="lunar-core">
+                  <circle
+                    cx="130"
+                    cy="130"
+                    r="78"
+                    fill="url(#lunar-obsidian)"
+                    stroke="#9baabd"
+                    stroke-width=".7"
+                  ></circle>
+                  <circle
+                    cx="125"
+                    cy="134"
+                    r="79"
+                    fill="url(#lunar-pearl)"
+                    mask="url(#lunar-cut)"
+                  ></circle>
+                  <path
+                    d="M151 57a79 79 0 1 0 54 97"
+                    fill="none"
+                    stroke="url(#lunar-edge)"
+                    stroke-width="1.4"
+                  ></path>
+                  <path
+                    d="M175 32a80 80 0 0 0-30 157"
+                    transform="translate(-16 0)"
+                    fill="none"
+                    stroke="url(#lunar-edge)"
+                    stroke-width=".8"
+                    opacity=".55"
+                  ></path>
+                </g>
+              </svg>
+              <span class="lunar-glint"></span>
+            </div>
+          </article>
+          <article class="mini-status luna-home-queue">
+            <span class="status-icon status-icon-queue" aria-hidden="true"></span>
+            <div>
+              <p>Work Queue</p>
+              <strong id="home-work-queue-status" data-queue-state="loading">Loading</strong
+              ><small id="home-work-queue-detail" class="mini-status-detail"
+                >Checking saved progress.</small
+              ><button id="home-resume-work-queue" class="home-resume-button" type="button" hidden>
+                Resume Work
+              </button>
+            </div>
+            <div
+              id="home-queue-progress"
+              class="luna-progress-track"
+              role="progressbar"
+              aria-label="Queue completed"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <span id="home-queue-progress-fill"></span>
+            </div>
+          </article>
+          <section class="luna-shortcuts" aria-label="Shortcuts">
+            <h3>Shortcuts</h3>
+            <div>
+              <button type="button" data-luna-section="manual-ad-assistant">
+                <strong>Manual Ad</strong><span>Data &amp; images</span></button
+              ><button type="button" data-luna-section="scraper-images">
+                <strong>Listings</strong><span>Collect &amp; review</span>
+              </button>
+            </div>
+          </section>
+          <div class="status-grid luna-home-connections">
+            <article
+              class="mini-status"
+              data-luna-section="sheet-statistics"
+              tabindex="0"
+              role="button"
+            >
+              <span class="status-icon status-icon-sheet" aria-hidden="true"></span>
+              <div>
+                <p>Company Sheet</p>
+                <strong id="home-sheet-status" data-connection-state="loading">Loading</strong
+                ><small id="home-sheet-detail" class="mini-status-detail"
+                  >Checking approved read-only service.</small
+                >
+              </div>
+            </article>
+            <article class="mini-status" data-luna-section="settings" tabindex="0" role="button">
+              <span class="status-icon status-icon-ayshei" aria-hidden="true"></span>
+              <div>
+                <p>Ayshei Catalog</p>
+                <strong id="home-ayshei-status" data-ayshei-state="loading">Loading</strong
+                ><small id="home-ayshei-detail" class="mini-status-detail"
+                  >Checking the selected endpoint only.</small
+                >
+              </div>
+            </article>
+
+            <article
+              class="mini-status"
+              data-luna-section="jenkins-assistant"
+              tabindex="0"
+              role="button"
+            >
+              <span class="status-icon status-icon-jenkins" aria-hidden="true"></span>
+              <div>
+                <p>Jenkins</p>
+                <strong id="home-jenkins-status">No saved batch</strong
+                ><small class="mini-status-detail"
+                  >Jenkins batches remain session-only and start when you import one.</small
+                >
+              </div>
+            </article>
+          </div>
+
+          <section class="home-notes-card" aria-labelledby="home-notes-title">
+            <div class="home-notes-heading">
+              <div>
+                <h3 id="home-notes-title">Notes</h3>
+              </div>
+              <span id="home-notes-count" class="home-notes-count">0</span>
+            </div>
+            <p id="home-notes-empty" class="home-notes-empty">
+              <svg class="empty-state-icon" viewbox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h7l4 4v14H7zM14 3v5h4M10 12h5M10 16h5"></path>
+              </svg>
+              Add a note from Work Queue to keep it here by vendor.
+            </p>
+            <div id="home-notes-list" class="home-notes-list"></div>
+          </section>
+        </section>
+        <section class="sheet-connection-view" aria-label="Sheet connection" hidden>
+          <div class="connection-card">
+            <div class="connection-heading">
+              <div>
+                <h3>Company Sheet</h3>
+              </div>
+              <span
+                id="sheet-connection-status"
+                class="connection-badge"
+                data-connection-state="loading"
+                >Loading</span
+              >
+            </div>
+            <p id="sheet-connection-detail" class="connection-detail">
+              Checking the approved read-only Sheet service...
+            </p>
+            <dl class="connection-meta">
+              <div>
+                <dt>Monthly tab</dt>
+                <dd id="sheet-connection-tab">Checking...</dd>
+              </div>
+              <div>
+                <dt>Rows received</dt>
+                <dd id="sheet-connection-rows">0</dd>
+              </div>
+              <div class="connection-window-meta">
+                <dt><label for="sheet-date-window">Date window</label></dt>
+                <dd class="connection-window-control">
+                  <input
+                    id="sheet-date-window"
+                    type="number"
+                    min="1"
+                    max="30"
+                    step="1"
+                    value="10"
+                    inputmode="numeric"
+                    aria-describedby="sheet-date-window-help"
+                  />
+                  <span>UAE days</span>
+                </dd>
+                <small id="sheet-date-window-help">1–30 UAE days</small>
+              </div>
+            </dl>
+            <button id="sheet-connection-refresh" class="connection-button" type="button">
+              Refresh Connection
+            </button>
+            <p class="connection-safety">Read-only Sheet connection.</p>
+          </div>
+          <div class="workspace-view-switcher">
+            <label for="insights-view-select">
+              <span>View</span>
+              <select id="insights-view-select" data-luna-select="">
+                <option value="tools">Vendor</option>
+                <option value="tracker">Tracker</option>
+                <option value="monthly">Monthly</option>
+                <option value="interactions">Interactions</option>
+                <option value="report">Report</option>
+              </select>
+            </label>
+          </div>
+          <nav class="sheet-statistics-tabs" aria-label="Sheet Statistics views" hidden>
+            <button
+              class="sheet-statistics-tab is-active"
+              type="button"
+              data-sheet-subview-button="tools"
+              aria-pressed="true"
+            >
+              Vendor</button
+            ><button
+              class="sheet-statistics-tab"
+              type="button"
+              data-sheet-subview-button="tracker"
+              aria-pressed="false"
+            >
+              Tracker</button
+            ><button
+              class="sheet-statistics-tab"
+              type="button"
+              data-sheet-subview-button="monthly"
+              aria-pressed="false"
+            >
+              Monthly</button
+            ><button
+              class="sheet-statistics-tab"
+              type="button"
+              data-sheet-subview-button="interactions"
+              aria-pressed="false"
+            >
+              Interactions</button
+            ><button
+              class="sheet-statistics-tab"
+              type="button"
+              data-sheet-subview-button="report"
+              aria-pressed="false"
+            >
+              Report
+            </button>
+          </nav>
+          <div class="sheet-report-action" data-sheet-subview="report" hidden>
+            <button id="sheet-report-export" class="counter-refresh" type="button">
+              Download full Excel report
+            </button>
+            <p id="sheet-report-message" class="tracker-message" role="status" aria-live="polite">
+              Export available months, tracking, interactions and audit.
+            </p>
+            <p class="luna-report-summary">Work months, tracking, interactions and source audit.</p>
+          </div>
+
+          <div class="vendor-counter-card" data-sheet-subview="tools">
+            <div class="counter-heading">
+              <div>
+                <h3>Listed / Unlisted Counter</h3>
+              </div>
+              <span id="vendor-counter-status" class="counter-badge" data-counter-state="loading"
+                >Loading</span
+              >
+            </div>
+            <p id="vendor-counter-window" class="counter-window">
+              Available data: last 10 UAE calendar days.
+            </p>
+            <form id="vendor-counter-form" class="vendor-counter-form">
+              <label for="vendor-name">Vendor name</label>
+              <div class="vendor-search-row">
+                <input
+                  id="vendor-name"
+                  name="vendorName"
+                  type="text"
+                  list="vendor-options"
+                  autocomplete="off"
+                  placeholder="Type or select a vendor"
+                />
+                <datalist id="vendor-options"></datalist>
+                <button class="connection-button counter-submit" type="submit">Count Vendor</button>
+              </div>
+            </form>
+            <button id="vendor-counter-refresh" class="counter-refresh" type="button">
+              Refresh data
+            </button>
+            <p id="vendor-counter-message" class="counter-message">
+              Loading the last 10 UAE calendar days...
+            </p>
+
+            <div id="vendor-counter-results" class="counter-results" hidden>
+              <div class="counter-totals" aria-label="Vendor totals">
+                <article><span>Listed</span><strong id="vendor-listed-count">0</strong></article>
+                <article>
+                  <span>Unlisted</span><strong id="vendor-unlisted-count">0</strong>
+                </article>
+                <article>
+                  <span>Auctions</span><strong id="vendor-auctions-count">0</strong>
+                </article>
+                <article><span>Total work</span><strong id="vendor-total-count">0</strong></article>
+              </div>
+              <div class="agent-results-wrap">
+                <table class="agent-results">
+                  <thead>
+                    <tr>
+                      <th scope="col">Agent</th>
+                      <th scope="col">Listed</th>
+                      <th scope="col">Unlisted</th>
+                      <th scope="col">Auctions</th>
+                      <th scope="col">Total work</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-agent-results"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="monthly-performance-card" data-sheet-subview="monthly" hidden>
+            <div class="tracker-heading">
+              <div>
+                <h3>Monthly Performance</h3>
+              </div>
+              <span
+                id="monthly-performance-status"
+                class="tracker-badge"
+                data-tracker-state="loading"
+                >Loading</span
+              >
+            </div>
+            <p id="monthly-performance-meta" class="tracker-window">
+              Choose an available monthly Sheet tab. Unknown off days are not counted.
+            </p>
+            <label class="tracker-label" for="monthly-performance-month">Month</label>
+            <select id="monthly-performance-month" disabled data-luna-select="">
+              <option value="">Current month</option>
+            </select>
+            <label class="tracker-label" for="monthly-performance-agent">Agent</label>
+            <select id="monthly-performance-agent" disabled data-luna-select="">
+              <option value="__all__">All Agents</option>
+            </select>
+            <div class="monthly-performance-actions">
+              <button id="monthly-performance-refresh" class="counter-refresh" type="button">
+                Refresh month
+              </button>
+            </div>
+            <p id="monthly-performance-message" class="tracker-message">
+              Loading monthly performance...
+            </p>
+            <div id="monthly-performance-results" class="tracker-results" hidden>
+              <div class="counter-totals" aria-label="Selected-month team totals">
+                <article><span>Listed</span><strong id="monthly-listed-count">0</strong></article>
+                <article>
+                  <span>Unlisted</span><strong id="monthly-unlisted-count">0</strong>
+                </article>
+                <article>
+                  <span>Auctions</span><strong id="monthly-auctions-count">0</strong>
+                </article>
+                <article>
+                  <span>Total work</span><strong id="monthly-total-count">0</strong>
+                </article>
+                <article>
+                  <span>Active agents</span><strong id="monthly-active-agents-count">0</strong>
+                </article>
+                <article>
+                  <span>Recorded days</span><strong id="monthly-active-days-count">0</strong>
+                </article>
+              </div>
+              <p class="monthly-definition">
+                Total work, share, and active days use Listed + Auctions only. Unlisted stays
+                visible separately and is never added to a total.
+              </p>
+              <section class="monthly-explorer" aria-label="Performance Explorer">
+                <div class="monthly-explorer-tabs" role="tablist" aria-label="Performance details">
+                  <button
+                    class="monthly-explorer-tab is-active"
+                    type="button"
+                    data-monthly-view="agents"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Agents
+                  </button>
+                  <button
+                    class="monthly-explorer-tab"
+                    type="button"
+                    data-monthly-view="daily"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Daily trend
+                  </button>
+                  <button
+                    class="monthly-explorer-tab"
+                    type="button"
+                    data-monthly-view="vendors"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Vendors
+                  </button>
+                </div>
+                <p id="monthly-explorer-description" class="monthly-explorer-description">
+                  Agent totals, active recorded days, and share of displayed work.
+                </p>
+                <div id="monthly-agent-results" class="monthly-explorer-list" role="tabpanel"></div>
+                <div
+                  id="monthly-daily-results"
+                  class="monthly-explorer-list"
+                  role="tabpanel"
+                  hidden
+                ></div>
+                <div
+                  id="monthly-vendor-results"
+                  class="monthly-explorer-list"
+                  role="tabpanel"
+                  hidden
+                ></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="daily-interactions-card" data-sheet-subview="interactions" hidden>
+            <div class="tracker-heading">
+              <div><h3>Calls &amp; chats</h3></div>
+              <span id="interactions-status" class="tracker-badge" data-tracker-state="loading"
+                >Ready</span
+              >
+            </div>
+            <p id="interactions-meta" class="tracker-window">
+              One Sheet row is one interaction. Choose a period to explore agents, days, and company
+              sources.
+            </p>
+            <div class="interaction-periods" role="group" aria-label="Interaction period">
+              <button
+                class="interaction-period"
+                type="button"
+                data-interaction-period="today"
+                aria-pressed="false"
+              >
+                Today
+              </button>
+              <button
+                class="interaction-period is-active"
+                type="button"
+                data-interaction-period="last7"
+                aria-pressed="true"
+              >
+                7 days
+              </button>
+              <button
+                class="interaction-period"
+                type="button"
+                data-interaction-period="month"
+                aria-pressed="false"
+              >
+                Month
+              </button>
+              <button
+                class="interaction-period"
+                type="button"
+                data-interaction-period="all"
+                aria-pressed="false"
+              >
+                All time
+              </button>
+            </div>
+            <div class="interaction-filters">
+              <label class="interaction-agent-filter"
+                >Agent<select id="interactions-agent" disabled data-luna-select="">
+                  <option value="__all__">All agents</option>
+                </select></label
+              >
+              <label id="interactions-month-wrap" class="interaction-month-filter" hidden
+                >Month<select id="interactions-month" disabled data-luna-select=""></select
+              ></label>
+              <label
+                >Type<select id="interactions-channel" disabled data-luna-select="">
+                  <option value="__all__">All types</option>
+                  <option value="Inbound">Inbound calls</option>
+                  <option value="Outbound">Outbound calls</option>
+                  <option value="Chat">Chats</option>
+                </select></label
+              >
+              <label
+                >Company<select id="interactions-source" disabled data-luna-select="">
+                  <option value="__all__">Both companies</option>
+                  <option value="Ayshei">Ayshei</option>
+                  <option value="Other source">Other source</option>
+                </select></label
+              >
+            </div>
+            <button id="interactions-refresh" class="counter-refresh" type="button">
+              Refresh interactions
+            </button>
+            <p id="interactions-message" class="tracker-message">Open this view to load counts.</p>
+            <div id="interactions-results" hidden>
+              <div class="interaction-totals" aria-label="Interaction totals">
+                <article>
+                  <span>Total interactions</span><strong id="interactions-total">0</strong>
+                </article>
+                <article>
+                  <span>Inbound calls</span><strong id="interactions-inbound">0</strong>
+                </article>
+                <article>
+                  <span>Outbound calls</span><strong id="interactions-outbound">0</strong>
+                </article>
+                <article><span>Chats</span><strong id="interactions-chat">0</strong></article>
+              </div>
+              <section class="monthly-explorer" aria-label="Interaction breakdown">
+                <div class="monthly-explorer-tabs" role="tablist" aria-label="Interaction details">
+                  <button
+                    class="monthly-explorer-tab is-active"
+                    type="button"
+                    data-interaction-view="agents"
+                    role="tab"
+                    aria-selected="true"
+                  >
+                    Agents
+                  </button>
+                  <button
+                    class="monthly-explorer-tab"
+                    type="button"
+                    data-interaction-view="daily"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    By day
+                  </button>
+                  <button
+                    class="monthly-explorer-tab"
+                    type="button"
+                    data-interaction-view="sources"
+                    role="tab"
+                    aria-selected="false"
+                  >
+                    Companies
+                  </button>
+                </div>
+                <div
+                  id="interactions-agent-results"
+                  class="monthly-explorer-list"
+                  role="tabpanel"
+                ></div>
+                <div
+                  id="interactions-daily-results"
+                  class="monthly-explorer-list"
+                  role="tabpanel"
+                  hidden
+                ></div>
+                <div
+                  id="interactions-source-results"
+                  class="monthly-explorer-list"
+                  role="tabpanel"
+                  hidden
+                ></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="agent-tracker-card" data-sheet-subview="tracker" hidden>
+            <div class="tracker-heading">
+              <div>
+                <h3>Agent Work Tracker</h3>
+              </div>
+              <span id="tracker-status" class="tracker-badge" data-tracker-state="loading"
+                >Loading</span
+              >
+            </div>
+            <p class="tracker-window">
+              UAE time · Saturday–Friday week · Up to the last 10 calendar days.
+            </p>
+
+            <label class="tracker-label" for="tracker-agent">Agent</label>
+            <select id="tracker-agent" disabled data-luna-select="">
+              <option value="__all__">All Agents</option>
+            </select>
+
+            <fieldset class="tracker-periods">
+              <legend>Date filter</legend>
+              <button
+                class="tracker-period is-active"
+                type="button"
+                data-period="today"
+                aria-pressed="true"
+              >
+                Today
+              </button>
+              <button class="tracker-period" type="button" data-period="week" aria-pressed="false">
+                This week
+              </button>
+              <button class="tracker-period" type="button" data-period="last7" aria-pressed="false">
+                Last 7 days
+              </button>
+              <button
+                class="tracker-period"
+                type="button"
+                data-period="last10"
+                aria-pressed="false"
+              >
+                Last 10 days
+              </button>
+            </fieldset>
+
+            <button id="tracker-refresh" class="counter-refresh" type="button">
+              Refresh tracker data
+            </button>
+            <p id="tracker-message" class="tracker-message">
+              Loading agent work from the last 10 UAE calendar days...
+            </p>
+
+            <div id="tracker-results" class="tracker-results" hidden>
+              <div class="counter-totals" aria-label="Agent work totals">
+                <article><span>Listed</span><strong id="tracker-listed-count">0</strong></article>
+                <article>
+                  <span>Unlisted</span><strong id="tracker-unlisted-count">0</strong>
+                </article>
+                <article>
+                  <span>Auctions</span><strong id="tracker-auctions-count">0</strong>
+                </article>
+                <article>
+                  <span>Total work</span><strong id="tracker-total-count">0</strong>
+                </article>
+              </div>
+
+              <h4>Work by vendor</h4>
+              <div class="agent-results-wrap">
+                <table class="agent-results">
+                  <thead>
+                    <tr>
+                      <th scope="col">Vendor</th>
+                      <th scope="col">Listed</th>
+                      <th scope="col">Unlisted</th>
+                      <th scope="col">Auctions</th>
+                      <th scope="col">Total work</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tracker-vendor-results"></tbody>
+                </table>
+              </div>
+
+              <section id="tracker-all-agents" class="all-agents-results">
+                <h4>All Agents</h4>
+                <div class="agent-results-wrap">
+                  <table class="agent-results">
+                    <thead>
+                      <tr>
+                        <th scope="col">Agent</th>
+                        <th scope="col">Listed</th>
+                        <th scope="col">Unlisted</th>
+                        <th scope="col">Auctions</th>
+                        <th scope="col">Total work</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tracker-agent-results"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="work-queue-view" aria-label="Work Queue" hidden>
+          <details id="queue-import-details" class="queue-card queue-import-card" open>
+            <summary>Import or replace queue</summary>
+            <p>
+              Copy rows A:F from the working Sheet. Luna previews every row before replacing saved
+              work.
+            </p>
+            <label for="queue-import-text">Copied Sheet rows</label>
+            <textarea
+              id="queue-import-text"
+              rows="6"
+              spellcheck="false"
+              placeholder="Date    Category    Vendor    Advertisement    Agent    URL"
+            ></textarea>
+            <button id="queue-start" class="connection-button" type="button">Preview Import</button>
+            <p id="queue-import-message" class="queue-message">
+              No headers. Extra columns after F are ignored.
+            </p>
+            <section id="queue-import-preview" class="queue-import-preview" hidden>
+              <h3>Import preview</h3>
+              <div id="queue-import-summary" class="queue-import-summary"></div>
+              <p id="queue-import-warning" class="queue-message"></p>
+              <div class="settings-action-row">
+                <button id="queue-confirm-import" class="connection-button" type="button">
+                  Replace Saved Queue
+                </button>
+                <button id="queue-cancel-import" class="settings-secondary-button" type="button">
+                  Cancel
+                </button>
+              </div>
+            </section>
+            <small>Future Jenkins default: 20 ads. Jenkins is not connected in this module.</small>
+          </details>
+
+          <div id="queue-workspace" class="queue-workspace" hidden>
+            <div class="queue-card queue-summary-card">
+              <div>
+                <h3 id="queue-progress-title">Ad 1 of 1</h3>
+              </div>
+              <span id="queue-current-status" class="queue-status">Pending</span>
+              <div class="queue-counts" aria-label="Queue counts">
+                <span><strong id="queue-count-listed">0</strong> Listed</span>
+                <span><strong id="queue-count-unlisted">0</strong> Unlisted</span>
+                <span><strong id="queue-count-review">0</strong> Review</span>
+                <span><strong id="queue-count-pending">0</strong> Pending</span>
+              </div>
+              <div class="queue-summary-tools">
+                <label for="queue-filter">Show</label>
+                <select id="queue-filter" data-luna-select="">
+                  <option value="all">All ads</option>
+                  <option value="pending">Pending</option>
+                  <option value="listed">Listed</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="review_later">Review Later</option>
+                  <option value="attention">Needs Attention</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="workspace-view-switcher queue-view-switcher">
+              <label for="queue-view-select">
+                <span>Queue view</span>
+                <select id="queue-view-select" data-luna-select="">
+                  <option value="review">Review ad</option>
+                  <option value="listed">Listed output</option>
+                  <option value="unlisted">Unlisted output</option>
+                  <option value="later">Review later</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </label>
+            </div>
+
+            <section class="queue-panel queue-review-panel" data-queue-panel-view="review">
+              <article class="queue-card ad-source-card">
+                <div class="ad-number-row">
+                  <span id="queue-ad-number">Ad 1</span>
+                </div>
+                <p id="queue-ad-vendor" class="ad-vendor"></p>
+                <h3 id="queue-ad-name"></h3>
+                <button id="queue-open-url" class="queue-open-ad" type="button">
+                  <svg class="queue-open-icon" viewbox="0 0 32 32" aria-hidden="true">
+                    <path d="M20.8 5.6A11 11 0 1 0 26.4 22 9.6 9.6 0 0 1 20.8 5.6Z"></path>
+                    <path d="M23.5 7.5v4M21.5 9.5h4"></path>
+                  </svg>
+                  <span class="queue-open-copy">
+                    <strong>Open Advertisement</strong>
+                    <small id="queue-open-hint">Open in a reusable ad tab</small>
+                  </span>
+                  <svg class="queue-open-arrow" viewbox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 17 17 7M7 7h10v10"></path>
+                  </svg>
+                </button>
+                <p id="queue-ad-url" class="queue-url-text"></p>
+              </article>
+
+              <article class="queue-card queue-form-card">
+                <p id="queue-listed-fields-kicker" class="card-kicker">Listed fields · P:W</p>
+                <div id="queue-motors-listed-fields">
+                  <div class="queue-form-grid queue-form-columns">
+                    <div class="queue-form-column">
+                      <label
+                        >Category
+                        <select id="queue-listed-category" data-luna-select="">
+                          <option value="">Choose category</option>
+                          <option value="USED">USED</option>
+                          <option value="EXPORT">EXPORT</option>
+                          <option value="NEW">NEW</option>
+                        </select>
+                      </label>
+                      <label class="queue-live-label"
+                        >Trim
+                        <span id="queue-ayshei-trim-status" data-source="none" hidden></span>
+                        <span class="queue-trim-control">
+                          <input
+                            id="queue-listed-trim-copy"
+                            class="queue-trim-copy"
+                            type="text"
+                            readonly
+                            aria-label="Selected trim, copyable text"
+                            placeholder="Choose model first"
+                          />
+                          <select id="queue-listed-trim" disabled data-luna-select="">
+                            <option value="">Choose a live trim</option>
+                          </select>
+                        </span>
+                        <span id="queue-ayshei-trim-message" hidden></span>
+                      </label>
+                      <label
+                        >Color
+                        <span class="color-select-row"
+                          ><span
+                            id="queue-color-swatch"
+                            class="color-swatch"
+                            aria-hidden="true"
+                          ></span
+                          ><select id="queue-listed-color" data-luna-select="">
+                            <option value="">Choose color</option>
+                            <option value="White">White</option>
+                            <option value="Black">Black</option>
+                            <option value="Red">Red</option>
+                            <option value="Orange">Orange</option>
+                            <option value="Yellow">Yellow</option>
+                            <option value="Dark Green">Dark Green</option>
+                            <option value="Light Green">Light Green</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Blueberry">Blueberry</option>
+                            <option value="Purple">Purple</option>
+                            <option value="Pink">Pink</option>
+                            <option value="Beige">Beige</option>
+                            <option value="Cyan">Cyan</option>
+                            <option value="Grey">Grey</option>
+                            <option value="Black matt">Black matt</option>
+                            <option value="White Pearl">White Pearl</option>
+                            <option value="Dark Grey">Dark Grey</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Brown">Brown</option>
+                            <option value="Other">Other</option>
+                          </select></span
+                        >
+                      </label>
+                      <label id="queue-listed-specs-field"
+                        >Specs
+                        <select id="queue-listed-specs" data-luna-select="">
+                          <option value="">Choose specs</option>
+                          <option value="GCC">GCC</option>
+                          <option value="American">American</option>
+                          <option value="Canadian">Canadian</option>
+                          <option value="Chinese">Chinese</option>
+                          <option value="European">European</option>
+                          <option value="Japanese">Japanese</option>
+                          <option value="Korean">Korean</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="queue-form-column">
+                      <label class="queue-live-label"
+                        >Make &amp; Model
+                        <span id="queue-ayshei-model-status" data-source="none" hidden></span>
+                        <input
+                          id="queue-listed-make-model"
+                          type="search"
+                          autocomplete="off"
+                          spellcheck="false"
+                          placeholder="Search live Ayshei models"
+                        />
+                        <span id="queue-ayshei-model-message" hidden></span>
+                        <span
+                          id="queue-ayshei-model-results"
+                          class="queue-live-results"
+                          role="listbox"
+                          aria-label="Work Queue Make and Model results"
+                        ></span>
+                      </label>
+                      <label
+                        >Condition
+                        <input id="queue-listed-condition" type="text" value="VERY_GOOD" readonly />
+                      </label>
+                      <label id="queue-listed-transmission-field"
+                        >Transmission
+                        <select id="queue-listed-transmission" data-luna-select="">
+                          <option value="">Choose transmission</option>
+                          <option value="AUTOMATIC">AUTOMATIC</option>
+                          <option value="MANUAL">MANUAL</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div id="queue-noon-listed-fields" hidden>
+                  <div class="queue-form-grid">
+                    <label
+                      >CATEGORY
+                      <select id="queue-noon-category" data-luna-select="">
+                        <option value="">Choose category</option>
+                      </select>
+                    </label>
+                    <label
+                      >SUB_CATEGORIES
+                      <select id="queue-noon-sub-category" disabled data-luna-select="">
+                        <option value="">Choose category first</option>
+                      </select>
+                    </label>
+                    <label
+                      >SUB_SUB_CATEGORIES
+                      <select id="queue-noon-sub-sub-category" disabled data-luna-select="">
+                        <option value="">Choose sub-category first</option>
+                      </select>
+                    </label>
+                    <label
+                      >CONDITIONS
+                      <input id="queue-noon-condition" type="text" value="NEW_WITH_TAGS" readonly />
+                    </label>
+                  </div>
+                </div>
+                <div class="queue-listed-actions">
+                  <button
+                    id="queue-mark-listed"
+                    class="queue-action queue-action-listed"
+                    type="button"
+                  >
+                    Save listed
+                  </button>
+                  <button
+                    id="queue-auto-fill"
+                    class="queue-action queue-action-autofill"
+                    type="button"
+                  >
+                    Auto Fill
+                  </button>
+
+                  <button id="luna-unlisted-open" class="queue-action" type="button">
+                    Unlisted</button
+                  ><button
+                    id="queue-mark-review"
+                    class="queue-action queue-action-review"
+                    type="button"
+                  >
+                    Later
+                  </button>
+                </div>
+                <p id="queue-auto-fill-message" class="queue-message" aria-live="polite">
+                  Read the matching open ad to review its fields.
+                </p>
+                <details id="queue-source-preview" class="source-facts-preview" hidden>
+                  <summary>Vendor facts captured</summary>
+                  <ul id="queue-source-facts"></ul>
+                </details>
+              </article>
+
+              <section class="queue-ai-strip" aria-label="Optional vehicle intelligence">
+                <div id="queue-vehicle-ai-tools" class="queue-ai-actions">
+                  <button id="queue-ai-body-type" type="button">Body Type</button>
+                  <button id="queue-ai-model-trim" type="button">Best Model / Trim</button>
+                  <button id="queue-ai-fill" type="button" hidden>Fill Recommendation</button>
+                </div>
+                <p id="queue-ai-result" aria-live="polite">
+                  Review an AI recommendation before applying it.
+                </p>
+                <div class="queue-note-entry">
+                  <label for="queue-note-text">Add note</label>
+                  <div class="queue-note-row">
+                    <textarea
+                      id="queue-note-text"
+                      rows="2"
+                      maxlength="1000"
+                      placeholder="Saved locally under this vendor and ad"
+                    ></textarea>
+                    <button id="queue-add-note" type="button">Add</button>
+                  </div>
+                  <p id="queue-note-message" aria-live="polite">Saved under this vendor on Home.</p>
+                </div>
+              </section>
+
+              <p id="queue-action-message" class="queue-message" aria-live="polite"></p>
+
+              <div class="queue-navigation">
+                <button id="queue-previous" type="button">Previous</button>
+                <button id="queue-next" type="button">Next</button>
+                <button id="queue-undo" type="button">Undo</button>
+              </div>
+              <div class="queue-go-row">
+                <label for="queue-go-number">Go to Ad Number</label>
+                <input id="queue-go-number" type="number" min="1" step="1" />
+                <button id="queue-go" type="button">Go</button>
+              </div>
+            </section>
+
+            <section class="queue-panel" data-queue-panel-view="listed" hidden>
+              <article class="queue-card output-card">
+                <h3>Listed Output · Motors P:W / Noon 5 cells</h3>
+                <p id="queue-listed-output-note"></p>
+                <textarea id="queue-listed-output" rows="9" readonly spellcheck="false"></textarea>
+                <button id="queue-copy-listed" class="connection-button" type="button">
+                  Copy Listed Output
+                </button>
+              </article>
+            </section>
+
+            <section class="queue-panel" data-queue-panel-view="unlisted" hidden>
+              <article class="queue-card output-card">
+                <h3>Unlisted Output · K:N</h3>
+                <p id="queue-unlisted-output-note"></p>
+                <textarea
+                  id="queue-unlisted-output"
+                  rows="9"
+                  readonly
+                  spellcheck="false"
+                ></textarea>
+                <button id="queue-copy-unlisted" class="connection-button" type="button">
+                  Copy Unlisted K:N
+                </button>
+              </article>
+            </section>
+
+            <section class="queue-panel" data-queue-panel-view="later" hidden>
+              <article class="queue-card output-card">
+                <h3>Review Later</h3>
+                <div id="queue-review-list" class="queue-review-list"></div>
+                <p id="queue-review-output-note"></p>
+                <textarea
+                  id="queue-review-output"
+                  rows="7"
+                  readonly
+                  spellcheck="false"
+                  aria-label="Later URLs"
+                ></textarea
+                ><button id="queue-copy-review" class="connection-button" type="button" disabled>
+                  Copy Later URLs
+                </button>
+              </article>
+            </section>
+            <section class="queue-panel" data-queue-panel-view="pending" hidden>
+              <article class="queue-card output-card">
+                <h3>Pending</h3>
+                <div id="queue-pending-list" class="queue-review-list"></div>
+                <p id="queue-pending-output-note"></p>
+                <textarea
+                  id="queue-pending-output"
+                  rows="7"
+                  readonly
+                  spellcheck="false"
+                  aria-label="Pending URLs"
+                ></textarea
+                ><button id="queue-copy-pending" class="connection-button" type="button" disabled>
+                  Copy Pending URLs
+                </button>
+              </article>
+            </section>
+          </div>
+          <dialog id="luna-unlisted-dialog" class="luna-dialog" aria-label="Save unlisted">
+            <div class="luna-dialog-heading">
+              <h3>Unlisted</h3>
+              <button
+                class="luna-icon-button"
+                type="button"
+                data-luna-dialog-close
+                aria-label="Close unlisted"
+              >
+                <svg viewbox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 6 12 12M18 6 6 18"></path>
+                </svg>
+              </button>
+            </div>
+            <article class="luna-dialog-body">
+              <label for="queue-unlisted-reason">Reason</label>
+              <input
+                id="queue-unlisted-reason"
+                type="text"
+                list="queue-reason-options"
+                autocomplete="off"
+                placeholder="Write or select a recent reason"
+              />
+              <datalist id="queue-reason-options"></datalist>
+              <button
+                id="queue-mark-unlisted"
+                class="queue-action queue-action-unlisted"
+                type="button"
+              >
+                Save unlisted
+              </button>
+              <div
+                id="queue-frequent-reasons"
+                class="luna-reason-chips"
+                role="group"
+                aria-label="Your frequent and recent reasons"
+              ></div>
+              <div
+                id="queue-reason-suggestions"
+                class="luna-reason-suggestions"
+                role="group"
+                aria-label="Matching reasons"
+                hidden
+              ></div>
+              <p id="queue-reason-match-status" class="queue-message" role="status"></p>
+            </article>
+          </dialog>
+        </section>
+
+        <section class="listings-scraper-view" aria-label="New Luna Listings Scraper" hidden>
+          <article class="scraper-card scraper-start-card">
+            <div class="scraper-heading">
+              <div>
+                <h3>Vendor Listings Scraper</h3>
+              </div>
+              <span id="scraper-status" class="scraper-badge" data-scraper-state="idle">Ready</span>
+            </div>
+            <p class="scraper-detail">
+              Scrape the current page, open the next page manually, then click the same button
+              again. Luna keeps one batch of up to 250 accepted ads and never sends automatically.
+            </p>
+            <label class="scraper-duplicate-option" for="scraper-filter-duplicates">
+              <input id="scraper-filter-duplicates" type="checkbox" checked />
+              <span>
+                <strong>Filter duplicate name + price</strong>
+                <small id="scraper-duplicate-note"
+                  >On: repeated exact name + price listings move to Unlisted as Duplicate.</small
+                >
+              </span>
+            </label>
+            <button id="scraper-start" class="connection-button" type="button">Collect page</button>
+            <div class="scraper-access-row">
+              <button id="scraper-collect-more" class="scraper-secondary-button" type="button">
+                Load more / scroll
+              </button>
+              <button id="scraper-stop" class="scraper-secondary-button" type="button" disabled>
+                Stop
+              </button>
+            </div>
+            <div class="scraper-access-row">
+              <button
+                id="scraper-enable-other-sites"
+                class="scraper-secondary-button"
+                type="button"
+              >
+                Enable Other Websites
+              </button>
+              <span id="scraper-other-sites-status" data-access-state="limited"
+                >DubiCars + Dubizzle + Noon + Bayut</span
+              >
+            </div>
+            <p class="scraper-access-note">
+              For another website, enable access once and approve Chrome’s website prompt. Luna
+              still reads only the current page after you click Scrape.
+            </p>
+            <p id="scraper-message" class="scraper-message" data-kind="info" aria-live="polite">
+              Supports Dubizzle, DubiCars, Noon, and Bayut directly. Scrape each page after you open
+              it manually; Luna combines the pages until you send the batch.
+            </p>
+            <div id="scraper-last-send" class="scraper-last-send" data-kind="success" hidden>
+              <strong>Last Raw Data send</strong>
+              <span id="scraper-last-send-summary"></span>
+            </div>
+          </article>
+
+          <section
+            id="scraper-preview"
+            class="scraper-preview"
+            aria-label="Listings preview"
+            hidden
+          >
+            <article class="scraper-card">
+              <div class="scraper-heading">
+                <div>
+                  <h3>Detection Summary</h3>
+                </div>
+                <span id="scraper-mode" class="scraper-mode" data-mode="adapter">Adapter</span>
+              </div>
+              <p id="scraper-generic-warning" class="scraper-warning" hidden>
+                Generic mode — review results carefully.
+              </p>
+              <div class="scraper-totals" aria-label="Scraper totals">
+                <article>
+                  <span>Detected</span><strong id="scraper-total-detected">0</strong>
+                </article>
+                <article>
+                  <span>Accepted</span><strong id="scraper-total-accepted">0</strong>
+                </article>
+                <article>
+                  <span>Excluded</span><strong id="scraper-total-excluded">0</strong>
+                </article>
+              </div>
+              <p class="scraper-border-legend">Blue: accepted · Orange: unlisted · Red: excluded</p>
+            </article>
+
+            <nav
+              class="luna-view-tabs"
+              role="tablist"
+              aria-label="listings views"
+              data-luna-tabs="listings"
+            >
+              <button
+                id="listings-accepted-tab"
+                type="button"
+                data-luna-tab="listings-accepted"
+                role="tab"
+                aria-controls="listings-accepted-panel"
+                aria-selected="true"
+                tabindex="0"
+              >
+                Accepted</button
+              ><button
+                id="listings-unlisted-tab"
+                type="button"
+                data-luna-tab="listings-unlisted"
+                role="tab"
+                aria-controls="listings-unlisted-panel"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Unlisted</button
+              ><button
+                id="listings-excluded-tab"
+                type="button"
+                data-luna-tab="listings-excluded"
+                role="tab"
+                aria-controls="listings-excluded-panel"
+                aria-selected="false"
+                tabindex="-1"
+              >
+                Excluded
+              </button>
+            </nav>
+            <section
+              id="listings-accepted-panel"
+              class="luna-tab-panel"
+              data-luna-panel="listings-accepted"
+              role="tabpanel"
+              aria-labelledby="listings-accepted-tab"
+            >
+              <article class="scraper-card scraper-accepted-card">
+                <label for="scraper-search"
+                  >Find in batch<input
+                    id="scraper-search"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Name, URL or price"
+                /></label>
+                <div class="scraper-result-heading">
+                  <div>
+                    <h3>Accepted Listings</h3>
+                  </div>
+                  <span><strong id="scraper-selected-count">0</strong> selected</span>
+                </div>
+                <div class="scraper-selection-actions">
+                  <button id="scraper-select-all" type="button">Select All</button>
+                  <button id="scraper-unselect-all" type="button">Unselect All</button>
+                </div>
+                <ul id="scraper-accepted-list" class="scraper-accepted-list"></ul>
+                <label class="scraper-separator-option" for="scraper-add-separator">
+                  <input id="scraper-add-separator" type="checkbox" checked />
+                  <span>
+                    <strong>Add colored separator after this send</strong>
+                    <small
+                      >Turn this off for the early pages of one batch, then turn it on for the final
+                      page.</small
+                    >
+                  </span>
+                </label>
+                <div class="scraper-send-row">
+                  <button
+                    id="scraper-send-selected"
+                    class="connection-button"
+                    type="button"
+                    disabled
+                  >
+                    Send selected
+                  </button>
+                  <span>Only selected items are sent.</span>
+                </div>
+              </article>
+            </section>
+            <section
+              id="listings-unlisted-panel"
+              class="luna-tab-panel"
+              data-luna-panel="listings-unlisted"
+              role="tabpanel"
+              aria-labelledby="listings-unlisted-tab"
+              hidden
+            >
+              <article class="scraper-card scraper-unlisted-card">
+                <div class="scraper-result-heading">
+                  <div>
+                    <h3>Unlisted · Sold / POR</h3>
+                  </div>
+                  <span><strong id="scraper-unlisted-count">0</strong> items</span>
+                </div>
+                <p class="scraper-detail">Copy as two columns: URL and reason.</p>
+                <textarea
+                  id="scraper-unlisted-output"
+                  rows="6"
+                  readonly
+                  spellcheck="false"
+                  aria-label="Unlisted URL and reason output"
+                ></textarea>
+                <button
+                  id="scraper-copy-unlisted"
+                  class="scraper-secondary-button"
+                  type="button"
+                  disabled
+                >
+                  Copy URL + Reason
+                </button>
+              </article>
+            </section>
+            <section
+              id="listings-excluded-panel"
+              class="luna-tab-panel"
+              data-luna-panel="listings-excluded"
+              role="tabpanel"
+              aria-labelledby="listings-excluded-tab"
+              hidden
+            >
+              <article class="scraper-card">
+                <h3>Excluded</h3>
+                <ul id="scraper-excluded-list" class="scraper-excluded-list"></ul>
+              </article>
+            </section>
+          </section>
+
+          <p class="scraper-safety">Review the batch before sending.</p>
+        </section>
+
+        <section class="manual-ad-view" aria-label="Manual Ad Assistant" hidden>
+          <article class="manual-ad-card">
+            <div class="manual-ad-heading">
+              <div>
+                <h3>Manual Ad</h3>
+              </div>
+              <span id="manual-ad-status" class="manual-ad-badge" data-manual-state="idle"
+                >Ready</span
+              >
+            </div>
+            <div class="manual-ad-actions">
+              <button id="manual-ad-prepare" class="connection-button" type="button">
+                Read ad
+              </button>
+              <button id="manual-ad-fill-ayshei" class="connection-button" type="button" disabled>
+                Fill data &amp; images
+              </button>
+            </div>
+            <p id="manual-ad-message" class="manual-ad-message" data-kind="info" aria-live="polite">
+              Read the vendor ad, review its data and images, then fill the open Ayshei draft.
+            </p>
+          </article>
+
+          <nav
+            class="luna-view-tabs"
+            role="tablist"
+            aria-label="manual views"
+            data-luna-tabs="manual"
+          >
+            <button
+              id="manual-data-tab"
+              type="button"
+              data-luna-tab="manual-data"
+              role="tab"
+              aria-controls="manual-data-panel"
+              aria-selected="true"
+              tabindex="0"
+            >
+              Data</button
+            ><button
+              id="manual-images-tab"
+              type="button"
+              data-luna-tab="manual-images"
+              role="tab"
+              aria-controls="manual-images-panel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              Images
+            </button>
+          </nav>
+          <section
+            id="manual-data-panel"
+            class="luna-tab-panel"
+            data-luna-panel="manual-data"
+            role="tabpanel"
+            aria-labelledby="manual-data-tab"
+          >
+            <section id="manual-ad-preview" aria-label="Manual advertisement review" hidden>
+              <article class="manual-ad-card">
+                <div class="manual-ad-grid">
+                  <label
+                    >Category *
+                    <select data-manual-field="category" disabled data-luna-select="">
+                      <option value=""></option>
+                      <option value="EXPORT">Export</option>
+                      <option value="NEW">New</option>
+                      <option value="USED">Used</option>
+                    </select>
+                  </label>
+                  <label
+                    >Year *
+                    <input data-manual-field="year" inputmode="numeric" type="text" />
+                  </label>
+                  <label class="manual-ad-wide"
+                    >Make &amp; Model *
+                    <input data-manual-field="makeModel" type="search" autocomplete="off" />
+                    <span id="manual-ad-model-status" class="manual-ad-field-note"></span>
+                    <span id="manual-ad-model-results" class="manual-ad-model-results"></span>
+                  </label>
+                  <label
+                    >Trim *
+                    <select data-manual-field="trim" data-luna-select="">
+                      <option value=""></option>
+                    </select>
+                  </label>
+                  <label
+                    >Regional Spec *
+                    <select data-manual-field="regionalSpec" data-luna-select="">
+                      <option value=""></option>
+                      <option>GCC</option>
+                      <option>American</option>
+                      <option>Canadian</option>
+                      <option>Chinese</option>
+                      <option>European</option>
+                      <option>Japanese</option>
+                      <option>Korean</option>
+                      <option>Other</option>
+                    </select>
+                  </label>
+                  <label id="manual-ad-kilometers-field" hidden
+                    >Kilometers *
+                    <input data-manual-field="kilometers" inputmode="numeric" type="text" />
+                  </label>
+                  <label
+                    >Body Type *
+                    <select data-manual-field="bodyType" data-luna-select="">
+                      <option value=""></option>
+                      <option>Sedan</option>
+                      <option>Hatchback</option>
+                      <option>SUV</option>
+                      <option>Convertible</option>
+                      <option>Coupe</option>
+                      <option>Wagon</option>
+                      <option>Minivan</option>
+                      <option>Van</option>
+                      <option>Pickup</option>
+                      <option>Others</option>
+                    </select>
+                  </label>
+                  <label
+                    >Fuel Type *
+                    <select data-manual-field="fuelType" data-luna-select="">
+                      <option value=""></option>
+                      <option>Gasoline</option>
+                      <option>Electric</option>
+                      <option>Hybrid</option>
+                      <option>Diesel</option>
+                    </select>
+                  </label>
+                  <label
+                    >Transmission Type *
+                    <select data-manual-field="transmission" data-luna-select="">
+                      <option value=""></option>
+                      <option>Automatic</option>
+                      <option>Manual</option>
+                    </select>
+                  </label>
+                  <label
+                    >Insured *
+                    <input data-manual-field="insured" type="text" value="No" readonly />
+                  </label>
+                  <label
+                    >Exterior Color *
+                    <select data-manual-field="exteriorColor" data-luna-select="">
+                      <option value=""></option>
+                      <option>Beige</option>
+                      <option>Black</option>
+                      <option>Black matt</option>
+                      <option>Blue</option>
+                      <option>Blueberry</option>
+                      <option>Brown</option>
+                      <option>Cyan</option>
+                      <option>Dark Green</option>
+                      <option>Dark Grey</option>
+                      <option>Grey</option>
+                      <option>Light Green</option>
+                      <option>Orange</option>
+                      <option>Pink</option>
+                      <option>Purple</option>
+                      <option>Red</option>
+                      <option>Silver</option>
+                      <option>White</option>
+                      <option>White Pearl</option>
+                      <option>Yellow</option>
+                      <option>Other</option>
+                    </select>
+                  </label>
+                  <label id="manual-ad-condition-field" class="manual-ad-wide" hidden
+                    >Car Condition *
+                    <input data-manual-field="condition" type="text" readonly />
+                  </label>
+                  <label
+                    >Item Price (AED) *
+                    <input data-manual-field="price" inputmode="numeric" type="text" />
+                  </label>
+                  <label class="manual-ad-wide"
+                    >Description *
+                    <textarea data-manual-field="description" rows="4"></textarea>
+                  </label>
+                </div>
+                <aside id="manual-ad-ai-disclosure" class="manual-ad-ai-disclosure" hidden>
+                  <h3>AI-assisted information</h3>
+                  <ul id="manual-ad-ai-disclosure-list"></ul>
+                  <p>
+                    These values came from bounded AI logic, not an exact page field. Check them
+                    before Fill Open Ayshei Ad.
+                  </p>
+                </aside>
+              </article>
+            </section>
+            <details id="manual-ad-source-preview" class="source-facts-preview" hidden>
+              <summary>Vendor specifications captured</summary>
+              <ul id="manual-ad-source-facts"></ul>
+            </details>
+          </section>
+          <section
+            id="manual-images-panel"
+            class="luna-tab-panel"
+            data-luna-panel="manual-images"
+            role="tabpanel"
+            aria-labelledby="manual-images-tab"
+            hidden
+          >
+            <article class="image-scraper-card" aria-label="Car Image Scraper">
+              <div class="image-scraper-heading">
+                <div>
+                  <h3>Car Image Scraper</h3>
+                </div>
+                <span id="image-scraper-status" class="image-scraper-status" data-image-state="idle"
+                  >Ready</span
+                >
+              </div>
+              <p class="image-scraper-copy">Collect or add images independently of Data.</p>
+              <div class="image-scraper-actions">
+                <button id="image-scraper-collect" type="button">Collect images</button>
+                <button id="image-scraper-import" type="button" disabled>Add images only</button>
+                <button id="image-scraper-clear" type="button" disabled>Clear</button>
+              </div>
+              <div id="image-scraper-preview" class="image-scraper-preview" hidden>
+                <div class="image-scraper-preview-heading">
+                  <strong>Review order</strong>
+                  <span id="image-scraper-count">0/3 images</span>
+                </div>
+                <ul
+                  id="image-scraper-list"
+                  class="image-scraper-list"
+                  aria-label="Scrollable car images in upload order"
+                  aria-describedby="image-scraper-help"
+                  tabindex="0"
+                ></ul>
+                <button id="image-scraper-undo" class="image-scraper-undo" type="button" hidden>
+                  Undo last removal
+                </button>
+                <p id="image-scraper-help" class="image-scraper-help">
+                  Choose the main image, reorder or remove. At least 3 images.
+                </p>
+              </div>
+              <p
+                id="image-scraper-message"
+                class="image-scraper-message"
+                data-kind="info"
+                aria-live="polite"
+              >
+                Open any vendor car ad and collect its images.
+              </p>
+            </article>
+          </section>
+        </section>
+
+        <section class="jenkins-assistant-view" aria-label="Jenkins Assistant" hidden>
+          <p class="jenkins-safety">Fill parameters only. Build stays manual.</p>
+          <nav
+            class="luna-view-tabs"
+            role="tablist"
+            aria-label="jenkins views"
+            data-luna-tabs="jenkins"
+          >
+            <button
+              id="jenkins-batch-tab"
+              type="button"
+              data-luna-tab="jenkins-batch"
+              role="tab"
+              aria-controls="jenkins-batch-panel"
+              aria-selected="true"
+              tabindex="0"
+            >
+              Batch</button
+            ><button
+              id="jenkins-fields-tab"
+              type="button"
+              data-luna-tab="jenkins-fields"
+              role="tab"
+              aria-controls="jenkins-fields-panel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              Review fields
+            </button>
+          </nav>
+          <section
+            id="jenkins-batch-panel"
+            class="luna-tab-panel"
+            data-luna-panel="jenkins-batch"
+            role="tabpanel"
+            aria-labelledby="jenkins-batch-tab"
+          >
+            <article class="jenkins-card jenkins-start-card">
+              <div class="jenkins-heading">
+                <div>
+                  <h3>Jenkins Batch Builder</h3>
+                </div>
+                <span id="jenkins-status" class="jenkins-badge" data-jenkins-state="idle"
+                  >Ready</span
+                >
+              </div>
+              <p class="jenkins-detail">Review complete rows for the selected job.</p>
+              <label for="jenkins-type">Jenkins job</label>
+              <select id="jenkins-type" data-luna-select="">
+                <option value="dubicars">DubiCars · P:U · 6 fields</option>
+                <option value="dubizzle">Dubizzle · P:W · 8 fields</option>
+                <option value="noon">Noon · 5 fields · URL + taxonomy</option>
+              </select>
+              <label for="jenkins-paste">Copied Sheet rows</label>
+              <textarea
+                id="jenkins-paste"
+                rows="7"
+                spellcheck="false"
+                placeholder="Paste P:U, P:W, or Noon 5-cell tab-separated rows"
+              ></textarea>
+              <div class="jenkins-actions">
+                <button id="jenkins-prepare" class="connection-button" type="button">
+                  Prepare and Review
+                </button>
+                <button id="jenkins-clear" class="jenkins-secondary-button" type="button" disabled>
+                  Clear
+                </button>
+              </div>
+              <p id="jenkins-message" class="jenkins-message" data-kind="info" aria-live="polite">
+                Paste complete rows, then review the fields.
+              </p>
+            </article>
+          </section>
+          <section
+            id="jenkins-fields-panel"
+            class="luna-tab-panel"
+            data-luna-panel="jenkins-fields"
+            role="tabpanel"
+            aria-labelledby="jenkins-fields-tab"
+            hidden
+          >
+            <section
+              id="jenkins-preview"
+              class="jenkins-preview"
+              aria-label="Separated Jenkins fields"
+              hidden
+            >
+              <article class="jenkins-card">
+                <div class="jenkins-heading">
+                  <div>
+                    <h3>Review Separated Fields</h3>
+                  </div>
+                </div>
+                <dl class="jenkins-totals">
+                  <div>
+                    <dt>Complete rows</dt>
+                    <dd id="jenkins-row-count">0</dd>
+                  </div>
+                  <div>
+                    <dt>Jenkins fields</dt>
+                    <dd id="jenkins-field-count">0</dd>
+                  </div>
+                </dl>
+                <div class="luna-jenkins-field-picker">
+                  <label for="jenkins-field-select"
+                    >Field<select id="jenkins-field-select" disabled data-luna-select="">
+                      <option value="">Prepare a batch first</option>
+                    </select></label
+                  ><button id="jenkins-field-copy" class="connection-button" type="button" disabled>
+                    Copy field
+                  </button>
+                </div>
+                <div id="jenkins-preview-fields" class="jenkins-preview-fields"></div>
+              </article>
+
+              <article class="jenkins-card jenkins-fill-card">
+                <h3>Fill reviewed fields</h3>
+                <p class="jenkins-detail">Credentials and Build stay manual.</p>
+                <button id="jenkins-fill" class="connection-button" type="button" disabled>
+                  Fill Current Jenkins Page
+                </button>
+              </article>
+            </section>
+            <p id="luna-jenkins-empty" class="luna-empty">
+              Prepare complete rows to review the fields.
+            </p>
+          </section>
+        </section>
+
+        <section class="inventory-checker-view" aria-label="Inventory Checker" hidden>
+          <p class="inventory-safety">Read-only capture.</p>
+          <div class="connected-view-switcher" data-connected-switcher="inventory">
+            <button
+              class="view-step-button"
+              type="button"
+              data-luna-select-step="-1"
+              aria-label="Previous inventory step"
+              disabled
+            >
+              <svg viewbox="0 0 24 24" aria-hidden="true">
+                <path d="m14.5 6-6 6 6 6"></path>
+              </svg>
+            </button>
+            <select
+              id="inventory-view-select"
+              aria-label="Inventory step"
+              data-luna-select-tabs="inventory"
+              data-luna-select=""
+            >
+              <option value="inventory-names">1 · Names</option>
+              <option value="inventory-capture">2 · Inventory</option>
+              <option value="inventory-results">3 · Results</option>
+            </select>
+            <button
+              class="view-step-button"
+              type="button"
+              data-luna-select-step="1"
+              aria-label="Next inventory step"
+            >
+              <svg viewbox="0 0 24 24" aria-hidden="true">
+                <path d="m9.5 6 6 6-6 6"></path>
+              </svg>
+            </button>
+          </div>
+          <section
+            id="inventory-names-panel"
+            class="luna-tab-panel"
+            data-luna-panel="inventory-names"
+            role="tabpanel"
+            aria-label="Advertisement names"
+          >
+            <article class="inventory-card inventory-sheet-card">
+              <div class="inventory-heading">
+                <div>
+                  <h3>Paste Advertisement Names</h3>
+                </div>
+                <span id="inventory-sheet-count" class="inventory-badge">0 names</span>
+              </div>
+              <p class="inventory-detail">
+                Copy only the advertisement-name column from the Sheet, then paste one name per row.
+              </p>
+              <label for="inventory-sheet-text">Advertisement names</label>
+              <textarea
+                id="inventory-sheet-text"
+                rows="5"
+                spellcheck="false"
+                placeholder="Toyota Camry GL 2010 GCC Specs"
+              ></textarea>
+              <div class="inventory-actions inventory-sheet-actions">
+                <button id="inventory-use-sheet-data" class="connection-button" type="button">
+                  Use names &amp; continue
+                </button>
+                <button
+                  id="inventory-clear-sheet-data"
+                  class="inventory-secondary-button"
+                  type="button"
+                  disabled
+                >
+                  Clear names
+                </button>
+              </div>
+            </article>
+          </section>
+          <section
+            id="inventory-capture-panel"
+            class="luna-tab-panel"
+            data-luna-panel="inventory-capture"
+            role="tabpanel"
+            aria-label="Inventory capture"
+            hidden
+          >
+            <article class="inventory-card inventory-capture-card">
+              <div class="inventory-heading">
+                <div>
+                  <h3>Ayshei Inventory</h3>
+                </div>
+                <span class="inventory-badge"
+                  ><strong id="inventory-page-count">0</strong> pages</span
+                >
+              </div>
+              <p class="inventory-detail">
+                Open an Ayshei inventory page, wait until rows finish loading, then capture it. Luna
+                keeps pages with different filters, search, sort, page size, and offsets separately.
+              </p>
+              <div class="inventory-actions">
+                <button id="inventory-capture-page" class="connection-button" type="button">
+                  Capture Current Inventory Page
+                </button>
+                <button
+                  id="inventory-clear"
+                  class="inventory-secondary-button"
+                  type="button"
+                  disabled
+                >
+                  Clear captures
+                </button>
+              </div>
+              <dl class="inventory-summary">
+                <div>
+                  <dt>Account</dt>
+                  <dd id="inventory-account">Account not detected</dd>
+                </div>
+                <div>
+                  <dt>Captured names</dt>
+                  <dd id="inventory-name-count">0</dd>
+                </div>
+              </dl>
+              <div id="inventory-page-list" class="inventory-page-list"></div>
+            </article>
+            <details class="inventory-card inventory-paste-card">
+              <summary>Paste fallback</summary>
+              <p>
+                Paste a copied table containing Product Name, or paste one inventory ad name per
+                line.
+              </p>
+              <p>This box is only for inventory-page text, not Work Queue Sheet data.</p>
+              <label for="inventory-paste-text">Copied inventory-page text</label>
+              <textarea
+                id="inventory-paste-text"
+                rows="7"
+                spellcheck="false"
+                placeholder="Toyota Camry GL 2010 GCC Specs"
+              ></textarea>
+              <button id="inventory-add-paste" class="inventory-secondary-button" type="button">
+                Add Pasted Inventory Page
+              </button>
+            </details>
+          </section>
+          <section
+            id="inventory-results-panel"
+            class="luna-tab-panel"
+            data-luna-panel="inventory-results"
+            role="tabpanel"
+            aria-label="Inventory results"
+            hidden
+          >
+            <section
+              id="inventory-results"
+              class="inventory-results"
+              aria-label="Inventory comparison results"
+              hidden
+            >
+              <details class="inventory-result-card" data-result="matched">
+                <summary class="inventory-result-heading">
+                  <h3>Found in inventory</h3>
+                  <span id="inventory-total-matched">0</span>
+                </summary>
+                <div class="inventory-result-body"><ul id="inventory-list-matched"></ul></div>
+              </details>
+              <details class="inventory-result-card" data-result="missing">
+                <summary class="inventory-result-heading">
+                  <h3>Missing from inventory</h3>
+                  <span id="inventory-total-missing">0</span>
+                </summary>
+                <div class="inventory-result-body">
+                  <button
+                    id="inventory-copy-missing"
+                    class="inventory-section-copy"
+                    type="button"
+                    disabled
+                  >
+                    Copy Missing Names
+                  </button>
+                  <ul id="inventory-list-missing"></ul>
+                </div>
+              </details>
+              <details class="inventory-result-card" data-result="repeated">
+                <summary class="inventory-result-heading">
+                  <h3>Duplicate coverage</h3>
+                  <span id="inventory-total-repeated">0 names · 0 pasted occurrences</span>
+                </summary>
+                <div class="inventory-result-body">
+                  <button
+                    id="inventory-copy-repeated"
+                    class="inventory-section-copy"
+                    type="button"
+                    disabled
+                  >
+                    Copy Repeated Names
+                  </button>
+                  <ul id="inventory-list-repeated"></ul>
+                </div>
+              </details>
+              <details class="inventory-result-card" data-result="possible">
+                <summary class="inventory-result-heading">
+                  <h3>Possible matches that need manual checking</h3>
+                  <span id="inventory-total-possible">0</span>
+                </summary>
+                <div class="inventory-result-body"><ul id="inventory-list-possible"></ul></div>
+              </details>
+            </section>
+          </section>
+          <article class="inventory-card inventory-compare-card">
+            <h3>Compare Names with Inventory</h3>
+            <p class="inventory-detail">
+              Only the names pasted from the Sheet are checked. Other inventory ads are ignored.
+              Exact matching ignores capitalization and extra spaces; duplicate names are covered
+              one occurrence at a time.
+            </p>
+            <button id="inventory-compare" class="connection-button" type="button" disabled>
+              Compare names
+            </button>
+            <p id="inventory-comparison-source" class="inventory-source-note">
+              Paste advertisement names above, then capture the inventory pages.
+            </p>
+            <p id="inventory-message" class="inventory-message" data-kind="info" aria-live="polite">
+              Add names and capture inventory to compare.
+            </p>
+          </article>
+        </section>
+
+        <section class="settings-view" aria-label="Settings" hidden>
+          <nav
+            class="luna-view-tabs"
+            role="tablist"
+            aria-label="settings views"
+            data-luna-tabs="settings"
+          >
+            <button
+              id="settings-connections-tab"
+              type="button"
+              data-luna-tab="settings-connections"
+              role="tab"
+              aria-controls="settings-connections-panel"
+              aria-selected="true"
+              tabindex="0"
+            >
+              Connections</button
+            ><button
+              id="settings-ai-tab"
+              type="button"
+              data-luna-tab="settings-ai"
+              role="tab"
+              aria-controls="settings-ai-panel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              AI</button
+            ><button
+              id="settings-about-tab"
+              type="button"
+              data-luna-tab="settings-about"
+              role="tab"
+              aria-controls="settings-about-panel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              About
+            </button>
+          </nav>
+          <section
+            id="settings-connections-panel"
+            class="luna-tab-panel"
+            data-luna-panel="settings-connections"
+            role="tabpanel"
+            aria-labelledby="settings-connections-tab"
+          >
+            <article class="settings-card public-edition-notice">
+              <h3>Public edition</h3>
+              <p>
+                Private work services and deployment configuration are not included. Local queues,
+                notes, capture, parsing and review remain available. No company connection or
+                credential is bundled.
+              </p>
+            </article>
+            <div class="settings-card">
+              <div class="settings-status-row">
+                <div>
+                  <h3>Read-only connection</h3>
+                  <p>Uses your work Google account and the approved company endpoint.</p>
+                </div>
+                <span
+                  id="settings-sheet-status"
+                  class="connection-badge"
+                  data-connection-state="loading"
+                  >Loading</span
+                >
+              </div>
+              <button id="settings-test-connection" class="connection-button" type="button">
+                Test Connection
+              </button>
+            </div>
+            <div class="settings-card">
+              <div class="settings-status-row">
+                <div>
+                  <h3>Live lookup source</h3>
+                  <p>
+                    Choose which approved Ayshei catalog route Luna uses for Make, Model, and Trim
+                    results.
+                  </p>
+                </div>
+                <span
+                  id="settings-ayshei-endpoint-status"
+                  class="connection-badge"
+                  data-endpoint-state="configured"
+                  >Configured</span
+                >
+              </div>
+              <label class="settings-endpoint-label" for="settings-ayshei-endpoint"
+                >Catalog endpoint</label
+              >
+              <select
+                id="settings-ayshei-endpoint"
+                class="settings-endpoint-select"
+                data-luna-select=""
+              >
+                <option value="mirror">New mirror endpoint (default)</option>
+                <option value="original">Original endpoint</option>
+              </select>
+              <p id="settings-ayshei-endpoint-message" class="scraper-message" data-kind="success">
+                The selected endpoint supplies Work Queue lookups. Manual Ad loads its required
+                vehicle catalog automatically.
+              </p>
+              <button id="settings-test-ayshei-endpoint" class="connection-button" type="button">
+                Test Selected Endpoint
+              </button>
+              <p id="settings-ayshei-endpoint-last" class="settings-metadata">
+                No successful catalog request recorded yet.
+              </p>
+            </div>
+            <div class="settings-card">
+              <div class="settings-status-row">
+                <div>
+                  <h3>Other vendor websites</h3>
+                  <p>
+                    Built-in Dubizzle and DubiCars access remains available. Broader access is
+                    optional and used only after an explicit scrape action.
+                  </p>
+                </div>
+                <span
+                  id="settings-websites-status"
+                  class="connection-badge"
+                  data-permission-state="loading"
+                  >Checking</span
+                >
+              </div>
+              <p id="settings-websites-message" class="settings-metadata">
+                Checking Chrome website permission.
+              </p>
+              <div class="settings-action-row">
+                <button id="settings-enable-websites" class="connection-button" type="button">
+                  Enable Other Websites
+                </button>
+                <button
+                  id="settings-revoke-websites"
+                  class="settings-secondary-button"
+                  type="button"
+                >
+                  Revoke Other Websites
+                </button>
+              </div>
+            </div>
+            <div class="settings-card raw-data-settings">
+              <div class="scraper-settings-heading">
+                <div>
+                  <h3>Luna Raw Data Writer</h3>
+                </div>
+                <span class="connection-badge" data-endpoint-state="configured">Built in</span>
+              </div>
+              <p class="scraper-settings-copy">
+                The your organization writer is included with Luna. Agents in the approved work
+                domain can load the extension and use Module 8 without entering a URL.
+              </p>
+              <p class="scraper-message" data-kind="success">No agent setup required.</p>
+            </div>
+          </section>
+          <section
+            id="settings-ai-panel"
+            class="luna-tab-panel"
+            data-luna-panel="settings-ai"
+            role="tabpanel"
+            aria-labelledby="settings-ai-tab"
+            hidden
+          >
+            <article class="settings-card public-edition-notice">
+              <h3>Public edition</h3>
+              <p>
+                Private work services and deployment configuration are not included. Local queues,
+                notes, capture, parsing and review remain available. No company connection or
+                credential is bundled.
+              </p>
+            </article>
+            <div class="settings-card">
+              <div class="settings-status-row">
+                <div>
+                  <h3>Protected multi-model connection</h3>
+                  <p>
+                    One Cloudflare Worker URL routes Groq, Gemini, and OpenRouter. This remains
+                    Luna's preferred route.
+                  </p>
+                </div>
+                <span id="settings-groq-status" class="connection-badge" data-groq-state="missing"
+                  >Worker URL missing</span
+                >
+              </div>
+              <label class="settings-endpoint-label" for="settings-groq-worker-url"
+                >Cloudflare Worker URL</label
+              >
+              <input
+                id="settings-groq-worker-url"
+                type="url"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Private connector not included"
+              />
+              <p class="settings-metadata">
+                Paste only the deployed workers.dev URL—not any API key. Luna sends bounded vehicle
+                facts, live Ayshei candidate labels, and at most one supported public car image. It
+                never sends vendor credentials or Sheet rows.
+              </p>
+              <div class="settings-action-row">
+                <button id="settings-save-groq-worker-url" class="connection-button" type="button">
+                  Save
+                </button>
+                <button
+                  id="settings-test-groq"
+                  class="settings-secondary-button"
+                  type="button"
+                  disabled
+                >
+                  Test connection
+                </button>
+                <button
+                  id="settings-clear-groq-worker-url"
+                  class="settings-secondary-button"
+                  type="button"
+                  disabled
+                >
+                  Clear
+                </button>
+              </div>
+              <p id="settings-groq-message" class="settings-metadata">
+                Deploy the included Worker, then paste its URL here. The same URL works on another
+                device.
+              </p>
+            </div>
+            <div class="settings-card settings-local-ai-card">
+              <div class="settings-status-row">
+                <div>
+                  <h3>Direct-provider backup</h3>
+                  <p>
+                    Save one or more keys on this Chrome profile. Luna uses them only when the AI
+                    Router is unavailable or not configured.
+                  </p>
+                </div>
+                <span
+                  id="settings-local-ai-status"
+                  class="connection-badge"
+                  data-local-ai-state="missing"
+                  >No local keys</span
+                >
+              </div>
+              <label for="luna-ai-provider"
+                >Provider<select id="luna-ai-provider" data-luna-select="">
+                  <option value="groq">Groq</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="openrouter">OpenRouter</option>
+                </select></label
+              >
+              <div class="settings-local-ai-providers">
+                <details class="settings-local-ai-provider" data-provider="groq">
+                  <summary>
+                    <span>Groq</span
+                    ><span
+                      id="settings-local-groq-status"
+                      class="settings-provider-state"
+                      data-local-provider-state="missing"
+                      >Not saved</span
+                    >
+                  </summary>
+                  <label class="settings-endpoint-label" for="settings-local-groq-key"
+                    >Groq API key</label
+                  >
+                  <div class="settings-key-row">
+                    <input
+                      id="settings-local-groq-key"
+                      type="password"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="Enter locally"
+                    /><button id="settings-save-local-groq" class="connection-button" type="button">
+                      Save
+                    </button>
+                  </div>
+                  <div class="settings-action-row">
+                    <button
+                      id="settings-test-local-groq"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Test</button
+                    ><button
+                      id="settings-clear-local-groq"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <p id="settings-local-groq-message" class="settings-metadata">
+                    Stored only in this Chrome profile.
+                  </p>
+                </details>
+                <details class="settings-local-ai-provider" data-provider="gemini">
+                  <summary>
+                    <span>Gemini</span
+                    ><span
+                      id="settings-local-gemini-status"
+                      class="settings-provider-state"
+                      data-local-provider-state="missing"
+                      >Not saved</span
+                    >
+                  </summary>
+                  <label class="settings-endpoint-label" for="settings-local-gemini-key"
+                    >Gemini API key</label
+                  >
+                  <div class="settings-key-row">
+                    <input
+                      id="settings-local-gemini-key"
+                      type="password"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="Enter locally"
+                    /><button
+                      id="settings-save-local-gemini"
+                      class="connection-button"
+                      type="button"
+                    >
+                      Save
+                    </button>
+                  </div>
+                  <div class="settings-action-row">
+                    <button
+                      id="settings-test-local-gemini"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Test</button
+                    ><button
+                      id="settings-clear-local-gemini"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <p id="settings-local-gemini-message" class="settings-metadata">
+                    Stored only in this Chrome profile.
+                  </p>
+                </details>
+                <details class="settings-local-ai-provider" data-provider="openrouter">
+                  <summary>
+                    <span>OpenRouter</span
+                    ><span
+                      id="settings-local-openrouter-status"
+                      class="settings-provider-state"
+                      data-local-provider-state="missing"
+                      >Not saved</span
+                    >
+                  </summary>
+                  <label class="settings-endpoint-label" for="settings-local-openrouter-key"
+                    >OpenRouter API key</label
+                  >
+                  <div class="settings-key-row">
+                    <input
+                      id="settings-local-openrouter-key"
+                      type="password"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="Enter locally"
+                    /><button
+                      id="settings-save-local-openrouter"
+                      class="connection-button"
+                      type="button"
+                    >
+                      Save
+                    </button>
+                  </div>
+                  <div class="settings-action-row">
+                    <button
+                      id="settings-test-local-openrouter"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Test</button
+                    ><button
+                      id="settings-clear-local-openrouter"
+                      class="settings-secondary-button"
+                      type="button"
+                      disabled
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <p id="settings-local-openrouter-message" class="settings-metadata">
+                    Stored only in this Chrome profile.
+                  </p>
+                </details>
+              </div>
+              <p id="settings-local-ai-message" class="settings-metadata">
+                Saved values are never shown again, synced, included in diagnostics, or sent to the
+                AI Router.
+              </p>
+            </div>
+          </section>
+          <section
+            id="settings-about-panel"
+            class="luna-tab-panel"
+            data-luna-panel="settings-about"
+            role="tabpanel"
+            aria-labelledby="settings-about-tab"
+            hidden
+          >
+            <div class="settings-card">
+              <div class="settings-facts">
+                <div><span>Version</span><strong id="settings-luna-version">Checking</strong></div>
+                <div>
+                  <span>Saved areas</span><strong id="settings-storage-summary">Checking</strong>
+                </div>
+              </div>
+              <button id="settings-copy-diagnostics" class="connection-button" type="button">
+                Copy diagnostics
+              </button>
+              <p id="settings-diagnostics-message" class="settings-metadata">
+                Diagnostics contain only coded states and times—never endpoints, credentials,
+                tokens, vendor content, or image URLs.
+              </p>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer>Luna 2.0.0</footer>
+    </div>
+
+    <dialog id="luna-module-dialog" class="luna-dialog" aria-label="All Luna sections">
+      <div class="luna-dialog-heading">
+        <h3>Your workspace</h3>
+        <button
+          class="luna-icon-button"
+          type="button"
+          data-luna-dialog-close
+          aria-label="Close sections"
+        >
+          <svg viewbox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"></path>
+          </svg>
+        </button>
+      </div>
+      <button class="luna-drawer-item" type="button" data-luna-section="home">Home</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="sheet-statistics">
+        Insights</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="work-queue">
+        Work Queue</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="manual-ad-assistant">
+        Manual Ad</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="scraper-images">
+        Listings</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="inventory-checker">
+        Inventory</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="jenkins-assistant">
+        Jenkins</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="settings">Settings</button>
+    </dialog>
+    <script src="src/shared/foundation.js"></script>
+    <script src="src/shared/diagnostics.js"></script>
+    <script src="src/features/home/home-status.js"></script>
+    <script src="src/shared/config.js"></script>
+    <script src="src/features/sheets/sheet-client.js"></script>
+    <script src="src/features/sheets/sheet-connection.js"></script>
+    <script src="src/features/sheets/vendor-counter-core.js"></script>
+    <script src="src/features/sheets/vendor-counter.js"></script>
+    <script src="src/features/sheets/agent-tracker-core.js"></script>
+    <script src="src/features/sheets/agent-tracker.js"></script>
+    <script src="src/features/sheets/monthly-performance-core.js"></script>
+    <script src="src/features/sheets/sheet-report-core.js"></script>
+    <script src="src/features/sheets/xlsx-export-core.js"></script>
+    <script src="src/features/sheets/monthly-performance.js"></script>
+    <script src="src/features/sheets/daily-interactions-core.js"></script>
+    <script src="src/features/sheets/daily-interactions.js"></script>
+    <script src="src/features/sheets/sheet-report.js"></script>
+    <script src="src/services/ayshei/ayshei-core.js"></script>
+    <script src="src/services/ayshei/ayshei-client.js"></script>
+    <script src="src/services/ai/groq-core.js"></script>
+    <script src="src/services/ai/groq-client.js"></script>
+    <script src="src/features/settings/groq-settings.js"></script>
+    <script src="src/features/settings/ayshei-endpoint-settings.js"></script>
+    <script src="src/services/ayshei/ayshei-status.js"></script>
+    <script src="src/features/settings/permission-settings.js"></script>
+    <script src="src/features/settings/settings-overview.js"></script>
+    <script src="src/features/work-queue/work-queue-core.js"></script>
+    <script src="src/features/work-queue/vehicle-detail-core.js"></script>
+    <script src="src/features/work-queue/work-queue-notes-core.js"></script>
+    <script src="src/features/work-queue/work-queue-notes.js"></script>
+    <script src="src/features/work-queue/work-queue.js"></script>
+    <script src="src/features/inventory/inventory-core.js"></script>
+    <script src="src/features/inventory/inventory-checker.js"></script>
+    <script src="src/features/images/image-scraper-core.js"></script>
+    <script src="src/features/images/image-scraper.js"></script>
+    <script src="src/features/listings/scraper-core.js"></script>
+    <script src="src/features/listings/listings-scraper.js"></script>
+    <script src="src/features/manual-ad/manual-ad-core.js"></script>
+    <script src="src/features/manual-ad/manual-ad-assistant.js"></script>
+    <script src="src/features/jenkins/jenkins-core.js"></script>
+    <script src="src/features/jenkins/jenkins-page.js"></script>
+    <script src="src/features/jenkins/jenkins-assistant.js"></script>
+    <script src="vendor/gsap.min.js"></script>
+    <script src="src/panel/luna-controls.js"></script>
+    <script src="src/panel/luna-motion.js"></script>
+    <script src="src/panel/luna-ui.js"></script>
+    <script src="src/panel/sidepanel.js"></script>
+  </body>
+</html>

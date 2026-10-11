@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Rotating Image Scraper Harness</title>
+  </head>
+  <body>
+    <main>
+      <h1>2026 Rotating Gallery Coupe</h1>
+      <section class="sell-car-slider-main">
+        <div class="car-slider-top">
+          <div class="car-slider-left">
+            <img class="slider-main-img" alt="Rotating test car">
+            <div class="mobile-image-count"><span>18</span></div>
+            <div class="mobile-dot-indicators"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <pre id="result">Running</pre>
+    <script>
+      const urls = Array.from(
+        { length: 18 },
+        (_, index) => `https://cdn.vendor.test/rotating-car-${index + 1}.jpg`
+      );
+      const mainImage = document.querySelector(".slider-main-img");
+      const dots = document.querySelector(".mobile-dot-indicators");
+      let activeIndex = 7;
+      const render = () => {
+        mainImage.src = urls[activeIndex];
+        [...dots.children].forEach((dot, index) => {
+          dot.classList.toggle("active", index === activeIndex);
+        });
+      };
+      urls.forEach((url, index) => {
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.addEventListener("click", () => {
+          setTimeout(() => {
+            activeIndex = index;
+            render();
+          }, 15);
+        });
+        dots.append(dot);
+      });
+      render();
+
+      addEventListener("load", async () => {
+        const source = await fetch("/luna/src/features/images/image-scraper-source.js", {
+          cache: "no-store"
+        }).then((response) => response.text());
+        const capture = await (0, eval)(source);
+        document.querySelector("#result").textContent = JSON.stringify({
+          activeIndex,
+          capture
+        });
+      });
+    </script>
+  </body>
+</html>

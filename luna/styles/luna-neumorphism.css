@@ -1,0 +1,1291 @@
+/* Luna Soft Eclipse. Final shared theme, based on the user's Neumorphism design.md.
+   Layout/controller contracts live in the existing module styles and scripts. */
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --luna-bg: #e8e8e8;
+  --luna-bg-deep: #e8e8e8;
+  --luna-surface: #ededee;
+  --luna-surface-raised: #f3f3f4;
+  --luna-surface-soft: #e5e8ec;
+  --luna-line: #d0d4da;
+  --luna-line-strong: #b9c1cb;
+  --luna-text: #303747;
+  --luna-muted: #5d6573;
+  --luna-faint: #697181;
+  --luna-accent: #c8e0f4;
+  --luna-accent-strong: #b6d3ea;
+  --luna-accent-ink: #314d68;
+  --luna-pink: #f5e0e8;
+  --luna-success: #346b53;
+  --luna-warning: #85622b;
+  --luna-danger: #a44058;
+  --luna-shadow: -5px -5px 15px #ffffffb3, 5px 5px 15px #c8cbd380;
+  --luna-shadow-small: -3px -3px 8px #ffffffa6, 3px 3px 8px #c6cbd373;
+  --luna-inset: inset 2px 2px 5px #c8ccd280, inset -2px -2px 5px #ffffffcf;
+  --luna-radius: 14px;
+  --text: var(--luna-text);
+  --muted: var(--luna-muted);
+  --violet: var(--luna-accent-ink);
+  --danger: var(--luna-danger);
+  --surface: var(--luna-surface);
+  --raised: var(--luna-surface-raised);
+  --soft-border: var(--luna-line);
+  --bg-space: var(--luna-bg);
+  --surface-lunar: var(--luna-surface);
+  --surface-raised: var(--luna-surface-raised);
+  --text-main: var(--luna-text);
+  --text-strong: var(--luna-text);
+  --text-muted: var(--luna-muted);
+  --accent-dove: #6c5978;
+  --accent-ice: var(--luna-accent-ink);
+  --glow-crimson: var(--luna-danger);
+  --border-soft: var(--luna-line);
+  --shadow-lunar: var(--luna-shadow);
+  background: var(--luna-bg);
+  color: var(--luna-text);
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--luna-bg);
+  color: var(--luna-text);
+  font:
+    14px/1.6 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  scrollbar-color: #b2bcc8 transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+h1,
+h2,
+h3,
+h4 {
+  color: var(--luna-text);
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+h3 {
+  font-size: 16px;
+  line-height: 1.35;
+}
+a {
+  color: var(--luna-accent-ink);
+  text-underline-offset: 3px;
+}
+:focus-visible {
+  outline: 2px solid #769cbd;
+  outline-offset: 3px;
+}
+::selection {
+  background: #bdd9ed;
+  color: #243b50;
+}
+::placeholder {
+  color: #747b88 !important;
+  opacity: 1;
+}
+
+.app-shell {
+  max-width: 800px;
+  min-height: 100dvh;
+  padding: 24px;
+  background: var(--luna-bg);
+  box-shadow: none;
+}
+.content {
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+.settings-view {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+.app-shell::before,
+.star-field,
+.ambient,
+.lunar-atmosphere {
+  display: none;
+}
+.luna-header {
+  padding-bottom: 20px;
+}
+.luna-home-button {
+  color: var(--luna-text);
+  font-size: 24px;
+  font-weight: 700;
+}
+.brand-mark {
+  width: 30px;
+  height: 34px;
+  flex-basis: 30px;
+}
+.luna-emblem {
+  width: 32px;
+  height: 32px;
+  filter: none;
+}
+.luna-emblem-moon {
+  fill: #9ab9d4;
+}
+.luna-emblem-star {
+  fill: #7c8fa4;
+}
+.header-status {
+  color: var(--luna-muted);
+  font-size: 11px;
+}
+.header-status .status-dot {
+  background: #7f9f91;
+  box-shadow: none;
+}
+.luna-header-actions {
+  gap: 10px;
+}
+.luna-icon-button,
+.luna-settings-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid #ffffff8c;
+  color: var(--luna-muted);
+  background: var(--luna-surface);
+  box-shadow: var(--luna-shadow-small);
+}
+.luna-icon-button:hover,
+.luna-settings-button:hover {
+  background: #e0e8ef;
+  border-color: #c7d4df;
+  color: var(--luna-text);
+}
+
+.luna-primary-nav,
+.luna-module-nav,
+.luna-view-tabs,
+.queue-view-tabs,
+.sheet-statistics-tabs {
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #ffffff9c;
+  border-radius: 16px;
+  background: var(--luna-bg);
+  box-shadow: var(--luna-inset);
+}
+.luna-primary-nav {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.luna-group-button {
+  min-height: 42px;
+  padding: 8px 4px;
+  border-radius: 14px;
+  color: var(--luna-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.luna-group-button:hover {
+  background: #e2e8ed;
+  color: var(--luna-text);
+}
+.luna-group-button[aria-current="page"] {
+  color: var(--luna-accent-ink);
+  border: 1px solid #adc8df;
+  background: var(--luna-accent);
+  box-shadow: var(--luna-shadow-small);
+  font-weight: 600;
+}
+.luna-module-nav {
+  margin-top: 12px;
+}
+.luna-module-nav .nav-item {
+  border-radius: 12px;
+  color: var(--luna-muted);
+  font-size: 12px;
+}
+.luna-module-nav .nav-item.is-active {
+  background: #d9e7f1;
+  color: var(--luna-accent-ink);
+  box-shadow: var(--luna-shadow-small);
+}
+.luna-module-nav .nav-item::after {
+  display: none;
+}
+.app-shell :is(.luna-view-tabs, .queue-view-tabs, .sheet-statistics-tabs) > button {
+  border-radius: 12px;
+  background: transparent;
+  color: var(--luna-muted);
+  box-shadow: none;
+}
+.app-shell
+  :is(.luna-view-tabs, .queue-view-tabs, .sheet-statistics-tabs)
+  > button:is([aria-selected="true"], [aria-pressed="true"], .is-active) {
+  background: var(--luna-accent);
+  color: var(--luna-accent-ink);
+  box-shadow: var(--luna-shadow-small);
+}
+#section-title {
+  margin: 28px 0 20px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.app-shell
+  :is(
+    .queue-card,
+    .manual-ad-card,
+    .image-scraper-card,
+    .scraper-card,
+    .inventory-card,
+    .jenkins-card,
+    .settings-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card,
+    .monthly-performance-card,
+    .daily-interactions-card,
+    .home-notes-card,
+    .luna-home-queue,
+    .luna-home-connections,
+    .sheet-report-action
+  ) {
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #ffffffa6;
+  border-radius: 14px;
+  color: var(--luna-text);
+  background: var(--luna-surface);
+  box-shadow: var(--luna-shadow);
+}
+.app-shell
+  :is(
+    .queue-card,
+    .settings-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card
+  ):hover {
+  border-color: #ffffffc9;
+  box-shadow: var(--luna-shadow);
+}
+.app-shell :is(.queue-card, .settings-card, .jenkins-start-card)::after,
+.app-shell :is(.connection-card, .vendor-counter-card, .agent-tracker-card)::before {
+  content: none;
+}
+.app-shell
+  :is(
+    .inventory-result-card,
+    .home-note-vendor,
+    .settings-local-ai-provider,
+    .manual-ad-images-optional,
+    .source-facts-preview,
+    .queue-import-preview,
+    .monthly-explorer,
+    .manual-ad-ai-disclosure
+  ) {
+  border: 1px solid var(--luna-line);
+  border-radius: var(--luna-radius);
+  color: var(--luna-text);
+  background: #e7eaee;
+  box-shadow: none;
+}
+.app-shell :is(.manual-ad-ai-disclosure, .source-facts-preview) {
+  background: #e5edf3;
+}
+.app-shell
+  :is(
+    .connection-heading,
+    .counter-heading,
+    .tracker-heading,
+    .scraper-heading,
+    .image-scraper-heading,
+    .manual-ad-heading,
+    .jenkins-heading,
+    .inventory-heading
+  )
+  h3 {
+  font-size: 16px;
+}
+.app-shell
+  :is(
+    .connection-badge,
+    .counter-badge,
+    .tracker-badge,
+    .scraper-badge,
+    .image-scraper-status,
+    .manual-ad-badge,
+    .jenkins-badge,
+    .inventory-badge,
+    .scraper-mode,
+    .queue-status,
+    .settings-provider-state,
+    .home-notes-count,
+    .inventory-result-heading span
+  ) {
+  color: var(--luna-muted);
+  background: #e2e7ed;
+  border: 1px solid #ccd4dc;
+  box-shadow: none;
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+.app-shell :is(label, .tracker-label, .settings-endpoint-label) {
+  color: #535d6c;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  gap: 8px;
+}
+
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+.luna-dialog input,
+.select-search,
+.app-shell .select-trigger {
+  border: 1px solid var(--luna-line-strong);
+  border-radius: var(--luna-radius);
+  background: #eef0f2 !important;
+  color: var(--luna-text) !important;
+  min-height: 42px;
+  padding: 11px 12px;
+  box-shadow: var(--luna-inset);
+  font-size: 13px;
+  font-weight: 400;
+}
+select {
+  background-color: #eef0f2 !important;
+  background-image: none !important;
+  border-color: var(--luna-line-strong) !important;
+}
+select option {
+  color: var(--luna-text);
+  background: #f1f2f4;
+}
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]), textarea):hover,
+.app-shell .select-trigger:hover {
+  border-color: #96a9ba;
+  background: #edf1f5;
+}
+.app-shell :is(input:not([type="checkbox"]):not([type="radio"]), textarea):focus,
+.app-shell .select-trigger[aria-expanded="true"],
+.select-search:focus,
+.luna-dialog input:focus {
+  border-color: #91b6d5;
+  outline: 2px solid #a9c9e3;
+  outline-offset: 2px;
+  box-shadow: var(--luna-inset);
+}
+.app-shell input[readonly],
+.app-shell textarea[readonly] {
+  background: #e7eaee !important;
+  color: #465467 !important;
+}
+.app-shell textarea {
+  line-height: 1.6;
+}
+.app-shell input[type="checkbox"],
+.app-shell input[type="radio"] {
+  accent-color: #6c98bc;
+}
+.app-shell input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  flex-basis: 17px;
+}
+
+.app-shell
+  :is(
+    button:not(.nav-item):not(.luna-group-button):not(.luna-home-button):not(.luna-icon-button):not(
+        .select-option
+      )
+  ),
+.luna-dialog button,
+.select-trigger {
+  border: 1px solid #ffffffbd;
+  border-radius: var(--luna-radius);
+  background: var(--luna-surface) !important;
+  color: var(--luna-text) !important;
+  box-shadow: var(--luna-shadow-small) !important;
+  min-height: 42px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 12px;
+  transition:
+    transform 150ms ease-out,
+    opacity 200ms ease-out;
+}
+.app-shell button:where(:not(:disabled):not(.luna-home-button)):hover,
+.luna-dialog button:not(:disabled):hover {
+  border-color: #becbd6;
+  background: #e2e8ee !important;
+  filter: none;
+}
+.app-shell button:not(:disabled):active,
+.luna-dialog button:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: var(--luna-inset);
+}
+.app-shell .luna-home-button:hover,
+.app-shell .luna-home-button:active {
+  background: transparent !important;
+  color: var(--luna-text) !important;
+  border-color: transparent;
+  box-shadow: none !important;
+  transform: none;
+}
+.app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import
+  ),
+.luna-dialog-body > button {
+  color: var(--luna-accent-ink) !important;
+  background: var(--luna-accent) !important;
+  border-color: #b2cce0 !important;
+  box-shadow: var(--luna-shadow-small) !important;
+}
+.app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import
+  ):hover,
+.luna-dialog-body > button:hover {
+  background: var(--luna-accent-strong) !important;
+  border-color: #9cbad3 !important;
+}
+.app-shell #queue-mark-unlisted {
+  background: var(--luna-accent) !important;
+  color: var(--luna-accent-ink) !important;
+  border-color: #b2cce0 !important;
+}
+.app-shell #queue-auto-fill {
+  color: #715467 !important;
+  background: var(--luna-pink) !important;
+  border-color: #ddc5d0 !important;
+  box-shadow: var(--luna-shadow-small) !important;
+}
+.app-shell #queue-auto-fill:hover {
+  background: #e9cdd9 !important;
+}
+.app-shell button:disabled,
+.luna-dialog button:disabled {
+  opacity: 0.5;
+  box-shadow: none !important;
+  transform: none;
+}
+.app-shell
+  button.select-trigger:not(.nav-item):not(.luna-group-button):not(.luna-home-button):not(
+    .luna-icon-button
+  ):not(.select-option) {
+  background: #eef0f2 !important;
+  color: var(--luna-text) !important;
+  border-color: var(--luna-line-strong) !important;
+  box-shadow: var(--luna-inset) !important;
+  font-weight: 400;
+}
+.app-shell
+  :is(.luna-view-tabs, .queue-view-tabs, .sheet-statistics-tabs)
+  > button:not(.nav-item):not(.luna-group-button):not(.luna-home-button):not(.luna-icon-button):not(
+    .select-option
+  ) {
+  background: transparent !important;
+  color: var(--luna-muted) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+.app-shell
+  :is(.luna-view-tabs, .queue-view-tabs, .sheet-statistics-tabs)
+  > button:not(.nav-item):not(.luna-group-button):not(.luna-home-button):not(.luna-icon-button):not(
+    .select-option
+  ):is([aria-selected="true"], [aria-pressed="true"], .is-active) {
+  background: var(--luna-accent) !important;
+  color: var(--luna-accent-ink) !important;
+  border-color: #b2cce0 !important;
+  box-shadow: var(--luna-shadow-small) !important;
+}
+.app-shell :is(.scraper-duplicate-option, .scraper-separator-option) {
+  background: #e3edf4;
+  border-color: #c2d5e5;
+  border-radius: 14px;
+}
+.app-shell
+  :is(
+    .scraper-detail,
+    .scraper-message,
+    .scraper-settings-copy,
+    .image-scraper-copy,
+    .image-scraper-message,
+    .image-scraper-help,
+    .manual-ad-message,
+    .manual-ad-field-note,
+    .jenkins-detail,
+    .jenkins-message,
+    .inventory-detail,
+    .inventory-message,
+    .inventory-empty,
+    .inventory-result-empty,
+    .queue-message,
+    .settings-metadata,
+    .connection-detail,
+    .connection-safety,
+    .tracker-message,
+    .tracker-window,
+    .counter-window,
+    .counter-message,
+    .monthly-definition,
+    .luna-report-summary,
+    .luna-empty
+  ) {
+  color: var(--luna-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.app-shell :is(.scraper-safety, .inventory-safety, .jenkins-safety) {
+  color: var(--luna-muted);
+  background: #e3e6eb;
+  border: 1px solid #d6dbe1;
+  border-radius: 14px;
+  font-size: 12px;
+  padding: 10px 12px;
+}
+.card-kicker {
+  color: var(--luna-faint);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.app-shell :is(.queue-form-grid, .manual-ad-grid, .interaction-filters, .settings-facts) {
+  gap: 16px 12px;
+}
+.queue-form-column {
+  gap: 16px;
+}
+.queue-form-column > label {
+  gap: 8px;
+}
+.app-shell .queue-trim-copy {
+  cursor: text;
+  user-select: text;
+}
+.queue-trim-control {
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 4px;
+}
+.queue-trim-control .luna-select {
+  width: 34px;
+}
+.app-shell .queue-trim-control .select-trigger {
+  width: 34px;
+  min-width: 34px;
+  padding-inline: 8px;
+}
+.queue-listed-actions {
+  position: static;
+  z-index: auto;
+  margin: 20px 0 12px !important;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  gap: 8px !important;
+}
+.queue-listed-actions > button {
+  min-height: 42px !important;
+  border-radius: 14px !important;
+}
+.app-shell .queue-open-ad {
+  background: #e6edf3;
+  border-color: #cad7e1;
+  box-shadow: var(--luna-shadow-small);
+}
+.queue-open-icon {
+  fill: #7d9ebb;
+}
+.queue-open-arrow {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.empty-state-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 12px;
+  fill: none;
+  stroke: #7f93a8;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.queue-open-arrow,
+.ad-vendor,
+#queue-ad-number {
+  color: var(--luna-accent-ink);
+}
+.queue-url-text {
+  background: #e5e8ec;
+  border-color: #d4d9df;
+  color: var(--luna-muted);
+  border-radius: 10px;
+}
+.color-swatch {
+  border-color: #a4aebb;
+  box-shadow: 0 0 0 2px #f6f6f7;
+}
+.color-swatch[data-has-color="false"] {
+  background: #d6dde5 !important;
+}
+.workspace-view-switcher,
+.connected-view-switcher {
+  padding: 6px;
+  margin-bottom: 20px;
+  border-color: #ffffffa6;
+  border-radius: 16px;
+  background: var(--luna-bg);
+  box-shadow: var(--luna-inset);
+}
+.workspace-view-switcher label {
+  gap: 12px;
+}
+.workspace-view-switcher label > span {
+  color: var(--luna-muted);
+  font-size: 10px;
+}
+.app-shell .view-step-button {
+  min-height: 42px;
+  background: var(--luna-surface);
+  border-color: #ffffffbd;
+}
+
+.select-popover {
+  z-index: 200;
+  padding: 6px;
+  border: 1px solid #c4cdd6;
+  border-radius: 16px;
+  background: #f0f2f4;
+  color: var(--luna-text);
+  box-shadow:
+    0 12px 32px #76869b3d,
+    inset 0 1px 0 #ffffff;
+}
+.select-popover .select-search {
+  margin-bottom: 6px;
+  min-height: 40px;
+  border-radius: 12px;
+}
+.select-option {
+  color: var(--luna-text);
+  border: 0;
+  box-shadow: none;
+  background: none;
+  min-height: 40px;
+  border-radius: 10px;
+  padding: 10px 30px 10px 12px;
+  font:
+    500 13px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+}
+.select-option.is-selected {
+  background: var(--luna-accent);
+  color: var(--luna-accent-ink);
+}
+.select-option.is-selected::after {
+  border-color: #567c9b;
+}
+.select-option.is-active,
+.select-option:hover {
+  background: #dfe9f1;
+  color: var(--luna-text);
+}
+.select-chevron {
+  stroke: var(--luna-muted);
+}
+.select-empty {
+  color: var(--luna-muted);
+}
+.luna-dialog {
+  z-index: 300;
+  border: 1px solid #ffffffcc;
+  border-radius: 28px;
+  padding: 20px;
+  color: var(--luna-text);
+  background: var(--luna-surface);
+  box-shadow:
+    0 20px 65px #52627540,
+    inset 0 1px 0 #ffffff;
+}
+.luna-dialog::backdrop {
+  background: #56647752;
+  backdrop-filter: blur(4px);
+}
+.luna-dialog button {
+  font-family: inherit;
+}
+.luna-dialog-heading h3 {
+  font-size: 22px;
+}
+.luna-dialog-heading .luna-icon-button {
+  min-height: 34px;
+  padding: 0;
+}
+.luna-dialog-body {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.luna-dialog-body > label,
+.luna-dialog p {
+  color: var(--luna-muted);
+  font-size: 13px;
+}
+.luna-drawer-item {
+  min-height: 48px;
+  padding: 12px 14px;
+}
+.luna-dialog :is(.queue-reason-chip, .queue-reason-suggestion, .luna-drawer-item) {
+  color: var(--luna-text);
+  border-color: #c6d0da;
+  background: #e6ecf1;
+}
+
+.app-shell
+  :is(.agent-results-wrap, .monthly-explorer-list, .scraper-accepted-list, .image-scraper-list) {
+  border-color: #d2d8df;
+  background: #e7eaee;
+  border-radius: 14px;
+}
+.app-shell table {
+  color: var(--luna-text);
+  font-size: 12px;
+}
+.app-shell th {
+  color: #535d6c;
+  background: #dfe6ed;
+  font-size: 11px;
+}
+.app-shell :is(th, td) {
+  border-color: #cfd6de;
+}
+.app-shell tbody tr:nth-child(even) {
+  background: #eef1f4;
+}
+.app-shell :is(.counter-totals, .interaction-totals, .scraper-totals) article {
+  border-color: #cbd2db;
+}
+.app-shell :is(.counter-totals, .interaction-totals, .scraper-totals) span {
+  color: var(--luna-muted);
+  font-size: 11px;
+}
+.app-shell :is(.tracker-period, .interaction-period, .monthly-explorer-tab).is-active {
+  color: var(--luna-accent-ink) !important;
+  background: var(--luna-accent) !important;
+  border-color: #b2cce0;
+}
+.app-shell :is(.inventory-summary, .jenkins-totals) div,
+.app-shell
+  :is(
+    .inventory-page,
+    .inventory-result-card li,
+    .monthly-explorer-item,
+    .queue-import-summary > div,
+    .settings-facts > div
+  ) {
+  color: var(--luna-text);
+  border-color: #d0d7df;
+  background: #e4e8ed;
+  border-radius: 12px;
+}
+.app-shell
+  :is(
+    .inventory-result-card li span,
+    .inventory-result-card li div,
+    .image-scraper-preview-heading span,
+    .image-scraper-item-label,
+    .inventory-page-list span,
+    .inventory-page-list small
+  ) {
+  color: var(--luna-muted);
+}
+.app-shell .image-scraper-list > li {
+  background: #edf0f3;
+  border-color: #c4ceda;
+}
+.app-shell .image-scraper-list > li.is-main {
+  border-color: #83a6c4;
+}
+.app-shell .image-scraper-list .is-main .image-scraper-item-label {
+  color: var(--luna-accent-ink);
+}
+.app-shell .scraper-last-send {
+  color: var(--luna-success);
+  background: #deebe4;
+  border-color: #b7cfc1;
+}
+.app-shell :is(.scraper-accepted-row, .scraper-excluded-list li, .home-note-item) {
+  border-color: #d2d8df;
+}
+.app-shell
+  :is(
+    .inventory-result-heading,
+    .inventory-paste-card summary,
+    .home-note-vendor summary,
+    .settings-local-ai-provider summary
+  ) {
+  color: var(--luna-text);
+}
+.settings-local-ai-provider[open] summary {
+  border-bottom-color: #cdd4dd;
+}
+.settings-key-row {
+  grid-template-columns: minmax(0, 1fr) 68px;
+  gap: 8px;
+}
+.app-shell .settings-key-row > .connection-button {
+  width: 68px;
+  min-width: 68px;
+}
+.settings-facts dt {
+  color: var(--luna-muted);
+}
+.settings-facts dd {
+  color: var(--luna-text);
+}
+.app-shell .manual-ad-grid label.is-missing :is(input, textarea, .select-trigger) {
+  border-color: #b9828e;
+  background: #f5e9ed;
+}
+.app-shell :is(.scraper-border-legend [data-mark="accepted"]) {
+  color: #3f7198;
+}
+.app-shell :is(.scraper-border-legend [data-mark="unlisted"]) {
+  color: var(--luna-warning);
+}
+.app-shell :is(.scraper-border-legend [data-mark="excluded"]) {
+  color: var(--luna-danger);
+}
+
+/* Semantics remain visible on pale surfaces instead of relying on shadow alone. */
+.app-shell
+  :is(
+    [data-kind="error"],
+    [data-source="error"],
+    [data-connection-state="failed"],
+    [data-ayshei-state="error"],
+    [data-endpoint-state="error"],
+    [data-jenkins-state="error"],
+    [data-image-state="error"],
+    [data-groq-state="error"],
+    [data-queue-status="unlisted"]
+  ) {
+  color: var(--luna-danger);
+}
+.app-shell
+  :is(
+    [data-kind="success"],
+    [data-source="live"],
+    [data-connection-state="connected"],
+    [data-jenkins-state="ready"],
+    [data-jenkins-state="filled"],
+    [data-queue-status="listed"]
+  ) {
+  color: var(--luna-success);
+}
+.app-shell :is([data-kind="warning"], [data-queue-status="review-later"]) {
+  color: var(--luna-warning);
+}
+
+.home-intro {
+  display: flex;
+  align-items: center;
+  min-height: 170px;
+  margin: 24px 0;
+  padding: 20px 16px;
+  border: 1px solid #ffffffb3;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #edeef0 30%, #e2e8ef);
+  box-shadow: var(--luna-shadow);
+}
+.welcome-copy {
+  max-width: 68%;
+}
+.home-intro h3 {
+  width: 100%;
+  font-size: clamp(23px, 5vw, 30px);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+}
+.home-intro p {
+  max-width: 28ch;
+  margin-top: 12px;
+  color: var(--luna-muted);
+  font-size: 13px;
+}
+.lunar-art {
+  width: 148px;
+  height: 148px;
+  top: 12px;
+  right: -12px;
+  opacity: 0.9;
+  filter: none;
+}
+.lunar-halo {
+  background: none;
+  box-shadow: none;
+  opacity: 0;
+}
+.lunar-core {
+  filter: drop-shadow(4px 6px 5px #6b7d8d33);
+}
+.luna-home-queue p,
+.luna-shortcuts h3 {
+  color: var(--luna-text);
+  font-size: 14px;
+}
+.luna-home-queue strong,
+.luna-home-queue small {
+  color: var(--luna-muted);
+  font-size: 12px;
+}
+.luna-progress-track {
+  height: 6px;
+  background: #d1d9e2;
+  box-shadow: var(--luna-inset);
+}
+.luna-progress-track span {
+  background: #91b8d6;
+}
+.luna-shortcuts > div {
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.app-shell .luna-shortcuts button {
+  padding: 16px;
+  border-radius: 14px;
+  gap: 6px;
+  min-height: 80px;
+}
+.luna-shortcuts strong {
+  color: var(--luna-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.luna-shortcuts span {
+  color: var(--luna-muted);
+  font-size: 12px;
+}
+.app-shell .luna-home-connections {
+  padding: 0;
+  overflow: hidden;
+}
+.luna-home-connections .mini-status {
+  padding: 16px;
+  border-bottom-color: #d1d7df;
+}
+.luna-home-connections .mini-status:hover {
+  background: #e2e9f0;
+}
+.luna-home-connections .mini-status > div {
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+.luna-home-connections .mini-status p {
+  color: var(--luna-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.luna-home-connections .mini-status strong {
+  color: var(--luna-muted);
+  font-size: 12px;
+}
+.luna-home-connections .mini-status small {
+  color: var(--luna-faint);
+  font-size: 12px;
+}
+.home-notes-empty {
+  color: var(--luna-muted);
+  font-size: 13px;
+  margin-bottom: 0;
+}
+.home-note-item strong {
+  color: var(--luna-text);
+}
+.home-note-item p {
+  color: var(--luna-muted);
+}
+footer {
+  color: var(--luna-faint);
+  font-size: 11px;
+  margin-top: 24px;
+}
+
+/* Module-specific legacy decorations inherit the same light surfaces. */
+.app-shell
+  button:not(.nav-item):not(.luna-group-button):not(.luna-home-button):not(.luna-icon-button):not(
+    .select-option
+  ):is(.is-active, [aria-pressed="true"], [aria-selected="true"]) {
+  background: var(--luna-accent) !important;
+  color: var(--luna-accent-ink) !important;
+  border-color: #b2cce0 !important;
+  box-shadow: var(--luna-shadow-small) !important;
+}
+#header-status[data-overall-state="attention"] {
+  color: var(--luna-warning);
+}
+#header-status[data-overall-state="available"] {
+  color: var(--luna-success);
+}
+.luna-primary-nav .luna-group-button[aria-current="page"] {
+  background: var(--luna-accent) !important;
+  color: var(--luna-accent-ink) !important;
+  border-color: #adc8df;
+  box-shadow: var(--luna-shadow-small);
+}
+.luna-primary-nav .nav-item::after {
+  content: none;
+}
+.connection-meta div {
+  padding: 12px;
+  border: 1px solid #d4dbe2;
+  border-radius: 12px;
+  background: #e6eaef;
+  box-shadow: none;
+}
+.connection-meta .connection-window-control {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.monthly-explorer {
+  padding: 12px;
+}
+.monthly-metric-card {
+  padding: 12px;
+  background: #edf0f3;
+  border-color: #cfd7df;
+  border-radius: 12px;
+}
+.monthly-metric-heading strong {
+  color: var(--luna-text);
+  font-size: 13px;
+}
+.monthly-metric-heading span {
+  color: var(--luna-accent-ink);
+  font-size: 15px;
+}
+.monthly-metric-card small,
+.monthly-metric-card .monthly-metric-meta,
+.monthly-explorer-description {
+  color: var(--luna-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.monthly-metric-bar {
+  height: 5px;
+  background: #d7e0e8;
+}
+.monthly-metric-bar i {
+  background: #99b9d2;
+}
+.monthly-explorer-tabs {
+  background: none;
+}
+.monthly-explorer-tab {
+  flex: 1;
+  padding-inline: 6px !important;
+  font-size: 12px !important;
+}
+.app-shell .inventory-result-card li button {
+  color: var(--luna-accent-ink) !important;
+}
+.app-shell .manual-ad-grid label.is-missing :is(input, textarea, .select-trigger) {
+  background: #f5e9ed !important;
+  border-color: #b9828e !important;
+}
+
+@media (min-width: 768px) {
+  .home-intro {
+    min-height: 190px;
+    padding: 28px;
+  }
+  .welcome-copy {
+    max-width: 72%;
+  }
+  .lunar-art {
+    right: 16px;
+    width: 190px;
+    height: 190px;
+    top: 0;
+  }
+}
+@media (max-width: 767px) {
+  .app-shell {
+    padding: 20px 16px;
+  }
+  .app-shell :is(.manual-ad-grid, .interaction-filters, .settings-facts) {
+    grid-template-columns: 1fr;
+  }
+  .app-shell .manual-ad-wide {
+    grid-column: auto;
+  }
+}
+@media (max-width: 500px) {
+  .settings-status-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .settings-status-row > div {
+    width: 100%;
+  }
+  .settings-status-row .connection-badge {
+    align-self: flex-start;
+    margin-bottom: 8px;
+  }
+  .app-shell
+    :is(
+      .connection-heading,
+      .counter-heading,
+      .tracker-heading,
+      .scraper-heading,
+      .image-scraper-heading,
+      .manual-ad-heading,
+      .jenkins-heading,
+      .inventory-heading
+    ) {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 360px) {
+  .app-shell {
+    padding: 16px 12px;
+  }
+  .app-shell
+    :is(
+      .queue-card,
+      .manual-ad-card,
+      .image-scraper-card,
+      .scraper-card,
+      .inventory-card,
+      .jenkins-card,
+      .settings-card,
+      .connection-card,
+      .vendor-counter-card,
+      .agent-tracker-card,
+      .monthly-performance-card,
+      .daily-interactions-card,
+      .home-notes-card,
+      .luna-home-queue
+    ) {
+    padding: 16px;
+  }
+  .luna-group-button {
+    font-size: 12px;
+    padding-inline: 2px;
+  }
+  .home-intro {
+    padding: 18px 14px;
+    min-height: 180px;
+  }
+  .welcome-copy {
+    max-width: 72%;
+  }
+  .home-intro h3 {
+    font-size: 24px;
+  }
+  .lunar-art {
+    right: -26px;
+    top: 23px;
+    width: 120px;
+    height: 120px;
+    opacity: 0.5;
+  }
+  .app-shell .queue-form-grid.queue-form-columns {
+    gap: 8px;
+  }
+  .app-shell .queue-form-column > label {
+    font-size: 11px;
+  }
+  .app-shell .queue-form-column :is(input, .select-trigger) {
+    font-size: 12px;
+    padding-inline: 9px;
+  }
+  .settings-key-row {
+    grid-template-columns: 1fr;
+  }
+  .app-shell .settings-key-row > .connection-button {
+    width: 100%;
+    min-width: 0;
+  }
+  .app-shell .luna-shortcuts button {
+    padding: 14px 12px;
+  }
+}
+@media (max-width: 310px) {
+  .settings-view .luna-view-tabs {
+    display: grid;
+    grid-template-columns: 1.4fr 0.7fr 0.9fr;
+  }
+  .app-shell .settings-view .luna-view-tabs > button {
+    min-width: 0;
+    font-size: 12px;
+    padding-inline: 5px;
+  }
+  .app-shell .queue-form-grid.queue-form-columns {
+    grid-template-columns: 1fr;
+  }
+  .welcome-copy {
+    max-width: 100%;
+  }
+  .lunar-art {
+    opacity: 0.18;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Public edition omits private configuration and fill controls. */
+.public-edition #settings-ai-panel .settings-card:not(.public-edition-notice),
+.public-edition .settings-card:has(#settings-test-connection),
+.public-edition .settings-card:has(#settings-test-ayshei-endpoint),
+.public-edition .raw-data-settings,
+.public-edition .scraper-send-row,
+.public-edition #manual-ad-fill-ayshei,
+.public-edition #image-scraper-import,
+.public-edition #jenkins-fill,
+.public-edition #inventory-capture-page,
+.public-edition #queue-vehicle-ai-tools {
+  display: none !important;
+}

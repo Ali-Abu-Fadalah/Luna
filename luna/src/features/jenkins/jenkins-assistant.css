@@ -1,0 +1,267 @@
+.jenkins-assistant-view {
+  display: grid;
+  gap: 15px;
+}
+
+.jenkins-card {
+  padding: 17px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 4%), transparent 58%),
+    var(--surface-lunar);
+  box-shadow: var(--shadow-lunar);
+}
+
+.jenkins-start-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.jenkins-start-card::after {
+  position: absolute;
+  top: -42px;
+  right: -32px;
+  width: 120px;
+  height: 120px;
+  border: 1px solid rgb(167 199 231 / 12%);
+  border-radius: 50%;
+  box-shadow: inset 0 0 30px rgb(167 199 231 / 5%);
+  content: "";
+  pointer-events: none;
+}
+
+.jenkins-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jenkins-heading h3,
+.jenkins-fill-card h3 {
+  margin: 0 0 9px;
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+.jenkins-badge {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 1px solid rgb(167 199 231 / 22%);
+  border-radius: 999px;
+  color: var(--accent-ice);
+  background: rgb(167 199 231 / 8%);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.jenkins-badge[data-jenkins-state="ready"],
+.jenkins-badge[data-jenkins-state="filled"] {
+  color: #9fe0bd;
+  border-color: rgb(111 207 151 / 25%);
+  background: rgb(111 207 151 / 9%);
+}
+
+.jenkins-badge[data-jenkins-state="error"] {
+  color: #f0a6ad;
+  border-color: rgb(224 108 117 / 25%);
+  background: rgb(224 108 117 / 9%);
+}
+
+.jenkins-detail,
+.jenkins-safety,
+.jenkins-message {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.jenkins-detail {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 14px;
+}
+
+.jenkins-card > label {
+  display: block;
+  margin: 12px 0 6px;
+  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.jenkins-card select,
+.jenkins-card textarea {
+  width: 100%;
+  border: 1px solid rgb(207 198 227 / 18%);
+  border-radius: 11px;
+  color: var(--text-main);
+  background: rgb(10 12 20 / 66%);
+  font: inherit;
+}
+
+.jenkins-card select {
+  min-height: 42px;
+  padding: 9px 34px 9px 11px;
+}
+
+.jenkins-card textarea {
+  min-height: 104px;
+  padding: 10px 11px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.jenkins-card select:focus-visible,
+.jenkins-card textarea:focus-visible,
+.jenkins-actions button:focus-visible,
+.jenkins-fill-card button:focus-visible {
+  border-color: rgb(167 199 231 / 45%);
+  outline: 3px solid rgb(167 199 231 / 14%);
+  outline-offset: 2px;
+}
+
+.jenkins-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.jenkins-secondary-button {
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 11px;
+  color: var(--text-main);
+  background: var(--surface-raised);
+  cursor: pointer;
+}
+
+.jenkins-message {
+  min-height: 38px;
+  margin: 12px 0 0;
+  padding: 9px 10px;
+  border: 1px solid rgb(167 199 231 / 12%);
+  border-radius: 11px;
+  background: rgb(167 199 231 / 5%);
+}
+
+.jenkins-message[data-kind="success"] {
+  color: #b5e8ca;
+  border-color: rgb(111 207 151 / 18%);
+  background: rgb(111 207 151 / 6%);
+}
+
+.jenkins-message[data-kind="error"] {
+  color: #f0b2b7;
+  border-color: rgb(224 108 117 / 20%);
+  background: rgb(224 108 117 / 7%);
+}
+
+.jenkins-preview {
+  display: grid;
+  gap: 15px;
+}
+
+.jenkins-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 5px 0 14px;
+}
+
+.jenkins-totals div {
+  padding: 10px;
+  border: 1px solid rgb(207 198 227 / 10%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.jenkins-totals dt {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.jenkins-totals dd {
+  margin: 3px 0 0;
+  color: var(--accent-ice);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.jenkins-preview-fields {
+  display: grid;
+  gap: 9px;
+}
+
+.jenkins-field-preview {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgb(207 198 227 / 11%);
+  border-radius: 12px;
+  background: rgb(9 11 18 / 42%);
+}
+
+.jenkins-field-preview > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.jenkins-field-preview strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-main);
+  font-size: 0.68rem;
+}
+
+.jenkins-field-preview span {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.jenkins-field-preview textarea {
+  min-height: 66px;
+  max-height: 150px;
+  resize: vertical;
+  scrollbar-width: thin;
+}
+
+.jenkins-fill-card .connection-button {
+  width: 100%;
+}
+
+.jenkins-safety {
+  margin: 0;
+  padding: 0 4px;
+  text-align: center;
+}
+
+@media (max-width: 340px) {
+  .jenkins-card {
+    padding: 14px;
+  }
+
+  .jenkins-heading,
+  .jenkins-field-preview > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .jenkins-badge,
+  .jenkins-field-preview span {
+    align-self: flex-start;
+  }
+
+  .jenkins-actions {
+    grid-template-columns: 1fr;
+  }
+}

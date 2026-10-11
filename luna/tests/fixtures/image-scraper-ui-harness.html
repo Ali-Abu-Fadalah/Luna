@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Scraper UI Harness</title>
+    <link rel="stylesheet" href="/luna/styles/sidepanel.css">
+    <link rel="stylesheet" href="/luna/src/features/images/image-scraper.css">
+  </head>
+  <body>
+    <main class="content">
+      <article class="image-scraper-card" aria-label="Car Image Scraper">
+        <div class="image-scraper-heading">
+          <div>
+            <p class="card-kicker">Fast image-only workflow</p>
+            <h3>Car Image Scraper</h3>
+          </div>
+          <span id="image-scraper-status" class="image-scraper-status" data-image-state="idle">Ready</span>
+        </div>
+        <p class="image-scraper-copy">Collect and arrange the current vendor ad’s images, then import them into the only or uniquely nearest open Ayshei placement tab without leaving the vendor page.</p>
+        <div class="image-scraper-actions">
+          <button id="image-scraper-collect" type="button">1 · Get Car Images</button>
+          <button id="image-scraper-import" type="button" disabled>2 · Import to Ayshei</button>
+          <button id="image-scraper-clear" type="button">Clear</button>
+        </div>
+        <div id="image-scraper-preview" class="image-scraper-preview" hidden>
+          <div class="image-scraper-preview-heading">
+            <strong>Review order</strong>
+            <span id="image-scraper-count">0/3 images</span>
+          </div>
+          <ul id="image-scraper-list" class="image-scraper-list" aria-label="Scrollable car images in upload order" aria-describedby="image-scraper-help" tabindex="0"></ul>
+          <button id="image-scraper-undo" class="image-scraper-undo" type="button" hidden>Undo last removal</button>
+          <p id="image-scraper-help" class="image-scraper-help">Scroll inside the image box. Use Make main, the arrow buttons, or Remove. No control covers the photo.</p>
+        </div>
+        <p id="image-scraper-message" class="image-scraper-message" data-kind="info" aria-live="polite">Open any vendor car ad and collect its images.</p>
+      </article>
+    </main>
+    <script>
+      const savedDraft = {
+        images: [
+          { id: "front", url: "https://placehold.co/400x300/2d4b66/ffffff?text=Front" },
+          { id: "side", url: "https://placehold.co/400x300/44634f/ffffff?text=Side" },
+          { id: "rear", url: "https://placehold.co/400x300/65434d/ffffff?text=Rear" },
+          { id: "cabin", url: "https://placehold.co/400x300/57466b/ffffff?text=Cabin" }
+        ],
+        sourceTitle: "Example Car",
+        sourceUrl: "https://vendor.test/car"
+      };
+      globalThis.chrome = {
+        storage: {
+          local: {
+            get: async () => ({ "luna.imageScraper.draft.v1": savedDraft }),
+            remove: async () => {},
+            set: async () => {}
+          }
+        }
+      };
+    </script>
+    <script src="/luna/src/features/images/image-scraper-core.js"></script>
+    <script src="/luna/src/features/images/image-scraper.js"></script>
+  </body>
+</html>

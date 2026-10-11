@@ -1,0 +1,5 @@
+node_modules/
+cloudflare-groq-worker/node_modules/
+cloudflare-groq-worker/.wrangler/
+cloudflare-groq-worker/worker-configuration.d.ts
+scripts/.*

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Image Scraper Browser Harness</title>
+  </head>
+  <body>
+    <main>
+      <h1>2025 Example Coupe</h1>
+      <section class="vehicle-gallery">
+        <img data-full-src="https://cdn.vendor.test/car-1.jpg" alt="Example car front">
+        <img data-full-src="https://cdn.vendor.test/car-2.jpg" alt="Example car rear">
+        <img data-full-src="https://cdn.vendor.test/car-3.jpg" alt="Example car side">
+      </section>
+      <button id="show-photos" type="button">Show more photos</button>
+      <section class="similar-vehicles">
+        <h2>Similar Vehicles</h2>
+        <article>
+          <h3>Different car</h3>
+          <a href="/other-car"><img src="https://cdn.vendor.test/other-car.jpg" alt="Different car"></a>
+        </article>
+      </section>
+    </main>
+    <pre id="result">Running</pre>
+    <script>
+      document.querySelector("#show-photos").addEventListener("click", () => {
+        const modal = document.createElement("div");
+        modal.className = "vehicle-lightbox";
+        modal.innerHTML = `
+          <button type="button" aria-label="Close">×</button>
+          <img data-full-src="https://cdn.vendor.test/car-1.jpg" alt="Example car front">
+          <img data-full-src="https://cdn.vendor.test/car-2.jpg" alt="Example car rear">
+          <img data-full-src="https://cdn.vendor.test/car-3.jpg" alt="Example car side">
+          <img data-full-src="https://cdn.vendor.test/car-4.jpg" alt="Example car cabin">
+          <img data-full-src="https://cdn.vendor.test/car-5.jpg" alt="Example car dashboard">
+          <img data-full-src="https://cdn.vendor.test/car-6.jpg" alt="Example car wheels">
+        `;
+        modal.querySelector("button").addEventListener("click", () => modal.remove());
+        document.body.append(modal);
+      });
+
+      addEventListener("load", async () => {
+        const source = await fetch("/luna/src/features/images/image-scraper-source.js", {
+          cache: "no-store"
+        }).then((response) => response.text());
+        const capture = await (0, eval)(source);
+        document.querySelector("#result").textContent = JSON.stringify(capture);
+      });
+    </script>
+  </body>
+</html>

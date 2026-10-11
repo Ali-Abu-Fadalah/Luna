@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Generic vehicle inventory fixture</title>
+    <style>
+      body { font-family: sans-serif; }
+      .inventory-row { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .inventory-row > h3 { display: none; }
+      .vehicle-tile { margin: 8px; padding: 12px; border: 1px solid #ccc; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav><a href="/inventory">Inventory</a></nav>
+    </header>
+    <main>
+      <h1>Available Vehicles</h1>
+      <div class="inventory-grid">
+        <section class="inventory-row">
+          <h3>ISUZU FVZ SINGLE CAB MANUAL 2026</h3>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">ISUZU FVZ SINGLE CAB MANUAL 2026</div>
+            <span class="vehicle-price">AED 138,000</span>
+            <a href="/#/vehicle/126332">View Details</a>
+          </div>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">2026 Toyota Fortuner 4.0L V6</div>
+            <span data-price>AED 250,000</span>
+            <a href="/?vehicle=100247">View Details</a>
+          </div>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">2026 Mitsubishi Canter Recovery</div>
+            <span class="vehicle-price">AED 90,000</span>
+            <span>Sold</span>
+            <a href="/listings/mitsubishi-canter-recovery/">View More</a>
+          </div>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">TOYOTA YARIS 1.3L SEDAN 2026</div>
+            <span>Gasoline Automatic Sedan</span>
+            <a href="/#/vehicle/126455">View Details</a>
+          </div>
+        </section>
+        <section class="inventory-row">
+          <h3>ISUZU NPR TANKER 2026</h3>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">ISUZU NPR TANKER 2026</div>
+            <span>Price on request</span>
+            <a href="/?vehicle=126499">View Details</a>
+          </div>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">toyota yaris 1.3l sedan 2026</div>
+            <span>Gasoline Automatic Sedan</span>
+            <a href="/?vehicle=999999">View Details</a>
+          </div>
+          <div class="vehicle-tile">
+            <img>
+            <div class="vehicle-title">2026 Toyota Fortuner 4.0L V6</div>
+            <span data-price>AED 250,000</span>
+            <a href="/?return_filters=page%3D44&vehicle=100247">View Details</a>
+          </div>
+        </section>
+      </div>
+      <a href="/blog/company-news/">View more</a>
+    </main>
+    <pre id="capture">Loading...</pre>
+    <script>
+      fetch("/scraper-page.js")
+        .then((response) => response.text())
+        .then((source) => {
+          const capture = globalThis.eval(source);
+          document.querySelector("#capture").textContent =
+            JSON.stringify(capture);
+        })
+        .catch((error) => {
+          document.querySelector("#capture").textContent =
+            JSON.stringify({ error: error.message });
+        });
+    </script>
+  </body>
+</html>
