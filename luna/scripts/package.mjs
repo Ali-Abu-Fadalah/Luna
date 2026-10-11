@@ -81,7 +81,7 @@ end.writeUInt32LE(offset, 16);
 const zip = Buffer.concat([...parts, central, end]);
 const dist = path.join(repo, "dist");
 mkdirSync(dist, { recursive: true });
-const filename = "Luna-2.0.2-public.zip";
+const filename = "Luna-2.0.3-public.zip";
 writeFileSync(path.join(dist, filename), zip);
 writeFileSync(
   path.join(dist, filename + ".sha256"),

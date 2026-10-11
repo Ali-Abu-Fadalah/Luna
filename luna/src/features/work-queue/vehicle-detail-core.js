@@ -315,6 +315,22 @@ globalThis.LunaVehicleDetailCore = (() => {
     const make = explicitMake || (titleMakes.length === 1 ? titleMakes[0] : "");
     return make ? all.filter((candidate) => canonicalMake(candidate?.make) === make) : [];
   };
+  const isGccCapture = (capture) => {
+    const regionalEvidence = [factValue(capture, "specs"), factValue(capture, "targetMarket")]
+      .filter(Boolean)
+      .join(" ");
+    return (
+      !/\bnon[\s-]*gcc\b/i.test(regionalEvidence) && normalizeSpecs(regionalEvidence) === "GCC"
+    );
+  };
+  const preferGccCompatibleTrims = (candidates, capture) => {
+    const all = Array.isArray(candidates) ? candidates : [];
+    if (!isGccCapture(capture)) return all;
+    const compatible = all.filter(
+      (candidate) => !/\bnon[\s-]*gcc\b/i.test(clean(candidate?.label))
+    );
+    return compatible.length ? compatible : all;
+  };
   const trimFromEvidence = (candidates, capture) => {
     const explicitValue = factValue(capture, "trim");
     const explicitKey = key(explicitValue);
@@ -502,6 +518,7 @@ globalThis.LunaVehicleDetailCore = (() => {
     modelFromEvidence,
     modelSearchTerms,
     nearestModelCandidates,
+    preferGccCompatibleTrims,
     sameMakeModels,
     normalizeCategory,
     normalizeColor,

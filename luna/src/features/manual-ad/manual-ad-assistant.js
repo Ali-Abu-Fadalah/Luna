@@ -378,19 +378,21 @@ globalThis.LunaManualAdAssistant = (() => {
       capture.availableTrims = [];
       return capture;
     }
+    const trimCandidates = globalThis.LunaManualAdCore.preferGccCompatibleTrims(
+      capture.availableTrims,
+      capture.regionalSpec
+    );
     let trim =
-      globalThis.LunaManualAdCore.chooseTrim(capture.availableTrims, vendorTrim) ||
-      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(capture.availableTrims, [vendorTrim]);
+      globalThis.LunaManualAdCore.chooseTrim(trimCandidates, vendorTrim) ||
+      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(trimCandidates, [vendorTrim]);
     let trimSource = trim ? "Mirror trim exact/unique evidence match" : "";
-    if (!trim && capture.availableTrims.length) {
-      trim = await askClosedCatalogAi("trim", capture.availableTrims, capture);
+    if (!trim && trimCandidates.length) {
+      trim = await askClosedCatalogAi("trim", trimCandidates, capture);
       trimSource = trim
         ? `${trim.aiReview.model} choice from closed Mirror trim list · ${trim.aiReview.confidenceScore == null ? "confidence unreported" : `${Math.round(trim.aiReview.confidenceScore * 100)}% confidence`} · review required${trim.aiReview.riskFlags.length ? ` · flags: ${trim.aiReview.riskFlags.join(", ")}` : ""}`
         : "";
       if (!trim) {
-        trim = globalThis.LunaManualAdCore.chooseNearestCatalogMatch(capture.availableTrims, [
-          vendorTrim
-        ]);
+        trim = globalThis.LunaManualAdCore.chooseNearestCatalogMatch(trimCandidates, [vendorTrim]);
         trimSource = trim ? "Mirror nearest textual trim; agent review required" : "";
       }
     }
@@ -674,9 +676,13 @@ globalThis.LunaManualAdAssistant = (() => {
     modelResults.replaceChildren();
     modelStatus.textContent = "Loading trims…";
     draft.availableTrims = await loadMirrorTrims(model, draft);
+    const trimCandidates = globalThis.LunaManualAdCore.preferGccCompatibleTrims(
+      draft.availableTrims,
+      draft.regionalSpec
+    );
     const trim =
-      globalThis.LunaManualAdCore.chooseTrim(draft.availableTrims, draft.trim) ||
-      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(draft.availableTrims, [draft.trim]);
+      globalThis.LunaManualAdCore.chooseTrim(trimCandidates, draft.trim) ||
+      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(trimCandidates, [draft.trim]);
     draft.trim = trim?.label || "";
     draft.trimCode = trim?.trimCode ?? null;
     modelStatus.textContent = "";

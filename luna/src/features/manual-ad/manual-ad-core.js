@@ -172,6 +172,17 @@ globalThis.LunaManualAdCore = (() => {
     return "";
   };
 
+  const preferGccCompatibleTrims = (options, regionalSpec) => {
+    const all = Array.isArray(options) ? options : [];
+    if (
+      normalizeRegionalSpec(regionalSpec) !== "GCC" ||
+      /\bnon[\s-]*gcc\b/i.test(cleanText(regionalSpec))
+    )
+      return all;
+    const compatible = all.filter((option) => !/\bnon[\s-]*gcc\b/i.test(cleanText(option?.label)));
+    return compatible.length ? compatible : all;
+  };
+
   const inferYear = (text) => {
     const years = cleanText(text).match(/\b(?:19|20)\d{2}\b/g) || [];
     const currentYear = new Date().getUTCFullYear() + 2;
@@ -635,6 +646,7 @@ globalThis.LunaManualAdCore = (() => {
     mergeCaptures,
     mergeEnrichment,
     normalizeRegionalSpec,
+    preferGccCompatibleTrims,
     parseKilometers,
     parsePrice,
     polishDescription,

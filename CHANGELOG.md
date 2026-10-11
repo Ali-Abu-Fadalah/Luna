@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3 — GCC-aware trim matching
+
+- Automatic trim matching now avoids `NON GCC` trims for a listing identified as GCC whenever a compatible live trim exists.
+- The fallback remains safe: if the only available live trim is labelled `NON GCC`, it can still be selected.
+- Manual Ad Get Data now applies the same rule across exact, AI-assisted, and nearest-match trim selection while keeping the full list available for manual choice.
+
 ## 2.0.2 — Work Queue and Dubizzle gallery
 
 - Work Queue now places the full-width model and trim controls above an aligned two-column details grid.

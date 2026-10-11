@@ -1146,15 +1146,22 @@ globalThis.LunaWorkQueue = (() => {
       ...factsFromCapture(trimCapture),
       model: selectedModel?.model || facts.model
     };
-    let selectedTrim = globalThis.LunaVehicleDetailCore.trimFromEvidence(trims, trimCapture);
+    const trimCandidates = globalThis.LunaVehicleDetailCore.preferGccCompatibleTrims(
+      trims,
+      trimCapture
+    );
+    let selectedTrim = globalThis.LunaVehicleDetailCore.trimFromEvidence(
+      trimCandidates,
+      trimCapture
+    );
     let trimAi = null;
     let trimFallback = false;
-    if (selectedModel && !selectedTrim && trims.length) {
-      trimAi = await resolveWithGroq("trim", trimFacts, trims, capture.imageUrl);
+    if (selectedModel && !selectedTrim && trimCandidates.length) {
+      trimAi = await resolveWithGroq("trim", trimFacts, trimCandidates, capture.imageUrl);
       selectedTrim =
         trimAi?.selected && trimAi.result?.autoFillEligible === true
           ? trimAi.selected
-          : globalThis.LunaVehicleDetailCore.fallbackTrim(trims, trimCapture);
+          : globalThis.LunaVehicleDetailCore.fallbackTrim(trimCandidates, trimCapture);
       trimFallback = Boolean(
         selectedTrim && (!trimAi?.selected || trimAi.result?.autoFillEligible !== true)
       );

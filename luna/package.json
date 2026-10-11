@@ -1,6 +1,6 @@
 {
   "name": "luna-extension",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "scripts": {
     "test": "node --preserve-symlinks-main --preserve-symlinks scripts/test.mjs",
