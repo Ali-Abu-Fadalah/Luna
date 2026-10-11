@@ -1,5 +1,11 @@
 Luna 2.0.1 is a public-safe update to the calm Chrome side panel for organizing and reviewing vehicle-listing work.
 
+## Correct model and trim matching
+
+Work Queue Auto Fill now keeps the full live model when an advertised identifier could otherwise be mistaken for a trim. For example, **Land Rover Defender 110** is selected as the model, and Luna then chooses only from that model's available trims.
+
+The catalog lookup completes its small, evidence-based search plan before making a selection. It does not promote a model from mileage, separated numbers, related listings, or description text.
+
 ## A calmer workspace
 
 The Soft Eclipse design brings light surfaces, pastel actions, consistent fields and menus, and a crescent icon. Work Queue views take less space, Inventory moves through connected steps, and notes keep their expanded section while you work through them.
