@@ -26,7 +26,8 @@ globalThis.LunaAgentTrackerCore = (() => {
       return null;
     }
 
-    return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    const day = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    return new Date(day).toISOString().slice(0, 10) === dateKey ? day : null;
   };
 
   const getDateRange = (period, todayKey) => {
@@ -79,22 +80,19 @@ globalThis.LunaAgentTrackerCore = (() => {
     let auctions = 0;
 
     rows.forEach((row) => {
-      const rowDay = dateKeyToDay(row.date);
       const agentKey = normalizeName(row.agentName);
 
-      if (
-        rowDay === null ||
-        rowDay < startDay ||
-        rowDay > endDay ||
-        !agentKey ||
-        (selectedAgent !== "__all__" && agentKey !== selectedAgent)
-      ) {
+      if (!agentKey || (selectedAgent !== "__all__" && agentKey !== selectedAgent)) {
         return;
       }
 
-      const listedKey = normalizeName(row.listedVendor);
-      const unlistedKey = normalizeName(row.unlistedVendor);
-      const auctionKey = normalizeName(row.auctionVendor);
+      const inRange = (date) => {
+        const day = dateKeyToDay(date);
+        return day !== null && day >= startDay && day <= endDay;
+      };
+      const listedKey = inRange(row.date) ? normalizeName(row.listedVendor) : "";
+      const unlistedKey = inRange(row.unlistedDate) ? normalizeName(row.unlistedVendor) : "";
+      const auctionKey = inRange(row.date) ? normalizeName(row.auctionVendor) : "";
 
       if (!listedKey && !unlistedKey && !auctionKey) {
         return;

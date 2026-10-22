@@ -61,7 +61,7 @@ globalThis.LunaFoundation = (() => {
       retired: true,
       version: 1
     }),
-    sheetCache: Object.freeze({ area: "local", key: storageKeys.sheetCache, version: 1 }),
+    sheetCache: Object.freeze({ area: "local", key: storageKeys.sheetCache, version: 2 }),
     workQueue: Object.freeze({ area: "local", key: storageKeys.workQueue, version: 1 }),
     workQueueAdTab: Object.freeze({ area: "session", key: storageKeys.workQueueAdTab, version: 0 }),
     workQueueNotes: Object.freeze({ area: "local", key: storageKeys.workQueueNotes, version: 1 })

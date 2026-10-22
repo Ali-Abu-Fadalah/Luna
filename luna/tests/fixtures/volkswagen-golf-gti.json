@@ -1,0 +1,88 @@
+{
+  "capture": {
+    "site": "dubizzle",
+    "sourceUrl": "https://uae.dubizzle.com/motors/used-cars/example/volkswagen-golf-gti/",
+    "title": "Volkswagen Golf GTI Other",
+    "facts": {
+      "make": {
+        "value": "Volkswagen"
+      },
+      "model": {
+        "value": "Golf GTI"
+      },
+      "trim": {
+        "value": "Other"
+      },
+      "year": {
+        "value": "2022"
+      },
+      "category": {
+        "value": "Used"
+      },
+      "mileage": {
+        "value": "85000"
+      },
+      "specs": {
+        "value": "American Specs"
+      },
+      "transmission": {
+        "value": "Manual Transmission"
+      },
+      "color": {
+        "value": "White"
+      }
+    }
+  },
+  "models": [
+    {
+      "label": "Volkswagen Other",
+      "make": "Volkswagen",
+      "model": "Other",
+      "makeCode": 112,
+      "modelCode": 0
+    },
+    {
+      "label": "Volkswagen Golf",
+      "make": "Volkswagen",
+      "model": "Golf",
+      "makeCode": 112,
+      "modelCode": 113
+    },
+    {
+      "label": "Volkswagen Golf Plus",
+      "make": "Volkswagen",
+      "model": "Golf Plus",
+      "makeCode": 112,
+      "modelCode": 114
+    },
+    {
+      "label": "Volkswagen Passat",
+      "make": "Volkswagen",
+      "model": "Passat",
+      "makeCode": 112,
+      "modelCode": 115
+    }
+  ],
+  "trims": [
+    {
+      "label": "Other",
+      "trimCode": 0
+    },
+    {
+      "label": "STD",
+      "trimCode": 116
+    },
+    {
+      "label": "GTI S",
+      "trimCode": 117
+    },
+    {
+      "label": "GTI",
+      "trimCode": 118
+    },
+    {
+      "label": "GTI (NON GCC)",
+      "trimCode": 119
+    }
+  ]
+}

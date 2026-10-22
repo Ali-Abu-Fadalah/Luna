@@ -83,7 +83,7 @@ globalThis.LunaGroqSettings = (() => {
             .filter(([, ready]) => ready)
             .map(([name]) => name)
             .join(", ") || "Groq"
-        } verified.`
+        } verified.${tested.degraded ? " Some providers are unavailable; available providers can still be used." : ""}`
       });
     } catch (error) {
       const current = await globalThis.LunaGroq.status();
@@ -97,12 +97,12 @@ globalThis.LunaGroqSettings = (() => {
       renderWorker({
         ...result,
         connected: true,
-        detail: `AI Router is ready. ${
+        detail: `Connected: ${
           Object.entries(result.providers || {})
             .filter(([, ready]) => ready)
             .map(([name]) => name)
             .join(", ") || "Groq"
-        } verified with real calls. Deterministic matching remains first.`
+        }.${result.degraded ? " Some providers are unavailable." : ""}`
       });
     } catch (error) {
       const current = await globalThis.LunaGroq.status();
@@ -133,7 +133,9 @@ globalThis.LunaGroqSettings = (() => {
         const result = await globalThis.LunaGroq.testLocalProvider(provider.name);
         provider.status.dataset.localProviderState = "saved";
         provider.status.textContent = "Verified";
-        provider.message.textContent = `${result.provider} is ready with Luna's approved model.`;
+        provider.message.textContent = result.verifiedModels
+          ? `Verified: ${result.verifiedModels.join(", ")}.${result.unavailableModels?.length ? ` Unavailable: ${result.unavailableModels.map((item) => item.model).join(", ")}. Images need a vision model.` : ""}`
+          : `${result.provider} is ready with Luna's approved model.`;
       } catch (error) {
         provider.status.dataset.localProviderState = "error";
         provider.status.textContent = "Test failed";

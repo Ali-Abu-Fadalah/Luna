@@ -188,7 +188,7 @@ const createController = (testConnection, { cache = null, now = () => Date.now()
       }),
     {
       cache: {
-        version: 1,
+        version: 2,
         windows: {
           10: {
             payload: { ok: false, rows: [] },
@@ -233,7 +233,7 @@ const createController = (testConnection, { cache = null, now = () => Date.now()
       }),
     {
       cache: {
-        version: 1,
+        version: 2,
         windows: {
           10: {
             payload: cachedPayload,
@@ -243,6 +243,18 @@ const createController = (testConnection, { cache = null, now = () => Date.now()
       }
     }
   );
+
+  const oldDateCache = createController(
+    async () => {
+      throw new Error("Offline");
+    },
+    {
+      cache: { version: 1, windows: { 10: { payload: cachedPayload, savedAt: Date.now() } } }
+    }
+  );
+  await waitForAsyncWork();
+  assert.equal(oldDateCache.elements["#sheet-connection-status"].textContent, "Connection failed");
+  assert.equal(oldDateCache.elements["#sheet-connection-rows"].textContent, "0");
 
   await waitForAsyncWork();
   assert.equal(cachedController.elements["#sheet-connection-status"].textContent, "Refreshing");
@@ -283,7 +295,7 @@ const createController = (testConnection, { cache = null, now = () => Date.now()
     },
     {
       cache: {
-        version: 1,
+        version: 2,
         windows: {
           10: {
             payload: cachedPayload,

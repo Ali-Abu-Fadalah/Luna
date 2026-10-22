@@ -47,7 +47,16 @@ globalThis.LunaVendorCounterCore = (() => {
 
     rows.forEach((row) => {
       const listedMatch = normalizeName(row.listedVendor) === normalizedQuery;
-      const unlistedMatch = normalizeName(row.unlistedVendor) === normalizedQuery;
+      const unlistedDate = String(row.unlistedDate || "");
+      const unlistedDay = /^\d{4}-\d{2}-\d{2}$/.test(unlistedDate)
+        ? new Date(`${unlistedDate}T00:00:00Z`)
+        : null;
+      const validUnlistedDate =
+        unlistedDay &&
+        Number.isFinite(unlistedDay.getTime()) &&
+        unlistedDay.toISOString().slice(0, 10) === unlistedDate;
+      const unlistedMatch =
+        validUnlistedDate && normalizeName(row.unlistedVendor) === normalizedQuery;
       const auctionMatch = normalizeName(row.auctionVendor) === normalizedQuery;
 
       if (!listedMatch && !unlistedMatch && !auctionMatch) {

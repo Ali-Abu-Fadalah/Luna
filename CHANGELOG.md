@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.5.1 — Matching and queue reliability
+
+- Model matching separates class names, full model identifiers and trim evidence, with regression coverage for GLS 450 and Golf GTI.
+- Generic `Other` choices no longer compete with specific models. Trim fallback requires explicit evidence instead of choosing by word overlap or list position.
+- Shared AI response parsing retains a uniquely recommended live trim and its uncertainty, while rejecting ambiguous, negative and out-of-catalog answers. Private AI connections remain unavailable in the public edition.
+- Work Queue clears completed-ad fields before showing the next ad, preserves edits during slow saves, and restores the correct draft on undo.
+- Vehicle capture excludes related-listing sections and records explicit engine, cylinder, fuel and drivetrain evidence.
+- Reusable reporting logic attributes unlisted work to its own date and invalidates older cached results. Private spreadsheet connections remain excluded.
+- Packaging derives the ZIP version from the extension manifest.
+
+This update brings the applicable local 2.5.1 source into the public edition. Private backends, deployments, credentials and development history are excluded. New regression fixtures use synthetic listing URLs and catalog identifiers.
+
 ## 2.0.3 — GCC-aware trim matching
 
 - Automatic trim matching now avoids `NON GCC` trims for a listing identified as GCC whenever a compatible live trim exists.

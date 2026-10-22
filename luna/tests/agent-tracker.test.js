@@ -22,12 +22,14 @@ const rows = [
   {
     agentName: "Agent One",
     date: "2026-07-29",
+    unlistedDate: "2026-07-29",
     listedVendor: "Vendor One",
     unlistedVendor: "Vendor Two"
   },
   {
     agentName: "Agent Two",
     date: "2026-07-29",
+    unlistedDate: "2026-07-29",
     listedVendor: "",
     unlistedVendor: "Vendor Three"
   },
@@ -35,42 +37,49 @@ const rows = [
     agentName: "Agent One",
     auctionVendor: "Auctions",
     date: "2026-07-29",
+    unlistedDate: "2026-07-29",
     listedVendor: "",
     unlistedVendor: ""
   },
   {
     agentName: " agent one ",
     date: "2026-07-25",
+    unlistedDate: "2026-07-25",
     listedVendor: "  vendor   one ",
     unlistedVendor: ""
   },
   {
     agentName: "AGENT ONE",
     date: "2026-07-24",
+    unlistedDate: "2026-07-24",
     listedVendor: "Vendor Four",
     unlistedVendor: ""
   },
   {
     agentName: "Agent One",
     date: "2026-07-22",
+    unlistedDate: "2026-07-22",
     listedVendor: "",
     unlistedVendor: "Vendor Five"
   },
   {
     agentName: "Agent One",
     date: "2026-07-19",
+    unlistedDate: "2026-07-19",
     listedVendor: "Too Old",
     unlistedVendor: ""
   },
   {
     agentName: "",
     date: "2026-07-29",
+    unlistedDate: "2026-07-29",
     listedVendor: "No Agent",
     unlistedVendor: ""
   },
   {
     agentName: "oThEr",
     date: "2026-07-19",
+    unlistedDate: "2026-07-19",
     listedVendor: "",
     unlistedVendor: ""
   }
@@ -172,5 +181,34 @@ assert.match(uiSource, /No Results/);
 assert.match(uiSource, /"Error"/);
 assert.match(uiSource, /LunaConnection\.isDataState/);
 assert.doesNotMatch(uiSource, /\b(?:POST|PUT|PATCH|DELETE)\b/);
+
+const independentDates = trackWork(
+  [
+    { agentName: "Agent K", date: "", unlistedDate: todayKey, unlistedVendor: "K Vendor" },
+    {
+      agentName: "Agent K",
+      date: "2026-07-01",
+      unlistedDate: todayKey,
+      listedVendor: "Old listing",
+      unlistedVendor: "K Vendor"
+    },
+    {
+      agentName: "Agent K",
+      date: todayKey,
+      unlistedDate: "2026-07-01",
+      listedVendor: "New listing",
+      unlistedVendor: "Old unlisted"
+    },
+    { agentName: "Agent K", date: todayKey, unlistedVendor: "Missing K" }
+  ],
+  { period: "today", todayKey }
+);
+assert.equal(independentDates.unlisted, 2);
+assert.equal(independentDates.listed, 1);
+assert.equal(independentDates.total, 1);
+assert.equal(
+  independentDates.vendors.some((item) => item.vendorName === "Missing K"),
+  false
+);
 
 console.log("Agent tracker tests passed.");

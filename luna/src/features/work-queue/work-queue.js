@@ -149,6 +149,13 @@ globalThis.LunaWorkQueue = (() => {
   const aiRecommendations = new Map();
   const vendorCaptures = new Map();
   let autoFillRun = 0;
+  let renderedAd = null;
+
+  const syncListedControls = () => {
+    [...listedInputs, noonCategory, noonSubCategory, noonSubSubCategory, noonCondition].forEach(
+      (input) => globalThis.LunaControls?.sync?.(input)
+    );
+  };
 
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -317,6 +324,7 @@ globalThis.LunaWorkQueue = (() => {
       listed.noonSubSubCategory
     );
     noonCondition.value = globalThis.LunaWorkQueueCore.NOON_CONDITION;
+    syncListedControls();
   };
 
   const setQueueLiveState = (element, source, label) => {
@@ -360,6 +368,7 @@ globalThis.LunaWorkQueue = (() => {
     listedTrim.disabled = !listed.makeCode || !listed.modelCode;
     listedTrimCopy.value = listedTrim.value;
     listedTrimCopy.placeholder = listedTrim.disabled ? "Choose model first" : "Choose a trim";
+    globalThis.LunaControls?.sync?.(listedTrim);
 
     if (listed.verifiedAt) {
       setQueueLiveState(queueModelStatus, "live", "Live verified");
@@ -495,7 +504,7 @@ globalThis.LunaWorkQueue = (() => {
   const captureDraft = () => {
     const ad = getCurrentAd();
 
-    if (!ad) {
+    if (!ad || ad !== renderedAd) {
       return;
     }
 
@@ -689,6 +698,13 @@ globalThis.LunaWorkQueue = (() => {
       return;
     }
 
+    if (ad !== renderedAd) {
+      autoFillRun += 1;
+      autoFillButton.disabled = false;
+      globalThis.clearTimeout(queueModelDebounce);
+      globalThis.LunaControls?.closeAll?.();
+    }
+    renderedAd = ad;
     queueVehicleRequest += 1;
     const listed = ensureVehicleFields(ad);
     // A persisted input draft must not suggest its own unfinished text.
@@ -742,6 +758,7 @@ globalThis.LunaWorkQueue = (() => {
     if (!isNoon) {
       renderQueueTrims();
     }
+    syncListedControls();
     previousButton.disabled = shown.indexOf(queue.currentIndex) <= 0;
     nextButton.disabled = shown.indexOf(queue.currentIndex) >= shown.length - 1;
     undoButton.disabled = queue.history.length === 0;
@@ -749,8 +766,8 @@ globalThis.LunaWorkQueue = (() => {
     actionMessage.textContent = "";
     autoFillButton.hidden = isNoon;
     autoFillMessage.textContent = isNoon
-      ? "Choose the exact dependent Noon categories above. Luna keeps the condition fixed as NEW_WITH_TAGS."
-      : "Auto Fill reads only the matching active DubiCars or Dubizzle ad and fills these editable fields. It never saves, changes status, or moves to Next.";
+      ? "Choose the Noon categories. Condition: NEW_WITH_TAGS."
+      : "Fill from the open ad, then review before saving.";
     sourceFacts.replaceChildren();
     const captured = vendorCaptures.get(ad.id);
     const samePage =
@@ -791,8 +808,7 @@ globalThis.LunaWorkQueue = (() => {
     vehicleAiTools.hidden = isNoon;
     aiFillButton.hidden = isNoon || !aiRecommendations.has(ad.id);
     aiResult.hidden = isNoon;
-    aiResult.textContent =
-      "Optional AI help for the matching active ad. It never saves, changes status, moves to Next, or clicks the page.";
+    aiResult.textContent = "Get an AI suggestion for this ad.";
     queueNoteText.value = "";
     queueAddNote.disabled = true;
     queueNoteMessage.textContent = "Notes stay on Home when you replace this Work Queue.";
@@ -950,8 +966,8 @@ globalThis.LunaWorkQueue = (() => {
     }
 
     moveAfterSave();
-    await persist();
     render();
+    await persist();
     globalThis.LunaUI?.queueSaved?.(status);
     syncOpenAdTab();
   };
@@ -977,10 +993,7 @@ globalThis.LunaWorkQueue = (() => {
 
   const withoutOther = (candidates) => {
     const nonOther = candidates.filter(
-      (candidate) =>
-        String(candidate?.label || "")
-          .trim()
-          .toLowerCase() !== "other"
+      (candidate) => !globalThis.LunaVehicleDetailCore.isOtherCandidate(candidate)
     );
     return nonOther.length ? nonOther : candidates;
   };
@@ -1033,9 +1046,9 @@ globalThis.LunaWorkQueue = (() => {
     if (!aiCache.has(key)) aiCache.set(key, globalThis.LunaGroq.analyze(input));
     try {
       return await aiCache.get(key);
-    } catch (error) {
+    } finally {
+      // The background owns the bounded evidence cache and settings invalidation.
       aiCache.delete(key);
-      throw error;
     }
   };
 
@@ -1056,7 +1069,7 @@ globalThis.LunaWorkQueue = (() => {
       const result = await analyzeWithGroq({ candidates: inputCandidates, facts, imageUrl, task });
       if (!result.candidate) {
         return {
-          error: `AI did not choose a nearest live ${task}.`,
+          reviewReason: result.reason || `AI could not establish a supported ${task} match.`,
           result,
           selected: null
         };
@@ -1076,11 +1089,21 @@ globalThis.LunaWorkQueue = (() => {
     const models = [];
     const modelKeys = new Set();
     let lookupFailure = "";
-    // Complete the bounded search plan: a vendor's family name can have a
-    // more-specific live catalog variant returned by a later query.
-    for (const keyword of globalThis.LunaVehicleDetailCore.modelSearchTerms(capture)) {
-      try {
-        const modelData = await globalThis.LunaAyshei.searchModels(keyword);
+    // Finish the bounded search plan: an exact vendor model can still be a
+    // shorter family name whose specific variant appears in later searches.
+    const searchTerms = globalThis.LunaVehicleDetailCore.modelSearchTerms(capture);
+    for (let offset = 0; offset < searchTerms.length; offset += 3) {
+      const results = await Promise.allSettled(
+        searchTerms
+          .slice(offset, offset + 3)
+          .map((keyword) => globalThis.LunaAyshei.searchModels(keyword))
+      );
+      for (const result of results) {
+        if (result.status === "rejected") {
+          lookupFailure ||= result.reason?.message || "Catalog request failed";
+          continue;
+        }
+        const modelData = result.value;
         modelData.models.forEach((candidate) => {
           const key = `${candidate.makeCode}:${candidate.modelCode}`;
           if (!modelKeys.has(key)) {
@@ -1088,8 +1111,6 @@ globalThis.LunaWorkQueue = (() => {
             models.push(candidate);
           }
         });
-      } catch (error) {
-        lookupFailure ||= error.message;
       }
     }
     if (lookupFailure) warnings.push(`One Ayshei model search was unavailable: ${lookupFailure}`);
@@ -1110,9 +1131,7 @@ globalThis.LunaWorkQueue = (() => {
       );
       modelAi = await resolveWithGroq("model", facts, nearest.slice(0, 24), "");
       selectedModel =
-        modelAi?.selected && modelAi.result?.autoFillEligible === true
-          ? modelAi.selected
-          : nearest[0] || null;
+        modelAi?.selected && modelAi.result?.autoFillEligible === true ? modelAi.selected : null;
       modelNearestFallback = Boolean(selectedModel);
       if (selectedModel)
         warnings.push(
@@ -1121,7 +1140,7 @@ globalThis.LunaWorkQueue = (() => {
     }
     if (!selectedModel)
       warnings.push(
-        "No live model for the advertised make was found; Make & Model and Trim were left empty."
+        "No compatible live model for the advertised vehicle was found; Make & Model and Trim were left empty."
       );
     let trims = [];
     if (selectedModel) {
@@ -1159,12 +1178,19 @@ globalThis.LunaWorkQueue = (() => {
     if (selectedModel && !selectedTrim && trimCandidates.length) {
       trimAi = await resolveWithGroq("trim", trimFacts, trimCandidates, capture.imageUrl);
       selectedTrim =
-        trimAi?.selected && trimAi.result?.autoFillEligible === true
+        trimAi?.selected &&
+        (trimAi.result?.autoFillEligible === true ||
+          trimAi.result?.trimRecommendationEligible === true)
           ? trimAi.selected
-          : globalThis.LunaVehicleDetailCore.fallbackTrim(trimCandidates, trimCapture);
-      trimFallback = Boolean(
-        selectedTrim && (!trimAi?.selected || trimAi.result?.autoFillEligible !== true)
-      );
+          : null;
+      if (selectedTrim && trimAi.result?.autoFillEligible !== true)
+        warnings.push(
+          "AI chose the closest available trim by vehicle specifications; this is a recommendation, not a verified exact grade. Review the comparison before saving."
+        );
+      if (!selectedTrim)
+        warnings.push(
+          "AI could not establish a supported trim equivalent; choose the trim after vehicle review."
+        );
     }
     return {
       facts,
@@ -1197,6 +1223,10 @@ globalThis.LunaWorkQueue = (() => {
       listed.trim = "";
       listed.trimCode = null;
     }
+    if (!selectedTrim) {
+      listed.trim = "";
+      listed.trimCode = null;
+    }
     const applied = ["Make & Model"];
     if (selectedTrim) {
       listed.trim = selectedTrim.label;
@@ -1226,12 +1256,9 @@ globalThis.LunaWorkQueue = (() => {
         imageUrl: capture.imageUrl,
         task: "bodyType"
       });
-      const imageNote = result.imageUsed
-        ? " Name and car image checked."
-        : " Name checked; the image was unavailable.";
-      aiResult.textContent = `Body Type: ${result.bodyType} · ${result.confidence} confidence.${imageNote} ${result.reason}`;
+      aiResult.textContent = `Body Type: ${result.bodyType} · ${result.confidence} confidence. Review before applying.`;
     } catch (error) {
-      aiResult.textContent = `${error.message} No field or workflow state changed.`;
+      aiResult.textContent = error.message;
     } finally {
       aiBodyTypeButton.disabled = false;
     }
@@ -1242,7 +1269,7 @@ globalThis.LunaWorkQueue = (() => {
     if (!ad || isNoonAd(ad)) return;
     aiModelTrimButton.disabled = true;
     aiFillButton.hidden = true;
-    aiResult.textContent = "Reading the matching active ad and checking live Ayshei options...";
+    aiResult.textContent = "Checking model and trim…";
     try {
       const capture = await captureMatchingActiveAd(ad);
       const recommendation = await resolveVehicleCatalog(capture);
@@ -1256,19 +1283,7 @@ globalThis.LunaWorkQueue = (() => {
       aiRecommendations.set(ad.id, { ...recommendation, sourceIdentity });
       const trim = recommendation.selectedTrim?.label || "No trim recommendation";
       const aiUsed = recommendation.modelAi?.selected || recommendation.trimAi?.selected;
-      const detail = !recommendation.selectedTrim
-        ? recommendation.trimAi?.error ||
-          "No live non-Other trim options were available to compare."
-        : recommendation.modelNearestFallback
-          ? "Luna used the nearest same-make live model because no exact model name was available; review before filling."
-          : recommendation.trimFallback
-            ? "Luna used the nearest live trim fallback; review before filling."
-            : recommendation.modelTrimFallback
-              ? "Luna skipped a generic model without trims and used the nearest specific model with trims; review before filling."
-              : aiUsed
-                ? "AI chose the nearest value only from live Ayshei options; review before filling."
-                : "Exact page evidence matched the live model and trim.";
-      aiResult.textContent = `Recommendation: ${recommendation.selectedModel.label} · ${trim}. ${detail}`;
+      aiResult.textContent = `${recommendation.selectedModel.label} · ${trim}. ${aiUsed ? "AI suggestion—review before applying." : "Matched the ad."}`;
       aiFillButton.hidden = false;
     } catch (error) {
       aiResult.textContent = `${error.message} Nothing was filled.`;
@@ -1290,9 +1305,8 @@ globalThis.LunaWorkQueue = (() => {
       aiFillButton.hidden = true;
       return;
     }
-    const statusBefore = ad.status;
     const applied = await applyCatalogRecommendation(ad, recommendation);
-    aiResult.textContent = `Filled ${applied.join(" and ")} into the normal editable controls. Status remains ${statusLabels[statusBefore]}; Luna did not save, move to Next, or click the page.`;
+    aiResult.textContent = `Filled ${applied.join(" and ")}. Review before saving.`;
   };
 
   const autoFillCurrentAdvertisement = async () => {
@@ -1308,8 +1322,7 @@ globalThis.LunaWorkQueue = (() => {
       ad.status === statusBefore;
     let vendorPreviewShown = false;
     autoFillButton.disabled = true;
-    autoFillMessage.textContent =
-      "Reading the matching vendor ad. Page facts will appear before catalog or AI checks.";
+    autoFillMessage.textContent = "Reading the ad…";
     try {
       const capture = await captureMatchingActiveAd(ad);
       if (!stillCurrent()) return;
@@ -1375,13 +1388,13 @@ globalThis.LunaWorkQueue = (() => {
         site: capture.site,
         sourceIdentity: globalThis.LunaFoundation.urls.identity(capture.sourceUrl),
         usedAi: false,
-        version: 6
+        version: 7
       };
       await persist();
       if (!stillCurrent()) return;
       render();
       vendorPreviewShown = true;
-      autoFillMessage.textContent = `Vendor facts are shown first. Filled ${pageApplied.length} directly from the page.${defaultedSpecs ? " Specs defaulted to Other because the page did not state a regional spec." : ""} Checking the live catalog and only unresolved details. Status remains ${statusLabels[statusBefore]}.`;
+      autoFillMessage.textContent = "Ad details loaded. Checking model and trim…";
       const baseline = {
         color: listed.color,
         makeModel: listed.makeModel,
@@ -1467,6 +1480,10 @@ globalThis.LunaWorkQueue = (() => {
         listed.trimCode = selectedTrim.trimCode;
         applied.push("Trim");
       }
+      if (canSetTrim && canSetModel && selectedModel && !selectedTrim) {
+        listed.trim = "";
+        listed.trimCode = null;
+      }
       const colorAccepted =
         canSetColor && colorAi?.selected && colorAi.result?.autoFillEligible === true;
       if (colorAccepted) {
@@ -1501,11 +1518,18 @@ globalThis.LunaWorkQueue = (() => {
         canSetTrim && trimAi,
         colorAccepted && colorAi
       ].filter(
-        (resolution) => resolution?.selected && resolution.result?.autoFillEligible === true
+        (resolution) =>
+          resolution?.selected &&
+          (resolution.result?.autoFillEligible === true ||
+            resolution.result?.trimRecommendationEligible === true)
       );
       const aiErrors = [modelAi?.error, trimAi?.error, colorAi?.error].filter(Boolean);
+      if (trimAi?.result?.imageWarning) warnings.push(trimAi.result.imageWarning);
       const uncertainAi = [modelAi, trimAi, colorAi].filter(
-        (resolution) => resolution?.selected && resolution.result?.autoFillEligible !== true
+        (resolution) =>
+          resolution?.selected &&
+          resolution.result?.autoFillEligible !== true &&
+          resolution.result?.trimRecommendationEligible !== true
       );
       if (!listed.makeModel) warnings.push("Make & Model needs a manual live-catalog choice.");
       if (listed.makeModel && !listed.trim)
@@ -1537,30 +1561,56 @@ globalThis.LunaWorkQueue = (() => {
         site: capture.site,
         sourceIdentity: globalThis.LunaFoundation.urls.identity(capture.sourceUrl),
         usedAi: aiMatches.length > 0,
+        aiAttempted: [modelAi, trimAi, colorAi].some(Boolean),
+        trimComparison: trimAi?.result?.trimComparison || null,
+        trimResolution: trimAi
+          ? {
+              model: trimAi.result?.model || "",
+              provider: trimAi.result?.provider || "",
+              candidateId: trimAi.result?.candidate?.id || "",
+              imageUsed: trimAi.result?.imageUsed === true,
+              imageWarning: trimAi.result?.imageWarning || "",
+              reason: trimAi.error || trimAi.reviewReason || trimAi.result?.reason || "",
+              outcome: selectedTrim ? "recommended" : "unresolved"
+            }
+          : null,
+        nearestTrimRecommendation: Boolean(
+          selectedTrim &&
+            trimAi?.result?.trimRecommendationEligible &&
+            !trimAi.result.autoFillEligible
+        ),
         version: 6
       };
       await persist();
       render();
       const aiLabels = [
-        canSetModel && modelAi?.selected && "model",
-        canSetTrim && trimAi?.selected && "trim",
+        canSetModel && modelAi?.selected && modelAi.result?.autoFillEligible === true && "model",
+        canSetTrim &&
+          trimAi?.selected &&
+          (trimAi.result?.autoFillEligible === true ||
+            trimAi.result?.trimRecommendationEligible === true) &&
+          "trim",
         colorAccepted && "green shade"
       ].filter(Boolean);
-      const aiNote = aiMatches.length
-        ? ` AI matched ${aiLabels.join(", ")}${aiMatches.some((resolution) => resolution.result?.imageUsed) ? " using page text and the car image" : " using page text"}; please check the editable values.`
-        : " AI added no fields; vendor facts were kept.";
-      const fallbackNote = modelNearestFallback
-        ? " Model is the nearest same-make choice, not an exact match; review it."
-        : "";
-      const missingNote = missing.length
-        ? ` Missing: ${missing.join(", ")}; review these fields.`
-        : "";
-      autoFillMessage.textContent = `Page filled ${pageApplied.length} field${pageApplied.length === 1 ? "" : "s"}; catalog checks completed.${defaultedSpecs ? " Specs defaulted to Other because the page did not state a regional spec." : ""}${aiNote}${fallbackNote}${missingNote} Status remains ${statusLabels[statusBefore]}; Luna did not save, move to Next, or run a page action.`;
+      const notes = ["Auto Fill complete."];
+      if (canSetTrim && selectedTrim && trimAi?.selected)
+        notes.push(
+          `AI trim: ${selectedTrim.label} · ${trimAi.result?.confidence || "unreported"} confidence.`
+        );
+      const otherAi = aiLabels.filter((label) => label !== "trim");
+      if (otherAi.length) notes.push(`AI: ${otherAi.join(", ")}.`);
+      if (missing.length) notes.push(`Review: ${missing.join(", ")}.`);
+      else notes.push("Review before saving.");
+      if (aiErrors.length) notes.push(`AI unavailable: ${aiErrors[0]}`);
+      if (trimAi?.result?.imageWarning) notes.push("Image unavailable; used text.");
+      if (defaultedSpecs) notes.push("Specs: Other (not stated).");
+      if (modelNearestFallback) notes.push("Check the suggested model.");
+      autoFillMessage.textContent = notes.join(" ");
     } catch (error) {
       if (stillCurrent())
         autoFillMessage.textContent = vendorPreviewShown
-          ? `Vendor facts remain available. Catalog or AI checks could not finish: ${error.message} No workflow action ran.`
-          : `${error.message} Nothing was saved and no workflow action ran.`;
+          ? `Ad details loaded. Checks incomplete: ${error.message}`
+          : error.message;
     } finally {
       if (run === autoFillRun) autoFillButton.disabled = false;
     }

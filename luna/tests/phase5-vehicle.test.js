@@ -21,6 +21,124 @@ vm.runInNewContext(vehicleCoreSource, context);
 vm.runInNewContext(groqCoreSource, context);
 
 const core = context.LunaVehicleDetailCore;
+const gls = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "fixtures/mercedes-gls450.json"), "utf8")
+);
+const glsTerms = core.modelSearchTerms(gls.capture);
+assert.ok(
+  glsTerms.includes("Mercedes GLS450"),
+  "Discover the model code inside a marketplace class/trim"
+);
+assert.ok(glsTerms.some((term) => term.toLowerCase() === "mercedes gls"));
+assert.ok(glsTerms.length <= 7);
+assert.equal(core.modelFromEvidence([gls.unrelated, ...gls.models], gls.capture)?.modelCode, 106);
+assert.equal(
+  core.nearestModelCandidates([gls.unrelated], gls.capture).length,
+  0,
+  "A GLS cannot become an EQB merely because both are Mercedes 4MATIC vehicles"
+);
+const glsTrimCapture = core.captureForModelTrim(
+  gls.capture,
+  gls.models.find((m) => m.modelCode === 106)
+);
+assert.equal(glsTrimCapture.facts.trim.value, "4 matic");
+assert.equal(core.trimFromEvidence(gls.trims, glsTrimCapture)?.trimCode, 108);
+assert.equal(gls.capture.facts.trim.value, "GLS 450 4MATIC", "Original evidence remains intact");
+assert.equal(
+  core.nearestModelCandidates(
+    gls.models.filter((m) => m.modelCode !== 106),
+    gls.capture
+  ).length,
+  0,
+  "A known GLS450 must not be replaced with GLS400/500/580 when its exact entry is unavailable"
+);
+const golf = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "fixtures/volkswagen-golf-gti.json"), "utf8")
+);
+assert.equal(
+  core.modelFromEvidence(golf.models, golf.capture)?.modelCode,
+  113,
+  "Golf GTI vendor model must resolve to the live Golf base model"
+);
+assert.equal(
+  core.trimFromEvidence(golf.trims, golf.capture)?.trimCode,
+  118,
+  "Vendor trim Other must not hide the exact GTI evidence in the model/title"
+);
+assert.equal(
+  core
+    .nearestModelCandidates(golf.models, {
+      title: "Volkswagen Other",
+      facts: { make: { value: "Volkswagen" } }
+    })
+    .some((item) => item.model === "Other"),
+  false,
+  "Qualified Other cannot compete with real models"
+);
+const exactGti = {
+  ...golf.models[1],
+  model: "Golf GTI",
+  label: "Volkswagen Golf GTI",
+  modelCode: 999
+};
+assert.equal(
+  core.modelFromEvidence([...golf.models, exactGti], golf.capture)?.modelCode,
+  999,
+  "An exact full model must still win over its shorter base model"
+);
+for (const [make, base, advertised] of [
+  ["Toyota", "Corolla", "Corolla Hybrid"],
+  ["BMW", "X5", "X5 M Sport"],
+  ["Volkswagen", "Golf", "Golf R"]
+]) {
+  const candidates = [
+    { make, model: "Other", label: `${make} Other`, modelCode: 0 },
+    { make, model: base, label: `${make} ${base}`, modelCode: 1 }
+  ];
+  assert.equal(
+    core.modelFromEvidence(candidates, {
+      title: `${make} ${advertised} Other`,
+      facts: { make: { value: make }, model: { value: advertised } }
+    })?.modelCode,
+    1
+  );
+}
+assert.equal(
+  core.modelFromEvidence([{ make: "BMW", model: "X5", modelCode: 1 }], {
+    title: "BMW X50",
+    facts: { make: { value: "BMW" }, model: { value: "X50" } }
+  }),
+  null,
+  "A base model must match complete identity tokens, not a partial number"
+);
+const candidateInput = {
+  task: "model",
+  facts: { make: "Volkswagen", model: "Golf GTI" },
+  candidates: golf.models.map((m) => ({ id: `${m.makeCode}:${m.modelCode}`, label: m.label }))
+};
+assert.equal(
+  context.LunaGroqCore.prepareAnalysis(candidateInput).candidates.some(
+    (c) => c.label === "Volkswagen Other"
+  ),
+  false
+);
+assert.throws(
+  () =>
+    context.LunaGroqCore.parseAnalysis(
+      {
+        model: "qwen/qwen3.8-27b",
+        analysis: {
+          candidateId: "112:0",
+          confidence: "high",
+          confidenceScore: 1,
+          riskFlags: []
+        }
+      },
+      candidateInput
+    ),
+  /outside the live Ayshei catalog/,
+  "Even a confident provider cannot select qualified Other over real catalog values"
+);
 assert.equal(
   core.supportedSite("https://www.dubicars.com/cadillac-escalade-717683.html"),
   "dubicars"
@@ -201,7 +319,7 @@ const models = [
   }
 ];
 assert.equal(core.exactModel(models, "Cadillac", "Escalade").modelCode, 2);
-assert.equal(core.exactTrim([{ label: "PLATINUM", trimCode: 9 }], "platinum").trimCode, 9);
+assert.equal(core.exactTrim([{ label: "PLATINUM", trimCode: 120 }], "platinum").trimCode, 120);
 assert.equal(
   core.exactTrim(
     [
@@ -323,8 +441,9 @@ assert.equal(
   core.nearestModelCandidates([toyotaModels[0]], {
     facts: { make: { value: "Toyota" }, model: { value: "Land Cruiser" } },
     title: "Toyota Land Cruiser 2024"
-  })[0].modelCode,
-  40
+  }).length,
+  0,
+  "An unrelated same-make model must not replace the advertised Land Cruiser"
 );
 assert.equal(
   core.modelFromEvidence(
@@ -349,8 +468,8 @@ assert.equal(
 );
 assert.equal(core.canonicalMake("Mercedec Benz"), "mercedes");
 const mercedesCandidates = [
-  { label: "Mercedes C-Class", make: "Mercedes", makeCode: 44, model: "C-Class", modelCode: 0 },
-  { label: "Mercedes C300", make: "Mercedes", makeCode: 44, model: "C300", modelCode: 703 }
+  { label: "Mercedes C-Class", make: "Mercedes", makeCode: 100, model: "C-Class", modelCode: 0 },
+  { label: "Mercedes C300", make: "Mercedes", makeCode: 100, model: "C300", modelCode: 703 }
 ];
 const defenderModels = ["Defender", "Defender 90", "Defender 110", "Defender 130"].map(
   (model, index) => ({
@@ -376,13 +495,15 @@ for (const variant of ["90", "110", "130"]) {
       ...defenderCapture,
       title: `Land Rover Defender${variant} HSE 2024`
     }).model,
-    `Defender ${variant}`
+    `Defender ${variant}`,
+    "Catalog variants must be recognized with or without a space before the number"
   );
 }
 for (const title of ["Land Rover Defender 110,000 km", "Land Rover Defender only 110 km"]) {
   assert.equal(
     core.modelFromEvidence(defenderModels, { ...defenderCapture, title }).model,
-    "Defender"
+    "Defender",
+    "Mileage and separated numbers must not refine the model"
   );
 }
 assert.equal(
@@ -392,21 +513,83 @@ assert.equal(
     summary: "We also sell Defender 110",
     context: "Related cars: Land Rover Defender 110"
   }).model,
-  "Defender"
+  "Defender",
+  "Description/context and a trim number alone cannot upgrade the model"
+);
+assert.equal(
+  core.modelFromEvidence(defenderModels, {
+    ...defenderCapture,
+    facts: { ...defenderCapture.facts, model: { value: "Defender 90" } }
+  }).model,
+  "Defender 90",
+  "Conflicting explicit variants must not be replaced by a different variant"
+);
+assert.equal(core.modelFromEvidence([defenderModels[0]], defenderCapture).model, "Defender");
+assert.equal(
+  core.modelFromEvidence(models, {
+    facts: { make: { value: "Cadillac" }, model: { value: "Escalade" } },
+    title: "Cadillac Escalade IQ 2025"
+  }).model,
+  "Escalade IQ",
+  "Refinement also applies to nonnumeric model names"
+);
+const defenderSearchTerms = core.modelSearchTerms(defenderCapture);
+assert.ok(defenderSearchTerms.includes("Land Rover Defender 110"));
+assert.ok(defenderSearchTerms.length <= 7, "Model discovery must stay bounded");
+const defenderTrims = [
+  { label: "110", trimCode: 1 },
+  { label: "HSE", trimCode: 2 },
+  { label: "STD", trimCode: 3 }
+];
+const gccTrimChoices = [
+  { label: "ROADSTER", trimCode: 20 },
+  { label: "ROADSTER (NON GCC)", trimCode: 21 }
+];
+const gccTrimCapture = { facts: { specs: { value: "GCC Specs" } } };
+assert.deepEqual(
+  JSON.parse(JSON.stringify(core.preferGccCompatibleTrims(gccTrimChoices, gccTrimCapture))),
+  [gccTrimChoices[0]],
+  "GCC listings must prefer a trim that is not labelled NON GCC"
+);
+assert.equal(
+  core.preferGccCompatibleTrims([gccTrimChoices[1]], gccTrimCapture)[0].trimCode,
+  21,
+  "The only live trim remains available as a fallback"
+);
+assert.equal(
+  core.preferGccCompatibleTrims(gccTrimChoices, { facts: { specs: { value: "American Specs" } } })
+    .length,
+  2,
+  "Non-GCC listings keep their full live trim list"
 );
 const defenderTrimCapture = core.captureForModelTrim(defenderCapture, defenderModels[2]);
-assert.equal(defenderCapture.facts.trim.value, "110");
+assert.equal(defenderCapture.facts.trim.value, "110", "Source facts must remain untouched");
 assert.equal(defenderTrimCapture.facts.trim.value, "");
+assert.equal(core.trimFromEvidence(defenderTrims, defenderTrimCapture).label, "HSE");
+assert.equal(core.fallbackTrim(defenderTrims, defenderTrimCapture).label, "HSE");
 assert.equal(
   core.trimFromEvidence(
-    [
-      { label: "110", trimCode: 1 },
-      { label: "HSE", trimCode: 2 }
-    ],
-    defenderTrimCapture
+    defenderTrims,
+    core.captureForModelTrim(
+      {
+        ...defenderCapture,
+        facts: { ...defenderCapture.facts, trim: { value: "110 HSE" } }
+      },
+      defenderModels[2]
+    )
   ).label,
-  "HSE"
+  "HSE",
+  "Keep actual trim words after a model identifier"
 );
+for (const trim of ["HSE", "1100", "Other", "STD"]) {
+  const capture = {
+    ...defenderCapture,
+    facts: { ...defenderCapture.facts, trim: { value: trim } }
+  };
+  assert.equal(core.captureForModelTrim(capture, defenderModels[2]), capture);
+}
+assert.equal(core.captureForModelTrim(defenderCapture, defenderModels[0]), defenderCapture);
+assert.equal(core.captureForModelTrim(defenderCapture, null), defenderCapture);
 const mercedesCapture = {
   facts: { make: { value: "Mercedes-Benz" }, model: { value: "C-Class" } },
   title: "Mercedes-Benz C-Class C300"
@@ -462,11 +645,11 @@ assert.equal(
   350
 );
 const mercedesGlcCandidates = [
-  { label: "Mercedes GLC", make: "Mercedes", makeCode: 44, model: "GLC", modelCode: 500 },
+  { label: "Mercedes GLC", make: "Mercedes", makeCode: 100, model: "GLC", modelCode: 500 },
   {
     label: "Mercedes GLC 300 AMG",
     make: "Mercedes",
-    makeCode: 44,
+    makeCode: 100,
     model: "GLC 300 AMG",
     modelCode: 501
   }
@@ -516,11 +699,11 @@ assert.equal(
   ).model.modelCode,
   400
 );
-const s3 = { label: "Mercedes S3", make: "Mercedes", makeCode: 44, model: "S3", modelCode: 3 };
+const s3 = { label: "Mercedes S3", make: "Mercedes", makeCode: 100, model: "S3", modelCode: 3 };
 const s318 = {
   label: "Mercedes S318",
   make: "Mercedes",
-  makeCode: 44,
+  makeCode: 100,
   model: "S318",
   modelCode: 318
 };
@@ -544,18 +727,19 @@ assert.equal(
       { label: "XDRIVE GT SPORT", trimCode: 2 }
     ],
     { title: "BMW 3-Series 330i xDrive" }
-  ).trimCode,
-  2
+  ),
+  null,
+  "xDrive wording must not imply an unsupported GT Sport grade"
 );
 assert.equal(
-  core.fallbackTrim([{ label: "Other", trimCode: 1000001 }], { title: "Unknown trim" }).trimCode,
-  1000001
+  core.fallbackTrim([{ label: "Other", trimCode: 1000001 }], { title: "Unknown trim" }),
+  null
 );
 assert.equal(
   core.trimFromEvidence(
     [
       { label: "Other", trimCode: 1 },
-      { label: "PLATINUM", trimCode: 9 }
+      { label: "PLATINUM", trimCode: 120 }
     ],
     { context: "The Platinum trim includes premium leather." }
   ),
@@ -761,7 +945,7 @@ const inferredFieldAnalysis = context.LunaGroqCore.prepareAnalysis({
     field: "Exterior Color",
     title: "2026 BYD Sealion 7"
   },
-  imageUrl: "https://alwanworld.com/wp-content/uploads/2026/09/1-1024x577.webp",
+  imageUrl: "https://alwanworld.com/wp-content/uploads/2026/120/1-1024x577.webp",
   task: "field"
 });
 assert.deepEqual(JSON.parse(JSON.stringify(inferredFieldAnalysis.candidates)), [

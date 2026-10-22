@@ -10,7 +10,9 @@ globalThis.LunaMonthlyPerformanceCore = (() => {
       .replace(/\s+/g, " ");
   const dateToDay = (key) => {
     const match = String(key).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    return match ? Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) : null;
+    if (!match) return null;
+    const day = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    return new Date(day).toISOString().slice(0, 10) === key ? day : null;
   };
   const dateRange = (todayKey) => {
     const endDay = dateToDay(todayKey);
@@ -56,31 +58,24 @@ globalThis.LunaMonthlyPerformanceCore = (() => {
     const team = metric("Team");
 
     rows.forEach((row) => {
-      const day = dateToDay(row.date);
       const agentKey = normalizeName(row.agentName);
-      if (
-        day === null ||
-        day < startDay ||
-        day > endDay ||
-        !agentKey ||
-        (selectedAgent !== "__all__" && agentKey !== selectedAgent)
-      )
-        return;
-      if (!agents.has(agentKey)) agents.set(agentKey, metric(displayName(row.agentName)));
-      const agentMetric = agents.get(agentKey);
-      const date = dayKey(day);
-      if (!daily.has(date)) daily.set(date, metric(date));
-      const dailyMetric = daily.get(date);
-      const agentDateKey = `${agentKey}\u0000${date}`;
-      if (!agentDaily.has(agentDateKey)) agentDaily.set(agentDateKey, metric(date));
-      const agentDailyMetric = agentDaily.get(agentDateKey);
+      if (!agentKey || (selectedAgent !== "__all__" && agentKey !== selectedAgent)) return;
       [
-        ["listed", row.listedVendor],
-        ["unlisted", row.unlistedVendor],
-        ["auctions", row.auctionVendor]
-      ].forEach(([type, vendorValue]) => {
+        ["listed", row.listedVendor, row.date],
+        ["unlisted", row.unlistedVendor, row.unlistedDate],
+        ["auctions", row.auctionVendor, row.date]
+      ].forEach(([type, vendorValue, workDate]) => {
+        const day = dateToDay(workDate);
         const vendorKey = normalizeName(vendorValue);
-        if (!vendorKey) return;
+        if (!vendorKey || day === null || day < startDay || day > endDay) return;
+        if (!agents.has(agentKey)) agents.set(agentKey, metric(displayName(row.agentName)));
+        const agentMetric = agents.get(agentKey);
+        const date = dayKey(day);
+        if (!daily.has(date)) daily.set(date, metric(date));
+        const dailyMetric = daily.get(date);
+        const agentDateKey = `${agentKey}\u0000${date}`;
+        if (!agentDaily.has(agentDateKey)) agentDaily.set(agentDateKey, metric(date));
+        const agentDailyMetric = agentDaily.get(agentDateKey);
         if (!vendors.has(vendorKey)) vendors.set(vendorKey, metric(displayName(vendorValue)));
         add(team, type, date);
         add(agentMetric, type, date);

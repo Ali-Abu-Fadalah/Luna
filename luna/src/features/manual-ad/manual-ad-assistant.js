@@ -55,10 +55,14 @@ globalThis.LunaManualAdAssistant = (() => {
   let fillBusy = false;
   let prepareBusy = false;
   let prepareRun = 0;
+  let prepareController = null;
 
-  const withTimeout = (promise, milliseconds, messageText) =>
+  const withTimeout = (promise, milliseconds, messageText, onTimeout) =>
     new Promise((resolve, reject) => {
-      const timer = globalThis.setTimeout(() => reject(new Error(messageText)), milliseconds);
+      const timer = globalThis.setTimeout(() => {
+        onTimeout?.();
+        reject(new Error(messageText));
+      }, milliseconds);
       Promise.resolve(promise).then(
         (value) => {
           globalThis.clearTimeout(timer);
@@ -179,7 +183,8 @@ globalThis.LunaManualAdAssistant = (() => {
         field === "description"
           ? "AI-polished text"
           : globalThis.LunaManualAdCore.cleanText(draft[field]);
-      entry.textContent = `${fieldLabels[field]}: ${value} — ${item.source}`;
+      const confidence = item.source?.match(/(?:\d+%|high|medium|low) confidence/i)?.[0];
+      entry.textContent = `${fieldLabels[field]}: ${value} · ${confidence || "AI suggestion"} · review before saving.`;
       aiDisclosureList.append(entry);
     });
     aiDisclosure.hidden = assisted.length === 0;
@@ -238,29 +243,38 @@ globalThis.LunaManualAdAssistant = (() => {
       label: option.aiLabel || option.label
     }));
     try {
-      const result = await globalThis.LunaGroq.analyze({
-        candidates,
-        facts: {
-          context: (capture.specs || []).join(" · "),
-          make: capture.makeModel,
-          model: capture.makeModel,
-          summary: capture.description || capture.descriptionSource,
-          trim: capture.trim,
-          year: capture.year
+      const result = await globalThis.LunaGroq.analyze(
+        {
+          candidates,
+          facts: {
+            context: (capture.specs || []).join(" · "),
+            make: capture.makeModel,
+            model: capture.makeModel,
+            summary: capture.description || capture.descriptionSource,
+            trim: capture.trim,
+            year: capture.year,
+            specs: capture.regionalSpec
+          },
+          imageUrl: capture.imageUrl,
+          task
         },
-        imageUrl: capture.imageUrl,
-        task
-      });
+        capture.aiRequestOptions
+      );
       const selected =
         options.find(
           (option) => (task === "model" ? modelId(option) : trimId(option)) === result.candidate?.id
         ) || null;
-      return selected
+      return selected &&
+        (result.autoFillEligible === true ||
+          (task === "trim" && result.trimRecommendationEligible === true))
         ? {
             ...selected,
             aiReview: {
               confidence: result.confidence || "low",
               confidenceScore: result.confidenceScore,
+              trimComparison: result.trimComparison || null,
+              reason: result.reason || "",
+              nearestTrimRecommendation: task === "trim" && result.autoFillEligible !== true,
               model: result.provider || result.model || "AI",
               riskFlags: result.riskFlags || [],
               reviewReason: result.reviewReason || ""
@@ -322,8 +336,13 @@ globalThis.LunaManualAdAssistant = (() => {
       .slice(0, 20);
     capture.availableModels = uniqueModels;
     let model =
-      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(uniqueModels, [vendorModel], 2) ||
-      globalThis.LunaManualAdCore.chooseExactModel(uniqueModels, vendorModel);
+      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(
+        uniqueModels,
+        globalThis.LunaManualAdCore.buildCatalogSearchTerms(capture).filter((term) =>
+          term.includes(" ")
+        ),
+        2
+      ) || globalThis.LunaManualAdCore.chooseExactModel(uniqueModels, vendorModel);
     let modelSource = model ? "Mirror catalog exact/unique evidence match" : "";
     if (!model && uniqueModels.length) {
       const enriched = await Promise.all(
@@ -344,13 +363,6 @@ globalThis.LunaManualAdAssistant = (() => {
       modelSource = model
         ? `${model.aiReview.model} choice from closed Mirror model list · ${model.aiReview.confidenceScore == null ? "confidence unreported" : `${Math.round(model.aiReview.confidenceScore * 100)}% confidence`} · review required${model.aiReview.riskFlags.length ? ` · flags: ${model.aiReview.riskFlags.join(", ")}` : ""}`
         : "";
-      if (!model) {
-        model = globalThis.LunaManualAdCore.chooseNearestCatalogMatch(uniqueModels, [
-          vendorModel,
-          vendorTrim
-        ]);
-        modelSource = model ? "Mirror nearest textual candidate; agent review required" : "";
-      }
     }
     if (!model) {
       capture.makeModel = vendorModel;
@@ -384,25 +396,36 @@ globalThis.LunaManualAdAssistant = (() => {
     );
     let trim =
       globalThis.LunaManualAdCore.chooseTrim(trimCandidates, vendorTrim) ||
-      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(trimCandidates, [vendorTrim]);
+      (!vendorTrim
+        ? globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(trimCandidates, [vendorModel])
+        : null);
     let trimSource = trim ? "Mirror trim exact/unique evidence match" : "";
     if (!trim && trimCandidates.length) {
       trim = await askClosedCatalogAi("trim", trimCandidates, capture);
       trimSource = trim
         ? `${trim.aiReview.model} choice from closed Mirror trim list · ${trim.aiReview.confidenceScore == null ? "confidence unreported" : `${Math.round(trim.aiReview.confidenceScore * 100)}% confidence`} · review required${trim.aiReview.riskFlags.length ? ` · flags: ${trim.aiReview.riskFlags.join(", ")}` : ""}`
         : "";
-      if (!trim) {
-        trim = globalThis.LunaManualAdCore.chooseNearestCatalogMatch(trimCandidates, [vendorTrim]);
-        trimSource = trim ? "Mirror nearest textual trim; agent review required" : "";
+      if (trim?.aiReview.trimComparison) {
+        const comparison = trim.aiReview.trimComparison;
+        trimSource += ` · ${trim.aiReview.nearestTrimRecommendation ? "Closest trim recommendation" : "Trim comparison"}: ${comparison.explanation} · Differences: ${comparison.materialDifferences?.join("; ") || "none identified"} · Uncertainties: ${comparison.uncertainties?.join("; ") || "none reported"}`;
+      } else if (trim?.aiReview.reason) {
+        trimSource += ` · Closest trim recommendation: ${trim.aiReview.reason}`;
       }
     }
-    capture.trim = trim?.label || vendorTrim;
+    capture.trim = trim?.label || "";
     capture.trimCode = trim?.trimCode ?? null;
     if (trim) {
       capture.evidence.trim = {
         raw: `${vendorTrim || "No explicit vendor trim"} → ${trim.label}`,
         source: trimSource,
         state: /exact|unique/.test(trimSource) ? "strong" : "review"
+      };
+    } else {
+      capture.evidence.trim = {
+        raw: vendorTrim || "No explicit vendor trim",
+        source:
+          "No supported trim equivalent was established; review vehicle specifications and select a live trim",
+        state: "missing"
       };
     }
     return capture;
@@ -412,7 +435,9 @@ globalThis.LunaManualAdAssistant = (() => {
     capture.description = globalThis.LunaManualAdCore.polishDescription(capture.description);
     if (capture.description) return capture;
     const verifiedSummary = globalThis.LunaManualAdCore.verifiedSpecificationSummary(capture);
-    if (verifiedSummary) {
+    const sourceText =
+      capture.descriptionSource || globalThis.LunaManualAdCore.descriptionFromSpecs(capture.specs);
+    if (verifiedSummary && !sourceText) {
       capture.description = verifiedSummary;
       capture.descriptionMode = "verified-spec-summary";
       capture.evidence.description = {
@@ -422,16 +447,28 @@ globalThis.LunaManualAdAssistant = (() => {
       };
       return capture;
     }
-    const sourceText =
-      capture.descriptionSource || globalThis.LunaManualAdCore.descriptionFromSpecs(capture.specs);
     if (!sourceText) return capture;
-    if (globalThis.LunaGroq?.analyze) {
+    const deterministicDescription = globalThis.LunaManualAdCore.specificationProse(
+      sourceText.split("\n").filter((line) => line.trim())
+    );
+    const deterministicReady =
+      sourceText.split("\n").filter((line) => /^[\w -]+:\s*\S/.test(line)).length >= 2 &&
+      globalThis.LunaManualAdCore.preservesSpecificationFacts(deterministicDescription, sourceText);
+    if (!deterministicReady && globalThis.LunaGroq?.analyze) {
       try {
-        const result = await globalThis.LunaGroq.analyze({
-          facts: { sourceText },
-          task: "description"
-        });
-        capture.description = globalThis.LunaManualAdCore.cleanDescription(result.description);
+        const result = await globalThis.LunaGroq.analyze(
+          {
+            facts: { sourceText },
+            task: "description"
+          },
+          capture.aiRequestOptions
+        );
+        capture.description = globalThis.LunaManualAdCore.polishDescription(result.description);
+        if (
+          !globalThis.LunaManualAdCore.preservesSpecificationFacts(capture.description, sourceText)
+        ) {
+          throw new Error("AI description changed verified specifications or did not return prose");
+        }
         capture.descriptionMode = "ai-polished";
         capture.evidence.description = {
           raw: "Formatted only from verified page specifications",
@@ -443,11 +480,13 @@ globalThis.LunaManualAdAssistant = (() => {
         // Keep every verified specification as a deterministic fallback.
       }
     }
-    capture.description = globalThis.LunaManualAdCore.cleanDescription(sourceText);
-    capture.descriptionMode = "specifications";
+    capture.description = globalThis.LunaManualAdCore.specificationProse(
+      sourceText.split("\n").filter((line) => line.trim())
+    );
+    capture.descriptionMode = "specification-prose";
     capture.evidence.description = {
       raw: "Copied from verified page specifications",
-      source: "Verified page specifications copied without rewording",
+      source: "Verified page specifications formatted as sentences without adding facts",
       state: "strong"
     };
     return capture;
@@ -461,15 +500,18 @@ globalThis.LunaManualAdAssistant = (() => {
     )
       return capture;
     try {
-      const result = await globalThis.LunaGroq.analyze({
-        candidates: [
-          { id: "light-green", label: "Light Green" },
-          { id: "dark-green", label: "Dark Green" }
-        ],
-        facts: { color: "Green", year: capture.year },
-        imageUrl: capture.imageUrl,
-        task: "color"
-      });
+      const result = await globalThis.LunaGroq.analyze(
+        {
+          candidates: [
+            { id: "light-green", label: "Light Green" },
+            { id: "dark-green", label: "Dark Green" }
+          ],
+          facts: { color: "Green", year: capture.year },
+          imageUrl: capture.imageUrl,
+          task: "color"
+        },
+        capture.aiRequestOptions
+      );
       if (!result.imageUsed) {
         capture.exteriorColor = "";
         capture.evidence.exteriorColor = {
@@ -496,15 +538,18 @@ globalThis.LunaManualAdAssistant = (() => {
   const resolveMissingBodyType = async (capture) => {
     if (capture.bodyType || !globalThis.LunaGroq?.analyze) return capture;
     try {
-      const result = await globalThis.LunaGroq.analyze({
-        facts: {
-          make: capture.makeModel,
-          model: capture.makeModel,
-          year: capture.year
+      const result = await globalThis.LunaGroq.analyze(
+        {
+          facts: {
+            make: capture.makeModel,
+            model: capture.makeModel,
+            year: capture.year
+          },
+          imageUrl: capture.imageUrl,
+          task: "bodyType"
         },
-        imageUrl: capture.imageUrl,
-        task: "bodyType"
-      });
+        capture.aiRequestOptions
+      );
       const aysheiBodyType =
         {
           Crossover: "SUV",
@@ -599,7 +644,12 @@ globalThis.LunaManualAdAssistant = (() => {
   const resolveMissingFields = async (capture) => {
     if (!globalThis.LunaGroq?.analyze) return capture;
     for (const config of inferredFieldConfigs) {
-      if (config.field === "exteriorColor" && capture.exteriorColor === "Other") {
+      if (
+        config.field === "exteriorColor" &&
+        capture.exteriorColor === "Other" &&
+        capture.evidence?.exteriorColor?.source !==
+          "Multiple exterior paint colors; no matching single-color form option"
+      ) {
         capture.exteriorColor = "";
       }
       if (capture[config.field]) continue;
@@ -618,23 +668,27 @@ globalThis.LunaManualAdAssistant = (() => {
       )
         continue;
       try {
-        const result = await globalThis.LunaGroq.analyze({
-          candidates: config.candidates.map((label) => ({
-            id: label.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-            label
-          })),
-          facts: {
-            context: (capture.specs || []).join(" · "),
-            field: config.label,
-            make: capture.makeModel,
-            model: capture.makeModel,
-            reported,
-            summary: capture.description || capture.descriptionSource,
-            year: capture.year
+        const result = await globalThis.LunaGroq.analyze(
+          {
+            candidates: config.candidates.map((label) => ({
+              id: label.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+              label
+            })),
+            facts: {
+              context: (capture.specs || []).join(" · "),
+              field: config.label,
+              make: capture.makeModel,
+              model: capture.makeModel,
+              reported,
+              summary: capture.description || capture.descriptionSource,
+              year: capture.year
+            },
+            imageUrl: config.useImage ? capture.imageUrl : "",
+            requiresImage: config.requiresImage === true,
+            task: "field"
           },
-          imageUrl: config.useImage ? capture.imageUrl : "",
-          task: "field"
-        });
+          capture.aiRequestOptions
+        );
         if (config.requiresImage && !result.imageUsed) continue;
         const value = result.candidate?.label || "";
         if (!config.candidates.includes(value)) continue;
@@ -680,9 +734,7 @@ globalThis.LunaManualAdAssistant = (() => {
       draft.availableTrims,
       draft.regionalSpec
     );
-    const trim =
-      globalThis.LunaManualAdCore.chooseTrim(trimCandidates, draft.trim) ||
-      globalThis.LunaManualAdCore.chooseUniqueCatalogMatch(trimCandidates, [draft.trim]);
+    const trim = globalThis.LunaManualAdCore.chooseTrim(trimCandidates, draft.trim);
     draft.trim = trim?.label || "";
     draft.trimCode = trim?.trimCode ?? null;
     modelStatus.textContent = "";
@@ -720,12 +772,15 @@ globalThis.LunaManualAdAssistant = (() => {
 
   const prepare = async () => {
     const run = ++prepareRun;
+    prepareController?.abort();
+    const controller = new AbortController();
+    prepareController = controller;
     let preparedImages = { detail: "No car images were collected.", imageCount: 0, isReady: false };
     let vendorPreviewShown = false;
     prepareBusy = true;
     startButton.disabled = true;
     setStatus("working", "Reading");
-    setMessage("Checking the open Ayshei form, then reading the vendor ad.");
+    setMessage("Checking Ayshei and reading the ad…");
     try {
       await clearCompletedWorkflow();
       const sourceDraft = await withTimeout(
@@ -767,40 +822,47 @@ globalThis.LunaManualAdAssistant = (() => {
       render();
       vendorPreviewShown = true;
       setStatus("working", "Page ready");
-      setMessage(
-        "Vendor facts are shown now. Luna is checking only missing details; you can review the fields while it works."
-      );
+      setMessage("Ad details loaded. Checking missing fields…");
       const imagePromise = withTimeout(
         globalThis.LunaImageScraper.collectForManualAd(),
         10000,
         "Image collection took too long. Vehicle data is still available."
       ).catch((error) => ({ detail: error.message, imageCount: 0, isReady: false }));
       const enriched = JSON.parse(JSON.stringify(sourceDraft));
+      Object.defineProperty(enriched, "aiRequestOptions", {
+        value: {
+          signal: controller.signal,
+          deadline: Date.now() + 30000,
+          sourceScope: sourceDraft.sourceUrl
+        }
+      });
       const enrichmentPromise = withTimeout(
         (async () => {
-          await improveMissingDescription(enriched);
-          await resolveVehicle(enriched);
-          await resolveGreenShade(enriched);
-          await resolveMissingBodyType(enriched);
-          await resolveMissingFields(enriched);
+          for (const step of [
+            improveMissingDescription,
+            resolveVehicle,
+            resolveGreenShade,
+            resolveMissingBodyType,
+            resolveMissingFields
+          ]) {
+            if (controller.signal.aborted) break;
+            await step(enriched);
+          }
           return enriched;
         })(),
         30000,
-        "AI and catalog checks timed out; vendor facts remain available."
+        "AI and catalog checks timed out; vendor facts remain available.",
+        () => controller.abort()
       );
       const [images, enrichment] = await Promise.all([
         imagePromise,
-        enrichmentPromise.catch((error) => ({ error }))
+        enrichmentPromise.catch((error) => ({ ...JSON.parse(JSON.stringify(enriched)), error }))
       ]);
       if (run !== prepareRun || !draft || draft.sourceUrl !== sourceDraft.sourceUrl) return;
       preparedImages = images;
-      const merge = enrichment.error
-        ? null
-        : globalThis.LunaManualAdCore.mergeEnrichment(sourceDraft, draft, enrichment);
-      if (!enrichment.error) {
-        draft = merge.draft;
-        await saveDraft();
-      }
+      const merge = globalThis.LunaManualAdCore.mergeEnrichment(sourceDraft, draft, enrichment);
+      draft = merge.draft;
+      await saveDraft();
       render();
       const validation = globalThis.LunaManualAdCore.validateDraft(draft);
       const workflowReady = validation.isReady && preparedImages.isReady;
@@ -810,13 +872,13 @@ globalThis.LunaManualAdAssistant = (() => {
         .map(([field]) => field);
       const aiBrief = aiChanged.length
         ? ` AI added ${aiChanged.map((field) => fieldLabels[field]).join(", ")}.`
-        : " AI added no fields; existing vendor facts were kept.";
+        : "";
       setMessage(
         validation.isReady && preparedImages.isReady
-          ? `Vendor data and ${preparedImages.imageCount} images are ready.${aiBrief} Review them, then fill the open Ayshei ad.`
+          ? `Ready: ${preparedImages.imageCount} images.${aiBrief} Review before filling Ayshei.`
           : validation.isReady
-            ? `Vendor data is ready.${aiBrief} Car images need review: ${preparedImages.detail}`
-            : `Vendor data is ready.${aiBrief} Check the red fields: ${validation.missing.join(", ")}.${enrichment.error ? ` ${enrichment.error.message}` : ""}`,
+            ? `Ad details ready.${aiBrief} Review car images.`
+            : `Review: ${validation.missing.join(", ")}.${enrichment.error ? " Some AI checks could not finish." : ""}`,
         workflowReady ? "success" : "warning"
       );
     } catch (error) {
@@ -824,6 +886,7 @@ globalThis.LunaManualAdAssistant = (() => {
       setStatus(vendorPreviewShown ? "review" : "failed", vendorPreviewShown ? "Review" : "Failed");
       setMessage(error.message, "error");
     } finally {
+      controller.abort();
       if (run !== prepareRun) return;
       prepareBusy = false;
       startButton.disabled = false;
@@ -1337,7 +1400,7 @@ globalThis.LunaManualAdAssistant = (() => {
     fillBusy = true;
     render();
     setStatus("working", "Filling");
-    setMessage("Filling available required fields and checking each value.");
+    setMessage("Filling and checking fields…");
     let imageUploadTask = null;
     try {
       const tab = await findAysheiTargetTab();
@@ -1367,22 +1430,19 @@ globalThis.LunaManualAdAssistant = (() => {
       if (!imagesConfirmed) {
         if (imageReview.isReady) {
           setMessage(`Preparing ${imageReview.imageCount} images for Ayshei…`);
-          let markImagesSelected;
-          const imageSelectedTask = new Promise((resolve) => {
-            markImagesSelected = resolve;
-          });
+          const markImagesSelected = ({ count }) => {
+            if (fillBusy) {
+              setMessage(
+                `Uploading ${count} images to Ayshei; filling vehicle details alongside them…`
+              );
+            }
+          };
           imageUploadTask = globalThis.LunaImageScraper.uploadToAysheiTab(
             tab.id,
             markImagesSelected
           ).then(
             (result) => ({ result }),
             (error) => ({ error })
-          );
-          const handoff = await Promise.race([imageSelectedTask, imageUploadTask]);
-          setMessage(
-            handoff?.selected
-              ? `${handoff.count} images added to Ayshei; filling vehicle details while they upload…`
-              : "Image preparation or upload did not finish; filling the available vehicle details for review…"
           );
         } else {
           imageIssue = imageReview.detail;
@@ -1457,10 +1517,7 @@ globalThis.LunaManualAdAssistant = (() => {
       }
       if (response.result?.filled && vehicleDependency.ok && imagesConfirmed) {
         setStatus("done", "Checked");
-        setMessage(
-          "Available required fields were filled and checked. Luna is ready for the next vendor ad; review Ayshei before continuing.",
-          "success"
-        );
+        setMessage("Fields filled and checked. Review Ayshei before continuing.", "success");
         await clearCompletedWorkflow();
       } else {
         const fieldsToCheck = fillResults
@@ -1475,8 +1532,8 @@ globalThis.LunaManualAdAssistant = (() => {
         setStatus("review", "Review");
         setMessage(
           response.result?.blocked
-            ? "Filling stopped before changing fields because the Ayshei category layout did not match this draft."
-            : `Finished every available field. Check manually: ${uniqueFieldsToCheck.join(", ") || "the highlighted fields"}.${imageIssue ? ` ${imageIssue}` : ""}`,
+            ? "Filling stopped: Ayshei categories don’t match this draft."
+            : `Review: ${uniqueFieldsToCheck.join(", ") || "highlighted fields"}.${imageIssue ? " Image check failed." : ""}`,
           "warning"
         );
       }

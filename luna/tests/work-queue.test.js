@@ -345,7 +345,7 @@ assert.match(uiSource, /jenkinsBatchSize: 20/);
 assert.match(uiSource, /Preview ready\. Saved work has not changed/);
 assert.match(uiSource, /expectedUrl: ad\?\.source\?\.url/);
 assert.match(uiSource, /vehicle-detail-page\.js/);
-assert.match(uiSource, /Status remains/);
+assert.match(uiSource, /Review before saving/);
 assert.match(html, /id="queue-ai-body-type"/);
 assert.match(html, /id="queue-ai-model-trim"/);
 assert.match(html, /id="queue-ai-fill"/);
@@ -369,9 +369,9 @@ assert.match(uiSource, /rankModelCandidates/);
 assert.match(uiSource, /sameMakeModels/);
 assert.match(uiSource, /nearestModelCandidates/);
 assert.match(uiSource, /resolveWithGroq\("model", facts, nearest\.slice\(0, 24\), ""\)/);
-assert.match(uiSource, /No live model for the advertised make was found/);
-assert.match(uiSource, /fallbackTrim/);
-assert.match(uiSource, /Model is the nearest same-make choice/);
+assert.match(uiSource, /No compatible live model for the advertised vehicle was found/);
+assert.doesNotMatch(uiSource, /LunaVehicleDetailCore\.fallbackTrim/);
+assert.match(uiSource, /Check the suggested model/);
 assert.doesNotMatch(uiSource, /rankModelCandidates\(candidates, capture\)\.length\) break/);
 const fillFlowSource = uiSource.slice(
   uiSource.indexOf("const autoFillCurrentAdvertisement"),
@@ -381,7 +381,6 @@ assert.doesNotMatch(
   fillFlowSource,
   /\bmarkAd\s*\(|\bmoveAfterSave\s*\(|\bsyncOpenAdTab\s*\(|\bopenOrUpdateAdTab\s*\(|\.click\s*\(/
 );
-assert.match(fillFlowSource, /Luna did not save, move to Next, or run a page action/);
 assert.doesNotMatch(uiSource, /\bconfirm\s*\(/);
 assert.doesNotMatch(uiSource, /\bfetch\s*\(/);
 

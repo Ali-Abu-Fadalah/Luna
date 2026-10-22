@@ -254,6 +254,21 @@ assert.equal(
   ),
   null
 );
+const manualGccTrimChoices = [
+  { label: "ROADSTER", trimCode: 20 },
+  { label: "ROADSTER (NON GCC)", trimCode: 21 }
+];
+assert.deepEqual(
+  JSON.parse(JSON.stringify(core.preferGccCompatibleTrims(manualGccTrimChoices, "GCC Specs"))),
+  [manualGccTrimChoices[0]],
+  "Manual Ad matching shares the GCC trim preference"
+);
+assert.equal(
+  core.preferGccCompatibleTrims([manualGccTrimChoices[1]], "GCC")[0].trimCode,
+  21,
+  "Manual Ad retains a NON GCC trim when it is the only live option"
+);
+assert.equal(core.preferGccCompatibleTrims(manualGccTrimChoices, "American Specs").length, 2);
 assert.equal(
   core.chooseTrim(
     [
@@ -501,7 +516,7 @@ assert.match(assistant, /globalThis\.confirm/);
 assert.match(assistant, /Fill every available field anyway/);
 assert.match(assistant, /classList\.toggle\("is-missing"/);
 assert.match(assistant, /task: "bodyType"/);
-assert.match(assistant, /Luna is ready for the next vendor ad/);
+assert.match(assistant, /Fields filled and checked/);
 assert.match(assistant, /clearCompletedDraft/);
 assert.match(assistant, /clearCompletedWorkflow/);
 assert.match(assistant, /chrome\.storage\.local\.remove\(storageKey\)/);
@@ -522,7 +537,7 @@ assert.match(assistant, /buildCatalogSearchTerms/);
 assert.match(assistant, /choice from closed Mirror model list/);
 assert.match(assistant, /task: "description"/);
 assert.match(assistant, /descriptionFromSpecs\(capture\.specs\)/);
-assert.match(assistant, /Verified page specifications copied without rewording/);
+assert.match(assistant, /Verified page specifications formatted as sentences without adding facts/);
 assert.match(assistant, /if \(!result\.imageUsed\)/);
 assert.match(assistant, /Vehicle image was unavailable to AI/);
 assert.doesNotMatch(assistant, /Qwen text-only fallback/);
@@ -591,14 +606,13 @@ assert.match(assistant, /setReactInput\(input, String\(value\)\)/);
 assert.match(assistant, /new KeyboardEvent\("keyup"/);
 assert.doesNotMatch(assistant, /Nothing else was filled/);
 assert.match(assistant, /vehicleDependency = await fillAysheiVehicleDependencies/);
-assert.match(assistant, /Finished every available field\. Check manually/);
+assert.match(assistant, /uniqueFieldsToCheck.join/);
 assert.match(assistant, /vehicleDependency\.stage === "Make & Model"/);
 assert.match(assistant, /let prepareRun = 0/);
 assert.match(assistant, /const sourceDraft = await withTimeout/);
 assert.match(assistant, /draft = sourceDraft;[\s\S]*render\(\);[\s\S]*const enrichmentPromise/);
 assert.match(assistant, /mergeEnrichment\(sourceDraft, draft, enrichment\)/);
-assert.match(assistant, /Vendor facts are shown now/);
-assert.match(assistant, /AI added no fields; existing vendor facts were kept/);
+assert.match(assistant, /Ad details loaded/);
 assert.match(html, /id="manual-ad-source-facts"/);
 assert.match(
   assistant,
@@ -664,10 +678,10 @@ assert.ok(
   imageUploadStart < vehicleFillStart,
   "The image upload must start before the vehicle fields."
 );
-assert.ok(
-  assistantFillFlow.indexOf("await Promise.race([imageSelectedTask, imageUploadTask])") <
-    vehicleFillStart,
-  "Vehicle fields must start only after Ayshei receives the selected image files (or upload fails)."
+assert.doesNotMatch(
+  assistantFillFlow.slice(imageUploadStart, vehicleFillStart),
+  /await (?:Promise\.race|imageUploadTask|imageSelectedTask)/,
+  "Vehicle fields must start without waiting for photo downloads, preparation, or selection."
 );
 assert.ok(
   vehicleFillStart < assistantFillFlow.indexOf("const upload = await imageUploadTask"),

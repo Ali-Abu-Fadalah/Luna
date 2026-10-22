@@ -59,7 +59,7 @@ globalThis.LunaManualAdCore = (() => {
       const label = cleanText(option?.label);
       return (
         label &&
-        normalize(label) !== "other" &&
+        !/\bothers?$/.test(normalize(label)) &&
         normalize(label).split(" ").length >= minimumWords &&
         sourceValues.some((value) => containsExactWords(value, label))
       );
@@ -81,20 +81,8 @@ globalThis.LunaManualAdCore = (() => {
   };
 
   const chooseNearestCatalogMatch = (options, evidence) => {
-    const sourceTokens = new Set(
-      normalize((Array.isArray(evidence) ? evidence : [evidence]).join(" "))
-        .split(" ")
-        .filter((token) => token.length > 1)
-    );
-    const ranked = (Array.isArray(options) ? options : [])
-      .filter((option) => normalize(option?.label) !== "other")
-      .map((option) => {
-        const labelTokens = normalize(option.label).split(" ").filter(Boolean);
-        const overlap = labelTokens.filter((token) => sourceTokens.has(token)).length;
-        return { option, overlap, score: overlap * 100 + normalize(option.label).length };
-      })
-      .sort((left, right) => right.score - left.score);
-    return ranked[0]?.overlap ? ranked[0].option : null;
+    // Compatibility helper: nearest spelling is not vehicle equivalence.
+    return null;
   };
 
   const buildCatalogSearchTerms = (capture) => {
@@ -107,6 +95,16 @@ globalThis.LunaManualAdCore = (() => {
       }
     };
     add(capture?.makeModel);
+    const make = specificationValue(capture?.specs, "Make");
+    const model = specificationValue(capture?.specs, "Model");
+    // Advertised model values may contain a trim before the base model and an
+    // edition after it. Search the observed model code with the observed make;
+    // the live catalog still decides the actual model label and identifiers.
+    const code = (model || capture?.makeModel || "").match(
+      /\b(?:[a-z]{1,4}\d{1,4}[a-z]{0,3}|\d{3,4})\b/i
+    )?.[0];
+    if (make && code) add(`${make} ${code}`);
+    if (code) add(code);
     (Array.isArray(capture?.specs) ? capture.specs : [])
       .map((item) => cleanText(item).match(/^(?:make|model)\s*:\s*(.+)$/i)?.[1])
       .filter(Boolean)
@@ -180,6 +178,7 @@ globalThis.LunaManualAdCore = (() => {
     )
       return all;
     const compatible = all.filter((option) => !/\bnon[\s-]*gcc\b/i.test(cleanText(option?.label)));
+    // Keep the sole live option available when the catalog does not provide a GCC-labelled trim.
     return compatible.length ? compatible : all;
   };
 
@@ -232,6 +231,16 @@ globalThis.LunaManualAdCore = (() => {
   const inferExteriorColor = (value) => {
     const text = normalize(value).replace(/\bgray\b/g, "grey");
     if (!text) return "";
+    const paintColors =
+      text.match(
+        /\b(?:beige|black|blueberry|blue|brown|cyan|green|grey|orange|pink|purple|red|silver|white|yellow)\b/g
+      ) || [];
+    if (
+      new Set(paintColors).size > 1 &&
+      /\//.test(cleanText(value)) &&
+      !/\b(?:available|options|or)\b/i.test(text)
+    )
+      return "Other";
     const composites = [
       [/\b(?:black matt|matte black)\b/, "Black matt"],
       [/\b(?:white pearl|pearl white)\b/, "White Pearl"],
@@ -266,6 +275,96 @@ globalThis.LunaManualAdCore = (() => {
       .filter(Boolean)
       .filter((value, index, items) => items.indexOf(value) === index)
       .join("\n");
+
+  const specificationProse = (specs = []) => {
+    const entries = descriptionFromSpecs(specs)
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const pair = line.match(/^([^:]+):\s*(.+)$/);
+        return { label: pair?.[1] || "", value: pair?.[2] || line };
+      });
+    const consumed = new Set();
+    const take = (...labels) => {
+      const entry = entries.find((item) => labels.includes(normalize(item.label)));
+      if (entry) consumed.add(entry);
+      return entry?.value || "";
+    };
+    const year = take("year");
+    const make = take("make");
+    const model = take("model").replace(/\s+(\d+ of \d+)$/i, ", $1");
+    const verification = take("verification");
+    const identity = [year, make, model].filter(Boolean).join(" ");
+    const sentences = [];
+    if (identity)
+      sentences.push(
+        `${identity}${verification ? `, with ${verification.toLowerCase().replace(/factory verified/i, "factory-verified")} specifications` : ""}.`
+      );
+    else if (verification) sentences.push(`The specifications are ${verification.toLowerCase()}.`);
+    const mileage = take("mileage", "odometer");
+    const engine = take("engine cylinders", "cylinders", "engine");
+    const cylinderCount = engine.match(/^(\d+)\s*cylinders?$/i)?.[1];
+    const enginePhrase = cylinderCount
+      ? `${/^(?:8|11|18)$/.test(cylinderCount) ? "an" : "a"} ${cylinderCount}-cylinder engine`
+      : engine;
+    if (mileage && enginePhrase)
+      sentences.push(
+        `The vehicle has a mileage of ${mileage} and is equipped with ${enginePhrase}.`
+      );
+    else if (mileage) sentences.push(`The vehicle has a mileage of ${mileage}.`);
+    else if (enginePhrase) sentences.push(`The vehicle is equipped with ${enginePhrase}.`);
+    const exterior = take("exterior color", "exterior colour", "color", "colour");
+    const interior = take("interior color", "interior colour");
+    if (exterior && interior)
+      sentences.push(`It features a ${exterior} exterior and ${interior} interior.`);
+    else if (exterior) sentences.push(`It features a ${exterior} exterior.`);
+    else if (interior) sentences.push(`It features a ${interior} interior.`);
+    const warranty = take("warranty status", "warranty");
+    if (/^contact (?:the )?dealership$/i.test(warranty))
+      sentences.push("For warranty status, please contact the dealership.");
+    else if (warranty) sentences.push(`Warranty status is ${warranty}.`);
+    for (const entry of entries) {
+      if (!consumed.has(entry))
+        sentences.push(
+          entry.label
+            ? `The ${entry.label.toLowerCase()} is ${entry.value}.`
+            : `${entry.value.replace(/\.+$/, "")}.`
+        );
+    }
+    return sentences.join(" ");
+  };
+
+  const preservesSpecificationFacts = (description, sourceText) => {
+    const prose = cleanDescription(description);
+    if (!prose || /^\s*(?:[-*•]|\d+[.)])\s/m.test(prose) || /^[^\n:]{1,40}:\s/m.test(prose))
+      return false;
+    const factKey = (value) =>
+      cleanText(value)
+        .toLocaleLowerCase("en")
+        .replace(/[^\p{L}\p{N}]+/gu, " ")
+        .replace(/\bcylinders?\b/g, "cylinder")
+        .replace(/\bcontact (?:the )?(?:dealer|dealership)\b/g, "contact dealership")
+        .trim();
+    const source = cleanDescription(sourceText);
+    const values = source
+      .split("\n")
+      .map((line) => line.match(/^[^:]+:\s*(.+)$/)?.[1])
+      .filter(Boolean);
+    if (values.some((value) => !` ${factKey(prose)} `.includes(` ${factKey(value)} `)))
+      return false;
+    const allowedWords = new Set(
+      factKey(source)
+        .split(" ")
+        .concat(
+          "a an and as at car for in is of on the to vehicle with this it its has listed features comes finished equipped engine exterior interior please specifications are".split(
+            " "
+          )
+        )
+    );
+    return factKey(prose)
+      .split(" ")
+      .every((word) => allowedWords.has(word));
+  };
 
   const specificationValue = (specs, label) =>
     (Array.isArray(specs) ? specs : [])
@@ -387,6 +486,24 @@ globalThis.LunaManualAdCore = (() => {
   const sanitizeCapture = (capture) => {
     const sourceUrl = cleanText(capture?.sourceUrl);
     const specs = Array.isArray(capture?.specs) ? capture.specs.map(cleanText) : [];
+    // Only a labeled Offer Type is evidence for this vendor-specific rule.
+    // Description prose, generic warranty fields, and other offers do not qualify.
+    const offerTypes = [
+      capture?.offerType,
+      ...specs.flatMap((line) => {
+        const match = line.match(/^([^:]+):\s*(.+)$/);
+        return match && normalize(match[1]) === "offer type" ? [match[2]] : [];
+      })
+    ]
+      .map(cleanText)
+      .filter(Boolean);
+    const offerType =
+      new Set(offerTypes.map((value) => value.toLowerCase())).size === 1 &&
+      capture?.evidence?.offerType?.state !== "conflicting"
+        ? offerTypes[0]
+        : "";
+    const isAlwan = /^https?:\/\/(?:www\.)?alwanworld\.com\//i.test(sourceUrl);
+    const warranty = isAlwan ? (/^warranty$/i.test(offerType) ? "Yes" : "No") : "";
     const specValue = (...labels) => {
       const wanted = new Set(labels.map(normalize));
       for (const line of specs) {
@@ -397,7 +514,11 @@ globalThis.LunaManualAdCore = (() => {
     };
     const combinedText = [capture?.description, ...specs].join(" ");
     const bodyType =
-      inferBodyType(capture?.bodyType) || inferBodyType(specValue("Body Type", "Body"));
+      inferBodyType(capture?.bodyType) ||
+      inferBodyType(specValue("Body Type", "Body")) ||
+      (/\b(?:spider|spyder|roadster|cabriolet|cabrio)\b/i.test(capture?.makeModel || "")
+        ? "Convertible"
+        : "");
 
     const allowedColors = [
       "Beige",
@@ -439,10 +560,22 @@ globalThis.LunaManualAdCore = (() => {
       "Korean",
       "Other"
     ];
+    const isSanam = /^https?:\/\/(?:www\.)?sanamcars\.com\//i.test(sourceUrl);
+    const regionalText =
+      capture?.regionalSpec || specValue("Regional Spec", "Regional Specs", "Specs");
     const normalizedSpec = normalizeRegionalSpec(
-      capture?.regionalSpec || specValue("Regional Spec", "Regional Specs", "Specs") || combinedText
+      regionalText ||
+        (isSanam
+          ? combinedText.match(
+              /\b(GCC|American|Canadian|Chinese|European|Japanese|Korean)\s+(?:regional\s+)?specs?\b/i
+            )?.[1]
+          : combinedText)
     );
-    const regionalSpec = allowedRegionalSpecs.includes(normalizedSpec) ? normalizedSpec : "";
+    const regionalSpec = allowedRegionalSpecs.includes(normalizedSpec)
+      ? normalizedSpec
+      : isSanam && !cleanText(regionalText) && !capture?.evidence?.regionalSpec
+        ? "Other"
+        : "";
     const insured = "No";
 
     const kilometers = parseKilometers(capture?.kilometers || capture?.mileage);
@@ -450,10 +583,32 @@ globalThis.LunaManualAdCore = (() => {
     const description = polishDescription(capture?.description);
     const descriptionSource = description ? "" : cleanDescription(capture?.descriptionSource);
     const evidence = sanitizeEvidence(capture?.evidence);
+    delete evidence.warranty;
+    if (warranty === "Yes") {
+      evidence.warranty = {
+        raw: offerType,
+        source: "Alwan vehicle Offer Type: Warranty",
+        state: "strong"
+      };
+    }
+    if (regionalSpec === "Other" && !normalizedSpec) {
+      evidence.regionalSpec = {
+        raw: "Other",
+        source: "No regional specification stated on the vendor page; requested fallback",
+        state: "strong"
+      };
+    }
     if (inferredExteriorColor && !evidence.exteriorColor) {
       evidence.exteriorColor = {
         raw: reportedExteriorColor ? cleanText(capture?.exteriorColor) : inferredExteriorColor,
         source: "Vendor vehicle detail",
+        state: "strong"
+      };
+    }
+    if (exteriorColor === "Other" && /\//.test(cleanText(capture?.exteriorColor))) {
+      evidence.exteriorColor = {
+        raw: cleanText(capture.exteriorColor),
+        source: "Multiple exterior paint colors; no matching single-color form option",
         state: "strong"
       };
     }
@@ -487,6 +642,7 @@ globalThis.LunaManualAdCore = (() => {
         ? cleanText(capture.imageUrl)
         : "",
       insured,
+      offerType,
       kilometers: category === "USED" ? kilometers : "",
       makeModel: cleanText(capture?.makeModel),
       price:
@@ -504,6 +660,7 @@ globalThis.LunaManualAdCore = (() => {
       transmission:
         inferTransmission(capture?.transmission) ||
         inferTransmission(specValue("Transmission", "Transmission Type")),
+      warranty,
       year: cleanText(capture?.year) || inferYear(combinedText),
       yearCode:
         Number.isInteger(capture?.yearCode) && capture.yearCode > 0 ? capture.yearCode : null,
@@ -637,6 +794,8 @@ globalThis.LunaManualAdCore = (() => {
     cleanText,
     containsExactWords,
     descriptionFromSpecs,
+    specificationProse,
+    preservesSpecificationFacts,
     verifiedSpecificationSummary,
     inferBodyType,
     inferExteriorColor,

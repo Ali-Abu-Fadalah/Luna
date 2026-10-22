@@ -1,0 +1,122 @@
+{
+  "capture": {
+    "site": "dubizzle",
+    "sourceUrl": "https://uae.dubizzle.com/motors/used-cars/example/mercedes-gls450/",
+    "title": "Mercedes-Benz GLS-Class GLS 450 4MATIC",
+    "facts": {
+      "category": {
+        "evidence": "Explicit condition route/title",
+        "value": "Used"
+      },
+      "color": {
+        "evidence": "Structured vehicle color",
+        "value": "White"
+      },
+      "mileage": {
+        "evidence": "Structured vehicle mileage",
+        "value": "16000"
+      },
+      "make": {
+        "evidence": "Structured vehicle brand",
+        "value": "Mercedes-Benz"
+      },
+      "model": {
+        "evidence": "Structured vehicle model",
+        "value": "GLS-Class"
+      },
+      "specs": {
+        "evidence": "Visible regional specification",
+        "value": "American Specs"
+      },
+      "targetMarket": {
+        "evidence": "Visible Target Market",
+        "value": "UAE (can be exported)"
+      },
+      "transmission": {
+        "evidence": "Structured vehicle transmission",
+        "value": "Automatic Transmission"
+      },
+      "trim": {
+        "evidence": "Visible Trim",
+        "value": "GLS 450 4MATIC"
+      },
+      "year": {
+        "evidence": "Structured model year",
+        "value": "2023"
+      }
+    }
+  },
+  "models": [
+    {
+      "label": "Mercedes GLS 600",
+      "make": "Mercedes",
+      "model": "GLS 600",
+      "makeCode": 100,
+      "modelCode": 101
+    },
+    {
+      "label": "Mercedes GLS63 AMG",
+      "make": "Mercedes",
+      "model": "GLS63 AMG",
+      "makeCode": 100,
+      "modelCode": 102
+    },
+    {
+      "label": "Mercedes GLS400",
+      "make": "Mercedes",
+      "model": "GLS400",
+      "makeCode": 100,
+      "modelCode": 103
+    },
+    {
+      "label": "Mercedes GLS500",
+      "make": "Mercedes",
+      "model": "GLS500",
+      "makeCode": 100,
+      "modelCode": 104
+    },
+    {
+      "label": "Mercedes GLS580",
+      "make": "Mercedes",
+      "model": "GLS580",
+      "makeCode": 100,
+      "modelCode": 105
+    },
+    {
+      "label": "Mercedes GLS450",
+      "make": "Mercedes",
+      "model": "GLS450",
+      "makeCode": 100,
+      "modelCode": 106
+    }
+  ],
+  "trims": [
+    {
+      "label": "4MATIC DARK SERIES",
+      "trimCode": 107
+    },
+    {
+      "label": "4MATIC",
+      "trimCode": 108
+    },
+    {
+      "label": "4M AMG HIGH",
+      "trimCode": 109
+    },
+    {
+      "label": "4M PREMIUM",
+      "trimCode": 110
+    },
+    {
+      "label": "STD (NON GCC)",
+      "trimCode": 111
+    }
+  ],
+  "unrelated": {
+    "label": "Mercedes EQB350 4MATIC",
+    "make": "Mercedes",
+    "model": "EQB350 4MATIC",
+    "makeCode": 100,
+    "modelCode": 999
+  }
+}

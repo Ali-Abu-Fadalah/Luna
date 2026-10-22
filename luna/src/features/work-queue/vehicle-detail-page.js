@@ -45,7 +45,9 @@
   ).replace(/\r/g, "");
   const lines = pageText.split(/\n+/).map(clean).filter(Boolean);
   const cutoff = lines.findIndex((line) =>
-    /^(?:similar cars|recommended|related cars)$/i.test(line)
+    /^(?:similar cars|you may also like|recommended(?: cars)?|related cars|car finance calculator|popular .*)$/i.test(
+      line
+    )
   );
   const detailLines = cutoff >= 0 ? lines.slice(0, cutoff) : lines;
   const afterLabel = (...labels) => {
@@ -170,7 +172,8 @@
   const structuredCondition = valueOf(vehicle.itemCondition);
   const category = first(visibleCondition, routeCondition, structuredCondition);
   const image = Array.isArray(vehicle.image) ? vehicle.image[0] : valueOf(vehicle.image);
-  const context = pageText
+  const context = detailLines
+    .join("\n")
     .split(/\n+|(?<=[.!?])\s+/)
     .map(clean)
     .filter(
@@ -234,6 +237,19 @@
       year: fact(
         year,
         year === valueOf(vehicle.vehicleModelDate) ? "Structured model year" : "Visible Year"
+      ),
+      engine: fact(
+        afterLabel("Engine Capacity (cc)", "Engine Capacity", "Engine"),
+        "Visible engine specification"
+      ),
+      cylinders: fact(
+        afterLabel("No. of Cylinders", "Cylinders"),
+        "Visible cylinder specification"
+      ),
+      fuelType: fact(afterLabel("Fuel Type"), "Visible fuel specification"),
+      drivetrain: fact(
+        afterLabel("Drivetrain", "Drive Type", "Drive"),
+        "Visible drivetrain specification"
       )
     },
     context,

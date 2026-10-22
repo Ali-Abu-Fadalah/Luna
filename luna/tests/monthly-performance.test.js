@@ -18,23 +18,49 @@ context.globalThis = context;
 vm.runInNewContext(source, context);
 const core = context.LunaMonthlyPerformanceCore;
 const rows = [
-  { date: "2026-08-01", agentName: "Agent A", listedVendor: "Vendor One", unlistedVendor: "" },
-  { date: "2026-08-01", agentName: "Agent A", listedVendor: "", unlistedVendor: "Vendor Two" },
+  {
+    date: "2026-08-01",
+    unlistedDate: "2026-08-01",
+    agentName: "Agent A",
+    listedVendor: "Vendor One",
+    unlistedVendor: ""
+  },
+  {
+    date: "2026-08-01",
+    unlistedDate: "2026-08-01",
+    agentName: "Agent A",
+    listedVendor: "",
+    unlistedVendor: "Vendor Two"
+  },
   {
     date: "2026-08-02",
+    unlistedDate: "2026-08-02",
     agentName: "Agent A",
     listedVendor: "Vendor One",
     unlistedVendor: "Vendor Three"
   },
-  { date: "2026-08-02", agentName: "Agent B", listedVendor: "Vendor Two", unlistedVendor: "" },
   {
     date: "2026-08-02",
+    unlistedDate: "2026-08-02",
+    agentName: "Agent B",
+    listedVendor: "Vendor Two",
+    unlistedVendor: ""
+  },
+  {
+    date: "2026-08-02",
+    unlistedDate: "2026-08-02",
     agentName: "Agent B",
     auctionVendor: "Auctions",
     listedVendor: "",
     unlistedVendor: ""
   },
-  { date: "2026-07-31", agentName: "Agent A", listedVendor: "Old", unlistedVendor: "" }
+  {
+    date: "2026-07-31",
+    unlistedDate: "2026-07-31",
+    agentName: "Agent A",
+    listedVendor: "Old",
+    unlistedVendor: ""
+  }
 ];
 const result = core.summarize(rows, { todayKey: "2026-08-02" });
 assert.equal(result.team.listed, 3);

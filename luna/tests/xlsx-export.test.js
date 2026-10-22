@@ -75,6 +75,11 @@ const readStoredZip = (bytes) => {
   assert.match(ranking, /Activity index/);
   assert.match(ranking, /1 unlisted \(not credited\)/);
   assert.match(entries.get("xl/worksheets/sheet9.xml"), /<autoFilter ref="A5:H10"\/>/);
+  const unlistedSerial = (Date.UTC(2026, 8, 30) - Date.UTC(1899, 11, 30)) / 86400000;
+  assert.match(
+    entries.get("xl/worksheets/sheet9.xml"),
+    new RegExp(`r="A8"[^>]*><v>${unlistedSerial}</v>`)
+  );
   assert.match(entries.get("xl/worksheets/sheet10.xml"), /<autoFilter ref="A5:F8"\/>/);
   assert.match(entries.get("xl/worksheets/sheet11.xml"), /Monthly activity index/);
   assert.match(entries.get("xl/styles.xml"), /formatCode="yyyy-mm-dd"/);

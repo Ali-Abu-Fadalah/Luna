@@ -86,6 +86,9 @@ const copied = [];
 const writes = [];
 const savedStatuses = [];
 const selectedPanels = [];
+const visibleControlValues = new Map();
+let finishDelayedWrite;
+let delayNextWrite = false;
 const context = {
   clearTimeout,
   setTimeout,
@@ -94,6 +97,12 @@ const context = {
   Intl,
   Date,
   document: documentStub,
+  LunaControls: {
+    sync(input) {
+      visibleControlValues.set(input, input.value);
+    },
+    closeAll() {}
+  },
   LunaUI: {
     queueSaved(status) {
       savedStatuses.push(status);
@@ -123,6 +132,12 @@ const context = {
         },
         async set(value) {
           writes.push(JSON.parse(JSON.stringify(value)));
+          if (delayNextWrite) {
+            delayNextWrite = false;
+            await new Promise((resolve) => {
+              finishDelayedWrite = resolve;
+            });
+          }
         }
       }
     }
@@ -141,7 +156,9 @@ context.globalThis = context;
 for (const file of [
   "src/shared/foundation.js",
   "src/features/work-queue/work-queue-core.js",
-  "src/services/ayshei/ayshei-core.js"
+  "src/services/ayshei/ayshei-core.js",
+  "src/features/work-queue/vehicle-detail-core.js",
+  "src/services/ai/groq-core.js"
 ])
   vm.runInNewContext(read(file), context);
 const core = context.LunaWorkQueueCore;
@@ -274,6 +291,290 @@ const labels = (id) => element(id).children.map((child) => child.textContent);
   await new Promise((resolve) => setTimeout(resolve, 220));
   assert.ok(writes.length, "Existing Chrome local storage draft persistence still runs");
   assert.ok(writes.every((write) => Object.keys(write).join() === "luna.workQueue.v1"));
+  element("queue-go-number").value = "1";
+  element("queue-go").fire("click");
+  assert.equal(element("queue-listed-make-model").value, "Sample Car");
+  assert.equal(visibleControlValues.get(element("queue-listed-color")), "Black");
+  delayNextWrite = true;
+  const saving = element("queue-mark-listed").fire("click");
+  assert.equal(
+    element("queue-progress-title").textContent,
+    "Ad 2 of 4",
+    "Next ad must render before a slow storage write finishes"
+  );
+  for (const name of ["category", "make-model", "trim", "color", "specs", "transmission"]) {
+    const field = element(`queue-listed-${name}`);
+    assert.equal(field.value, "", `${name} must show the current empty ad, not the completed ad`);
+    assert.equal(visibleControlValues.get(field), "", `${name} styled control must also reset`);
+  }
+  assert.equal(element("queue-listed-trim-copy").value, "");
+  assert.equal(element("queue-color-swatch").dataset.hasColor, "false");
+  assert.equal(element("queue-source-preview").hidden, true);
+  element("queue-listed-color").value = "White";
+  element("queue-listed-color").fire("input");
+  finishDelayedWrite();
+  await saving;
+  await new Promise((resolve) => setTimeout(resolve, 220));
+  const savedQueue = writes.at(-1)["luna.workQueue.v1"];
+  assert.equal(savedQueue.ads[0].listed.makeModel, "Sample Car", "Completed data stays saved");
+  assert.equal(savedQueue.ads[0].listed.color, "Black");
+  assert.equal(
+    savedQueue.ads[1].listed.makeModel,
+    "",
+    "Next draft cannot inherit the previous model"
+  );
+  assert.equal(savedQueue.ads[1].listed.color, "White", "New edits belong only to the next ad");
+  await element("queue-undo").fire("click");
+  assert.equal(element("queue-listed-make-model").value, "Sample Car");
+  assert.equal(
+    visibleControlValues.get(element("queue-listed-color")),
+    "Black",
+    "Undo must restore the correct ad's own saved values"
+  );
+  // Drive the real Auto Fill controller using the reported ad's extracted
+  // identity and synthetic Golf catalog codes. The answer must not depend on AI.
+  const golf = JSON.parse(read("tests/fixtures/volkswagen-golf-gti.json"));
+  context.chrome.tabs = { query: async () => [{ id: 77, url: golf.capture.sourceUrl }] };
+  context.chrome.scripting = { executeScript: async () => [{ result: golf.capture }] };
+  context.LunaAyshei = {
+    searchModels: async () => ({ models: golf.models }),
+    fetchTrims: async (makeCode, modelCode) => {
+      assert.equal(makeCode, 112);
+      assert.equal(modelCode, 113, "Trim lookup must use Golf, never Volkswagen Other");
+      return { trims: golf.trims };
+    }
+  };
+  let aiCalls = 0;
+  context.LunaGroq = {
+    analyze: async () => {
+      aiCalls++;
+      throw new Error("AI unavailable");
+    }
+  };
+  element("queue-import-text").value =
+    `10/19/2026\tMotors\tDemo Vendor\tGolf GTI\tAgent\t${golf.capture.sourceUrl}`;
+  element("queue-start").fire("click");
+  await element("queue-confirm-import").fire("click");
+  await element("queue-auto-fill").fire("click");
+  assert.equal(element("queue-listed-make-model").value, "Volkswagen Golf");
+  assert.equal(element("queue-listed-trim").value, "GTI");
+  assert.equal(element("queue-listed-specs").value, "American");
+  assert.equal(element("queue-listed-transmission").value, "MANUAL");
+  assert.equal(aiCalls, 0, "Clear catalog evidence must resolve without an AI guess");
+  const golfSaved = writes.at(-1)["luna.workQueue.v1"].ads[0];
+  assert.equal(golfSaved.listed.modelCode, 113);
+  assert.equal(golfSaved.listed.trimCode, 118);
+  assert.equal(golfSaved.status, "pending", "Auto Fill must not save as listed");
+  context.LunaWorkQueue.applyManualDraft({
+    sourceUrl: golf.capture.sourceUrl,
+    makeModel: "Volkswagen Other",
+    makeCode: 112,
+    modelCode: 0,
+    trim: "Other",
+    trimCode: 0
+  });
+  assert.equal(element("queue-listed-make-model").value, "Volkswagen Other");
+  await element("queue-auto-fill").fire("click");
+  assert.equal(
+    element("queue-listed-make-model").value,
+    "Volkswagen Golf",
+    "Retrying Auto Fill must repair an already-saved incorrect Other draft"
+  );
+  assert.equal(element("queue-listed-trim").value, "GTI");
+  const gls = JSON.parse(read("tests/fixtures/mercedes-gls450.json"));
+  context.chrome.tabs.query = async () => [{ id: 78, url: gls.capture.sourceUrl }];
+  context.chrome.scripting.executeScript = async () => [{ result: gls.capture }];
+  const glsSearches = [];
+  let activeModelSearches = 0;
+  let peakModelSearches = 0;
+  context.LunaAyshei.searchModels = async (keyword) => {
+    glsSearches.push(keyword);
+    activeModelSearches++;
+    peakModelSearches = Math.max(peakModelSearches, activeModelSearches);
+    await new Promise((resolve) => setImmediate(resolve));
+    activeModelSearches--;
+    return {
+      models:
+        keyword === "Mercedes GLS450" || keyword.toLowerCase() === "mercedes gls"
+          ? gls.models
+          : keyword === "Mercedes"
+            ? [gls.unrelated]
+            : []
+    };
+  };
+  context.LunaAyshei.fetchTrims = async (makeCode, modelCode) => {
+    assert.equal(makeCode, 100);
+    assert.equal(modelCode, 106);
+    return { trims: gls.trims };
+  };
+  element("queue-import-text").value =
+    `10/19/2026\tMotors\tDemo Vendor\tMercedes GLS 450\tAgent\t${gls.capture.sourceUrl}`;
+  element("queue-start").fire("click");
+  await element("queue-confirm-import").fire("click");
+  await element("queue-auto-fill").fire("click");
+  assert.ok(glsSearches.includes("Mercedes GLS450"));
+  assert.ok(glsSearches.includes("Mercedes GLS 450"));
+  assert.equal(
+    peakModelSearches,
+    3,
+    "Independent model-name variants run in bounded parallel batches"
+  );
+  assert.equal(element("queue-listed-make-model").value, "Mercedes GLS450");
+  assert.equal(element("queue-listed-trim").value, "4MATIC");
+  assert.equal(aiCalls, 0, "Exact GLS450/4MATIC evidence needs no AI guess");
+  const missingModelSearches = [];
+  context.LunaAyshei.searchModels = async (keyword) => {
+    missingModelSearches.push(keyword);
+    return { models: [gls.unrelated] };
+  };
+  await element("queue-auto-fill").fire("click");
+  assert.deepEqual(
+    missingModelSearches,
+    glsSearches,
+    "An absent model requires completing every planned name-variant query"
+  );
+  assert.equal(
+    element("queue-listed-make-model").value,
+    "",
+    "If the catalog omits GLS entirely, do not substitute EQB from the same make"
+  );
+  assert.equal(aiCalls, 0, "Unrelated models must not be offered to AI");
+  const xt6 = JSON.parse(read("tests/fixtures/xt6-black-edition.json"));
+  context.chrome.tabs.query = async () => [{ id: 79, url: xt6.capture.sourceUrl }];
+  context.chrome.scripting.executeScript = async () => [{ result: xt6.capture }];
+  context.LunaAyshei.searchModels = async () => ({ models: xt6.models });
+  context.LunaAyshei.fetchTrims = async () => ({ trims: xt6.trims });
+  context.LunaGroq.analyze = async (input) => {
+    assert.equal(input.task, "trim");
+    assert.equal(input.facts.trim, "Black Edition");
+    assert.equal(input.facts.specs, "Korean Specs");
+    assert.equal(input.facts.cylinders, "6");
+    assert.doesNotMatch(input.facts.context, /Escalade|Platinum/);
+    aiCalls++;
+    return context.LunaGroqCore.parseAnalysis(
+      {
+        model: "qwen/qwen3.8-27b",
+        analysis: {
+          candidateId: "122",
+          confidence: "high",
+          confidenceScore: 0.99,
+          exact: true,
+          riskFlags: [],
+          reason: "First catalog choice"
+        }
+      },
+      input
+    );
+  };
+  element("queue-import-text").value =
+    `10/19/2026\tMotors\tDemo Vendor\tXT6 Black Edition\tAgent\t${xt6.capture.sourceUrl}`;
+  element("queue-start").fire("click");
+  await element("queue-confirm-import").fire("click");
+  context.LunaWorkQueue.applyManualDraft({
+    sourceUrl: xt6.capture.sourceUrl,
+    makeModel: "Cadillac XT6",
+    makeCode: 120,
+    modelCode: 121,
+    trim: "LUXURY",
+    trimCode: 122
+  });
+  await element("queue-auto-fill").fire("click");
+  assert.equal(element("queue-listed-make-model").value, "Cadillac XT6");
+  assert.equal(
+    element("queue-listed-trim").value,
+    "",
+    "An unsupported old Luxury guess must be cleared"
+  );
+  assert.equal(writes.at(-1)["luna.workQueue.v1"].ads[0].listed.trimCode, null);
+  assert.match(element("queue-auto-fill-message").textContent, /Review: Trim/);
+  assert.equal(aiCalls, 1, "Unavailable editions must be sent to AI instead of text fallback");
+  context.LunaGroq.analyze = async (input) =>
+    context.LunaGroqCore.parseAnalysis(
+      {
+        model: "qwen/qwen3.8-27b",
+        analysis: {
+          candidateId: "125",
+          confidence: "low",
+          confidenceScore: 0.45,
+          trimComparison: {
+            basis: "vehicle-specification",
+            matchedSpecifications: [],
+            materialDifferences: [],
+            uncertainties: ["Actual Black Edition equipment requires verification"],
+            explanation:
+              "Test comparison only: this supplied grade is the closest configuration in this simulated response."
+          }
+        }
+      },
+      input
+    );
+  await element("queue-auto-fill").fire("click");
+  assert.equal(element("queue-listed-trim").value, "SPORT");
+  assert.match(
+    element("queue-auto-fill-message").textContent,
+    /AI trim: SPORT.*low confidence.*Review before saving/
+  );
+  assert.equal(
+    writes.at(-1)["luna.workQueue.v1"].ads[0].extractionEvidence.trimComparison.uncertainties[0],
+    "Actual Black Edition equipment requires verification"
+  );
+  assert.equal(
+    writes.at(-1)["luna.workQueue.v1"].ads[0].extractionEvidence.nearestTrimRecommendation,
+    true
+  );
+  assert.equal(
+    writes.at(-1)["luna.workQueue.v1"].ads[0].extractionEvidence.trimResolution.candidateId,
+    "125"
+  );
+  for (const answer of [
+    {
+      candidateId: null,
+      expected: "SPORT",
+      reason:
+        "Page facts.trim is 'Black Edition'. While not an exact match to the candidates, 'Black Edition' is a styling package typically associated with the 'SPORT' trim in Cadillac's lineup."
+    },
+    {
+      candidateId: "123",
+      expected: "PREMIUM LUXURY",
+      reason:
+        "Simulated alternative comparison recommends PREMIUM LUXURY based on the supplied equipment; SPORT remains an uncertain alternative."
+    }
+  ]) {
+    context.LunaGroq.analyze = async (input) =>
+      context.LunaGroqCore.parseAnalysis(
+        {
+          model: "qwen/qwen3.8-27b",
+          imageUsed: true,
+          analysis: {
+            candidateId: answer.candidateId,
+            confidence: "medium",
+            confidenceScore: 0.6,
+            reason: answer.reason
+          }
+        },
+        input
+      );
+    await element("queue-auto-fill").fire("click");
+    assert.equal(element("queue-listed-trim").value, answer.expected);
+    assert.ok(
+      element("queue-auto-fill-message").textContent.includes(`AI trim: ${answer.expected}`)
+    );
+    assert.equal(
+      writes.at(-1)["luna.workQueue.v1"].ads[0].extractionEvidence.trimResolution.reason,
+      answer.reason
+    );
+    assert.doesNotMatch(element("queue-auto-fill-message").textContent, /Missing: Trim/);
+  }
+  context.LunaGroq.analyze = async () => {
+    throw new Error("Groq quota exhausted");
+  };
+  await element("queue-auto-fill").fire("click");
+  assert.equal(
+    element("queue-listed-trim").value,
+    "",
+    "API failure must not select first/STD/textually similar trim"
+  );
+  assert.match(element("queue-auto-fill-message").textContent, /Groq quota exhausted/);
   console.log(
     "Work Queue interface tests passed: personal reasons, replacement search, canonical results, navigation, notes and persistence."
   );

@@ -24,6 +24,13 @@ globalThis.LunaSheet = (() => {
       throw new Error("The Sheet service returned an invalid response.");
     }
 
+    if (
+      payload.connection.mode !== "interactions" &&
+      Array.isArray(payload.connection.columnsRead) &&
+      !payload.connection.columnsRead.includes("K")
+    ) {
+      throw new Error("Update the Luna Sheet API deployment to read unlisted dates from column K.");
+    }
     return payload;
   };
 

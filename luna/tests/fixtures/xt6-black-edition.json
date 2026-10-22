@@ -1,0 +1,97 @@
+{
+  "capture": {
+    "facts": {
+      "category": {
+        "evidence": "Explicit condition route/title",
+        "value": "Used"
+      },
+      "color": {
+        "evidence": "Structured vehicle color",
+        "value": "White"
+      },
+      "mileage": {
+        "evidence": "Structured vehicle mileage",
+        "value": "62000"
+      },
+      "make": {
+        "evidence": "Structured vehicle brand",
+        "value": "Cadillac"
+      },
+      "model": {
+        "evidence": "Structured vehicle model",
+        "value": "XT6"
+      },
+      "specs": {
+        "evidence": "Visible regional specification",
+        "value": "Korean Specs"
+      },
+      "targetMarket": {
+        "evidence": "Visible Target Market",
+        "value": "UAE (can be exported)"
+      },
+      "transmission": {
+        "evidence": "Structured vehicle transmission",
+        "value": "Automatic Transmission"
+      },
+      "trim": {
+        "evidence": "Visible Trim",
+        "value": "Black Edition"
+      },
+      "year": {
+        "evidence": "Structured model year",
+        "value": "2022"
+      },
+      "engine": {
+        "evidence": "Visible engine specification",
+        "value": "3500 - 3999 cc"
+      },
+      "cylinders": {
+        "evidence": "Visible cylinder specification",
+        "value": "6"
+      },
+      "fuelType": {
+        "evidence": "Visible fuel specification",
+        "value": "Petrol"
+      },
+      "drivetrain": {
+        "evidence": "",
+        "value": ""
+      }
+    },
+    "context": "Synthetic example: automatic transmission, petrol, six cylinders.",
+    "description": "Synthetic Cadillac XT6 Black Edition example for regression testing.",
+    "summary": "Synthetic Cadillac XT6 Black Edition example for regression testing.",
+    "site": "dubizzle",
+    "sourceUrl": "https://uae.dubizzle.com/motors/used-cars/example/xt6-black-edition/",
+    "title": "Cadillac XT6 Black Edition",
+    "imageUrl": "https://dbz-images.dubizzle.com/example-car.jpg",
+    "version": 3
+  },
+  "models": [
+    {
+      "label": "Cadillac XT6",
+      "make": "Cadillac",
+      "model": "XT6",
+      "makeCode": 120,
+      "modelCode": 121
+    }
+  ],
+  "trims": [
+    {
+      "label": "LUXURY",
+      "trimCode": 122
+    },
+    {
+      "label": "PREMIUM LUXURY",
+      "trimCode": 123
+    },
+    {
+      "label": "PREMIUM LUXURY PLATINUM",
+      "trimCode": 124
+    },
+    {
+      "label": "SPORT",
+      "trimCode": 125
+    }
+  ]
+}

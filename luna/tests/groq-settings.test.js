@@ -129,6 +129,21 @@ vm.runInNewContext(source, context);
   assert.equal(localInput.value, "", "Saved API keys must never be re-displayed");
   assert.equal(elements["#settings-local-groq-status"].textContent, "Saved");
   assert.equal(elements["#settings-local-ai-status"].textContent, "1 local key saved");
+  context.LunaGroq.testLocalProvider = async () => ({
+    provider: "Groq",
+    verifiedModels: ["qwen/qwen3.8-27b", "openai/gpt-oss-20b"],
+    unavailableModels: [{ model: "openai/gpt-oss-120b", detail: "Not enabled" }]
+  });
+  await elements["#settings-test-local-groq"].listeners.get("click")();
+  assert.equal(elements["#settings-local-groq-status"].textContent, "Verified");
+  assert.match(
+    elements["#settings-local-groq-message"].textContent,
+    /Verified: qwen\/qwen3.8-27b, openai\/gpt-oss-20b/
+  );
+  assert.match(
+    elements["#settings-local-groq-message"].textContent,
+    /Unavailable: openai\/gpt-oss-120b/
+  );
   await elements["#settings-clear-local-groq"].listeners.get("click")();
   assert.equal(elements["#settings-local-groq-status"].textContent, "Not saved");
   console.log("AI Router Settings connection-state tests passed.");

@@ -33,14 +33,15 @@ globalThis.LunaSheetReportCore = (() => {
   const workEvents = (rows, start, end) => {
     const events = [];
     rows.forEach((row) => {
-      const date = String(row.date || "");
       const agent = clean(row.agentName);
-      if (!validDate(date) || date < start || date > end || !agent) return;
+      if (!agent) return;
       [
-        ["Listed", row.listedVendor],
-        ["Unlisted", row.unlistedVendor],
-        ["Auctions", row.auctionVendor]
-      ].forEach(([outcome, vendor]) => {
+        ["Listed", row.listedVendor, row.date],
+        ["Unlisted", row.unlistedVendor, row.unlistedDate],
+        ["Auctions", row.auctionVendor, row.date]
+      ].forEach(([outcome, vendor, workDate]) => {
+        const date = String(workDate || "");
+        if (!validDate(date) || date < start || date > end) return;
         if (clean(vendor))
           events.push({
             date,

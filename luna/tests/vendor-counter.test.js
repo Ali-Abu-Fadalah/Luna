@@ -20,41 +20,54 @@ const { countVendor, getVendorOptions, normalizeName } = context.LunaVendorCount
 
 const rows = [
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent One",
     listedVendor: "Listed Motors",
     unlistedVendor: ""
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent Two",
     listedVendor: "",
     unlistedVendor: "Unlisted Cars"
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent Three",
     listedVendor: "Both Auto",
     unlistedVendor: "Both Auto"
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent Four",
     listedVendor: "  Acme   Motors  ",
     unlistedVendor: ""
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: " agent four ",
     listedVendor: "",
     unlistedVendor: "ACME MOTORS"
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent Five",
     listedVendor: "Acme Motor",
     unlistedVendor: ""
   },
   {
+    unlistedDate: "2026-07-29",
     agentName: "Agent Six",
     listedVendor: "oThEr",
     unlistedVendor: ""
   },
-  { agentName: "Agent Seven", auctionVendor: "Auctions", listedVendor: "", unlistedVendor: "" }
+  {
+    unlistedDate: "2026-07-29",
+    agentName: "Agent Seven",
+    auctionVendor: "Auctions",
+    listedVendor: "",
+    unlistedVendor: ""
+  }
 ];
 
 assert.equal(normalizeName("  ACME   Motors "), "acme motors");
@@ -69,6 +82,18 @@ assert.deepEqual(JSON.parse(JSON.stringify(listedOnly)), {
 });
 
 const unlistedOnly = countVendor(rows, "UNLISTED CARS");
+assert.equal(
+  countVendor([{ agentName: "Agent One", date: "2026-07-29", unlistedVendor: "No K" }], "No K")
+    .unlisted,
+  0
+);
+assert.equal(
+  countVendor(
+    [{ agentName: "Agent One", unlistedDate: "2026-02-30", unlistedVendor: "Bad K" }],
+    "Bad K"
+  ).unlisted,
+  0
+);
 assert.equal(unlistedOnly.listed, 0);
 assert.equal(unlistedOnly.unlisted, 1);
 assert.equal(unlistedOnly.total, 0);

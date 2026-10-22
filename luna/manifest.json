@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Luna",
-  "version": "2.0.3",
+  "version": "2.5.1",
   "description": "A calm side-panel assistant for local vehicle-listing queues, notes, capture and review.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -10,21 +10,14 @@
     "48": "assets/icons/luna-48.png",
     "128": "assets/icons/luna-128.png"
   },
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "sidePanel",
-    "storage"
-  ],
+  "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
   "host_permissions": [
     "https://*.dubicars.com/*",
     "https://*.dubizzle.com/*",
     "https://*.noon.com/*",
     "https://*.bayut.com/*"
   ],
-  "optional_host_permissions": [
-    "https://*/*"
-  ],
+  "optional_host_permissions": ["https://*/*"],
   "content_scripts": [],
   "background": {
     "service_worker": "src/background/background.js"

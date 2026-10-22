@@ -73,6 +73,23 @@ const runClient = (fetchImplementation, overrides = {}) => {
   assert.equal(client.normalizeWindowDays(31), 30);
   assert.equal(client.normalizeWindowDays(""), 10);
   assert.equal(client.normalizeWindowDays("invalid"), 10);
+  assert.throws(
+    () =>
+      client.validatePayload({
+        ok: true,
+        rows: [],
+        connection: { columnsRead: ["A", "C", "E", "M", "N"] }
+      }),
+    /column K/
+  );
+  assert.equal(
+    client.validatePayload({
+      ok: true,
+      rows: [],
+      connection: { mode: "interactions", columnsRead: ["A", "B", "G", "H"] }
+    }).ok,
+    true
+  );
 
   await client.testConnection(30, { force: true });
   assert.equal(requests[1].url, `${endpoint}?days=30`);

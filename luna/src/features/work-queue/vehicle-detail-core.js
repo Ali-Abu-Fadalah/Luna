@@ -219,19 +219,41 @@ globalThis.LunaVehicleDetailCore = (() => {
         contiguousTokenIndex(modelTokens, titleTokens) >= 0
     );
   };
+  const isOtherCandidate = (candidate) => {
+    const value = clean(candidate?.model || candidate?.label);
+    return (
+      /^(?:other|others)(?:\s+(?:model|trim))?$/i.test(value) ||
+      (!candidate?.model && /\bothers?$/i.test(value))
+    );
+  };
+  const specificCandidates = (candidates) => {
+    const all = Array.isArray(candidates) ? candidates : [];
+    const specific = all.filter((candidate) => !isOtherCandidate(candidate));
+    return specific.length ? specific : all;
+  };
+  const modelIsExplicitBase = (candidate, capture) => {
+    const explicitTokens = identityTokens(factValue(capture, "model"));
+    const modelTokens = identityTokens(candidate?.model);
+    return (
+      modelTokens.length > 0 &&
+      modelTokens.length < explicitTokens.length &&
+      modelTokens.every((token, index) => token === explicitTokens[index])
+    );
+  };
   const rankModelCandidates = (candidates, capture) => {
     const identity = canonicalPhrase(evidenceText(capture, { includeContext: false }));
     const pageTokens = identityTokens(identity);
     const explicitMake = canonicalMake(factValue(capture, "make"));
     const explicitModel = canonicalPhrase(factValue(capture, "model"));
-    const all = Array.isArray(candidates) ? candidates : [];
+    const all = specificCandidates(candidates);
     const specificExplicit = explicitModel && !/\b(?:class|series)\b/.test(explicitModel);
     const compatibleExplicit = specificExplicit
       ? all.filter(
           (candidate) =>
             (!explicitMake || canonicalMake(candidate?.make) === explicitMake) &&
             (key(canonicalPhrase(candidate?.model)) === key(explicitModel) ||
-              modelRefinesExplicit(candidate, capture))
+              modelRefinesExplicit(candidate, capture) ||
+              modelIsExplicitBase(candidate, capture))
         )
       : [];
     return (specificExplicit ? compatibleExplicit : all)
@@ -281,11 +303,35 @@ globalThis.LunaVehicleDetailCore = (() => {
     const explicitMake = canonicalMake(factValue(capture, "make"));
     const pageTokens = identityTokens(evidenceText(capture, { includeContext: false }));
     const pageTokenSet = new Set(pageTokens);
-    return (Array.isArray(candidates) ? candidates : [])
+    const explicitFamily = identityTokens(factValue(capture, "model"))[0];
+    const classVariant =
+      /\b(?:class|series)\b/i.test(factValue(capture, "model")) &&
+      /^\p{L}+$/u.test(explicitFamily || "")
+        ? [
+            ...`${factValue(capture, "trim")} ${capture?.title || ""}`.matchAll(
+              /\b([a-z]{1,5})[\s-]*(\d{2,4})\b/gi
+            )
+          ].find((match) => match[1].toLowerCase() === explicitFamily)?.[2]
+        : "";
+    return specificCandidates(candidates)
       .map((candidate, index) => {
         const candidateMake = canonicalMake(candidate?.make);
         if (explicitMake && candidateMake !== explicitMake) return null;
         const modelTokens = identityTokens(candidate?.model);
+        // Sharing a make or drivetrain (4MATIC, xDrive, AWD) is not vehicle
+        // identity. A truncated make-wide catalog must not supply an unrelated car.
+        if (explicitFamily && /^\p{L}+$/u.test(explicitFamily) && modelTokens[0] !== explicitFamily)
+          return null;
+        if (classVariant && !modelTokens.includes(classVariant)) return null;
+        if (
+          !modelTokens.some(
+            (token) =>
+              token.length > 1 &&
+              pageTokenSet.has(token) &&
+              !/^(?:class|series|matic|quattro|awd|wd|xdrive|sdrive|amg)$/i.test(token)
+          )
+        )
+          return null;
         const overlap = modelTokens.reduce(
           (score, token) => score + (pageTokenSet.has(token) ? (/^\d+$/.test(token) ? 8 : 3) : 0),
           0
@@ -306,7 +352,7 @@ globalThis.LunaVehicleDetailCore = (() => {
     return rankModelCandidates(candidates, capture)[0] || null;
   };
   const sameMakeModels = (candidates, capture) => {
-    const all = Array.isArray(candidates) ? candidates : [];
+    const all = specificCandidates(candidates);
     const explicitMake = canonicalMake(factValue(capture, "make"));
     const title = ` ${canonicalPhrase(capture?.title)} `;
     const titleMakes = [
@@ -329,6 +375,7 @@ globalThis.LunaVehicleDetailCore = (() => {
     const compatible = all.filter(
       (candidate) => !/\bnon[\s-]*gcc\b/i.test(clean(candidate?.label))
     );
+    // Preserve the live list's only usable choice rather than leaving GCC listings blank.
     return compatible.length ? compatible : all;
   };
   const trimFromEvidence = (candidates, capture) => {
@@ -342,8 +389,10 @@ globalThis.LunaVehicleDetailCore = (() => {
         null
       );
     }
-    if (["other", "othertrim"].includes(explicitKey)) return null;
-    if (explicitValue) return exactTrim(candidates, explicitValue);
+    // A vendor's generic Other trim is missing information. The model/title
+    // may still contain an exact catalog trim (e.g. Golf GTI, trim Other).
+    if (explicitValue && !["other", "othertrim"].includes(explicitKey))
+      return exactTrim(candidates, explicitValue);
     const meaningful = (Array.isArray(candidates) ? candidates : []).filter(
       (candidate) => !["other", "std", "standard"].includes(key(candidate?.label))
     );
@@ -357,10 +406,15 @@ globalThis.LunaVehicleDetailCore = (() => {
       : null;
   };
   const captureForModelTrim = (capture, model) => {
-    if (!modelRefinesExplicit(model, capture)) return capture;
+    if (!model) return capture;
     const modelTokens = identityTokens(model.model);
-    const suffix = modelTokens.slice(identityTokens(factValue(capture, "model")).length);
     const trimTokens = identityTokens(factValue(capture, "trim"));
+    const trimContainsModel =
+      modelTokens.length > 0 && modelTokens.every((token, index) => token === trimTokens[index]);
+    if (!trimContainsModel && !modelRefinesExplicit(model, capture)) return capture;
+    const suffix = trimContainsModel
+      ? modelTokens
+      : modelTokens.slice(identityTokens(factValue(capture, "model")).length);
     if (!suffix.every((token, index) => token === trimTokens[index])) return capture;
     const withoutModel = (text) => {
       const tokens = identityTokens(text);
@@ -369,6 +423,8 @@ globalThis.LunaVehicleDetailCore = (() => {
         ? text
         : [...tokens.slice(0, index), ...tokens.slice(index + modelTokens.length)].join(" ");
     };
+    // Keep the original capture intact. Only trim matching sees the remaining
+    // trim words, so an identifier already consumed by the model cannot be reused.
     return {
       ...capture,
       facts: {
@@ -382,30 +438,9 @@ globalThis.LunaVehicleDetailCore = (() => {
     };
   };
   const fallbackTrim = (candidates, capture) => {
-    const all = (Array.isArray(candidates) ? candidates : []).filter((candidate) =>
-      key(candidate?.label)
-    );
-    const available = all.filter((candidate) => key(candidate?.label) !== "other");
-    if (!available.length)
-      return all.find((candidate) => key(candidate?.label) === "other") || null;
-    const exact = trimFromEvidence(available, capture);
-    if (exact) return exact;
-    const evidence = phrase(
-      [factValue(capture, "trim"), capture?.title, capture?.summary, capture?.context].join(" ")
-    );
-    const evidenceTokens = new Set(evidence.split(" ").filter((token) => token.length > 1));
-    const scored = available
-      .map((candidate, index) => {
-        const label = phrase(candidate?.label);
-        const overlap = label.split(" ").filter((token) => evidenceTokens.has(token)).length;
-        return { candidate, index, score: overlap * 100 + (evidence.includes(label) ? 250 : 0) };
-      })
-      .sort((left, right) => right.score - left.score || left.index - right.index);
-    if (scored[0]?.score > 0) return scored[0].candidate;
-    return (
-      available.find((candidate) => ["std", "standard"].includes(key(candidate?.label))) ||
-      available[0]
-    );
+    // Kept for compatibility: only explicit evidence is a deterministic match.
+    // A real-world equivalent must come from validated AI, never text ranking.
+    return trimFromEvidence(candidates, capture);
   };
   const selectTrimAwareModel = (options, capture, preferredModel = null) => {
     const available = (Array.isArray(options) ? options : []).filter((option) => option?.model);
@@ -449,11 +484,34 @@ globalThis.LunaVehicleDetailCore = (() => {
       .replace(/\s+/g, " ")
       .trim();
     const tokens = strippedTitle.split(" ").filter(Boolean);
+    // Marketplaces often put the specific model in Trim under a generic
+    // class/series. Search observed codes directly before a capped make lookup.
+    const family = identityTokens(model)[0] || "";
+    const specificCodes = [
+      ...`${factValue(capture, "trim")} ${title}`.matchAll(
+        /\b([a-z]{1,5})[\s-]*(\d{2,4})([a-z]{0,3})\b/gi
+      )
+    ]
+      .filter(
+        (match) =>
+          !family || !/\b(?:class|series)\b/i.test(model) || match[1].toLowerCase() === family
+      )
+      .flatMap((match) => [
+        `${make} ${match[1]}${match[2]}${match[3]}`,
+        `${make} ${match[1]} ${match[2]}${match[3]}`
+      ]);
     const values = [
       `${make} ${model}`,
-      strippedTitle,
-      model,
+      ...specificCodes.slice(0, 2),
+      ...(/\b(?:class|series)\b/i.test(model) && /^\p{L}+$/u.test(family)
+        ? [`${make} ${family}`]
+        : []),
+      ...(make && model
+        ? [`${make} ${canonicalPhrase(model)}`, `${make} ${identityTokens(model).join("")}`]
+        : []),
       make,
+      model,
+      strippedTitle,
       ...[2, 3, 4, 5, 6].map((count) => tokens.slice(0, count).join(" ")),
       title
     ]
@@ -515,6 +573,7 @@ globalThis.LunaVehicleDetailCore = (() => {
     key,
     mileageNumber,
     isPlainGreen,
+    isOtherCandidate,
     modelFromEvidence,
     modelSearchTerms,
     nearestModelCandidates,

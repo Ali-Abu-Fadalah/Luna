@@ -33,7 +33,8 @@ const month = (key, name, rows) => ({
 });
 const august = month("2026-08", "August + Auctions", [
   {
-    date: "2026-08-05",
+    date: "",
+    unlistedDate: "2026-08-05",
     agentName: "Agent A",
     listedVendor: "",
     unlistedVendor: "Vendor Old",
@@ -43,13 +44,24 @@ const august = month("2026-08", "August + Auctions", [
 const septemberRows = [
   {
     date: "2026-09-01",
+    unlistedDate: "2026-09-30",
     agentName: "Agent A",
     listedVendor: "Vendor One",
     unlistedVendor: "Vendor Two",
     unlistedReason: "Sold"
   },
-  { date: "2026-09-02", agentName: " agent a ", auctionVendor: "Auctions" },
-  { date: "2026-09-02", agentName: "Agent B", listedVendor: "Vendor One" }
+  {
+    date: "2026-09-02",
+    unlistedDate: "2026-09-02",
+    agentName: " agent a ",
+    auctionVendor: "Auctions"
+  },
+  {
+    date: "2026-09-02",
+    unlistedDate: "2026-09-02",
+    agentName: "Agent B",
+    listedVendor: "Vendor One"
+  }
 ];
 const september = month("2026-09", "September + Auctions", septemberRows);
 const recent = {
@@ -95,6 +107,10 @@ const report = context.LunaSheetReportCore.buildReport({
 assert.equal(report.defaultMonth, "2026-09");
 assert.equal(report.work.length, 5);
 assert.equal(report.work.filter((item) => item.credit).length, 3);
+assert.equal(report.work.find((item) => item.vendor === "Vendor Two").date, "2026-09-30");
+assert.equal(report.work.find((item) => item.vendor === "Vendor Old").date, "2026-08-05");
+assert.equal(report.recentRows.find((item) => item.period === "Today").unlisted, 1);
+assert.equal(report.dailyWork.find((item) => item.date === "2026-09-30").unlisted, 1);
 assert.equal(report.monthlyAgents.length, 3);
 assert.equal(
   report.monthlyAgents.find(

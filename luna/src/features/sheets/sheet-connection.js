@@ -105,7 +105,7 @@ globalThis.LunaConnection = (() => {
     try {
       const saved = await storageArea.get({ [cacheKey]: null });
       const cache = saved[cacheKey];
-      const entry = cache?.version === 1 ? cache.windows?.[String(windowDays)] : null;
+      const entry = cache?.version === 2 ? cache.windows?.[String(windowDays)] : null;
 
       if (
         !entry ||
@@ -134,7 +134,7 @@ globalThis.LunaConnection = (() => {
     try {
       const saved = await storageArea.get({ [cacheKey]: null });
       const existing = saved[cacheKey];
-      const windows = existing?.version === 1 && existing.windows ? { ...existing.windows } : {};
+      const windows = existing?.version === 2 && existing.windows ? { ...existing.windows } : {};
       windows[String(payload.connection.windowDays)] = {
         payload,
         savedAt: Date.now()
@@ -146,7 +146,7 @@ globalThis.LunaConnection = (() => {
       );
 
       await storageArea.set({
-        [cacheKey]: { version: 1, windows: newestWindows }
+        [cacheKey]: { version: 2, windows: newestWindows }
       });
     } catch (error) {
       console.error("Unable to save the Luna Sheet result:", error);

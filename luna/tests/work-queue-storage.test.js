@@ -132,6 +132,10 @@ const fillUrl = "https://dubai.dubizzle.com/motors/used-cars/bmw/840ci/example/"
 let groqCalls = 0;
 let captureOverride = null;
 let modelCatalogOverride = null;
+let modelSearchOverride = null;
+let trimCatalogOverride = null;
+const modelSearchCalls = [];
+const trimLookupCalls = [];
 let failModelAi = false;
 let deferTrimAi = false;
 let releaseTrimAi = null;
@@ -249,6 +253,8 @@ const context = {
   },
   LunaAyshei: {
     async fetchTrims(makeCode, modelCode) {
+      trimLookupCalls.push([makeCode, modelCode]);
+      if (trimCatalogOverride) return trimCatalogOverride(makeCode, modelCode);
       if (makeCode === 10 && [40, 41].includes(modelCode)) {
         return { trims: [{ label: "BASE", trimCode: 10 }] };
       }
@@ -263,8 +269,12 @@ const context = {
       };
     },
     async searchModels(keyword) {
+      modelSearchCalls.push(keyword);
+      if (modelSearchOverride) return modelSearchOverride(keyword);
       if (modelCatalogOverride) return { models: modelCatalogOverride };
-      assert.ok(["BMW 840", "BMW 840Ci"].includes(keyword));
+      assert.ok(
+        ["BMW 840", "BMW 840Ci", "BMW 840Ci Performance Package", "840Ci", "BMW"].includes(keyword)
+      );
       return {
         models: [{ label: "BMW 840Ci", make: "BMW", makeCode: 7, model: "840Ci", modelCode: 877 }]
       };
@@ -445,7 +455,7 @@ const waitForAsyncWork = () =>
     "Unresolved plain Green must not be shown as Other"
   );
   assert.equal(elements["#queue-source-preview"].hidden, false);
-  assert.match(elements["#queue-auto-fill-message"].textContent, /Vendor facts are shown first/);
+  assert.match(elements["#queue-auto-fill-message"].textContent, /Ad details loaded/);
   releaseTrimAi();
   deferTrimAi = false;
   await firstFill;
@@ -467,12 +477,9 @@ const waitForAsyncWork = () =>
   );
   assert.match(
     elements["#queue-auto-fill-message"].textContent,
-    /AI matched trim, green shade using page text and the car image/
+    /AI trim: M SPORT.*high confidence.*AI: green shade/
   );
-  assert.match(
-    elements["#queue-auto-fill-message"].textContent,
-    /Status remains Pending; Luna did not save, move to Next, or run a page action/
-  );
+  assert.match(elements["#queue-auto-fill-message"].textContent, /Review before saving/);
 
   captureOverride = { ...capturedPayload, context: `${capturedPayload.context} · second read` };
   deferTrimAi = true;
@@ -503,10 +510,7 @@ const waitForAsyncWork = () =>
   assert.deepEqual(missingSpecsAd.extractionEvidence.defaults, [
     "Specs: Other (not stated on vendor page)"
   ]);
-  assert.match(
-    elements["#queue-auto-fill-message"].textContent,
-    /Specs defaulted to Other because the page did not state a regional spec/
-  );
+  assert.match(elements["#queue-auto-fill-message"].textContent, /Specs: Other \(not stated\)/);
 
   captureOverride = {
     ...captureOverride,
@@ -593,20 +597,20 @@ const waitForAsyncWork = () =>
     { label: "Toyota Camry", make: "Toyota", makeCode: 10, model: "Camry", modelCode: 43 }
   ];
   await elements["#queue-auto-fill"].listeners.get("click")();
-  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.makeModel, "Toyota 4Runner");
-  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.trim, "BASE");
+  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.makeModel, "");
+  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.trim, "");
   assert.equal(
     groqCalls,
-    callsBeforeExactModel + 1,
-    "Missing exact model uses one bounded model AI request"
+    callsBeforeExactModel,
+    "Unrelated same-make models must not be offered to AI"
   );
-  assert.match(elements["#queue-auto-fill-message"].textContent, /nearest same-make choice/);
+  assert.match(elements["#queue-auto-fill-message"].textContent, /Review: Make & Model, Trim/);
 
   modelCatalogOverride = [toyota4Runner];
   failModelAi = true;
   await elements["#queue-auto-fill"].listeners.get("click")();
-  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.makeModel, "Toyota 4Runner");
-  assert.match(elements["#queue-auto-fill-message"].textContent, /nearest same-make choice/);
+  assert.equal(savedValues.at(-1)["luna.workQueue.v1"].ads[0].listed.makeModel, "");
+  assert.match(elements["#queue-auto-fill-message"].textContent, /Review: Make & Model, Trim/);
   failModelAi = false;
 
   modelCatalogOverride = [
@@ -617,7 +621,69 @@ const waitForAsyncWork = () =>
   assert.equal(noToyota.listed.makeModel, "");
   assert.equal(noToyota.listed.trim, "");
   assert.equal(noToyota.status, "pending");
-  assert.equal(groqCalls, callsBeforeExactModel + 2, "A missing make must not spend an AI request");
+  assert.equal(groqCalls, callsBeforeExactModel, "A missing make must not spend an AI request");
+  const defenderBase = {
+    label: "Land Rover Defender",
+    make: "Land Rover",
+    makeCode: 50,
+    model: "Defender",
+    modelCode: 100
+  };
+  const defender110 = {
+    ...defenderBase,
+    label: "Land Rover Defender 110",
+    model: "Defender 110",
+    modelCode: 102
+  };
+  captureOverride = {
+    ...captureOverride,
+    facts: {
+      ...captureOverride.facts,
+      make: { value: "Land Rover" },
+      model: { value: "Defender" },
+      trim: { value: "110" }
+    },
+    title: "Land Rover Defender 110 HSE 2024",
+    context: "Land Rover Defender 110 HSE",
+    summary: "Land Rover Defender 110 HSE"
+  };
+  // The first exact search returns only the family. The specific model is
+  // deliberately returned by a later query to reproduce the premature stop.
+  modelSearchOverride = (keyword) => ({
+    models: keyword === "Land Rover Defender 110" ? [defender110] : [defenderBase]
+  });
+  trimCatalogOverride = (makeCode, modelCode) => {
+    assert.equal(makeCode, 50);
+    assert.equal(modelCode, 102, "Trims must be fetched only for the resolved full model");
+    return {
+      trims: [
+        { label: "HSE", trimCode: 502 },
+        { label: "STD", trimCode: 503 }
+      ]
+    };
+  };
+  const callsBeforeDefender = groqCalls;
+  for (const trim of ["110", "110 HSE"]) {
+    captureOverride.facts.trim = { value: trim };
+    const queriesBefore = modelSearchCalls.length;
+    const trimsBefore = trimLookupCalls.length;
+    await elements["#queue-auto-fill"].listeners.get("click")();
+    const filledDefender = savedValues.at(-1)["luna.workQueue.v1"];
+    assert.equal(filledDefender.ads[0].listed.makeModel, "Land Rover Defender 110");
+    assert.equal(filledDefender.ads[0].listed.modelCode, 102);
+    assert.equal(filledDefender.ads[0].listed.trim, "HSE");
+    assert.equal(filledDefender.ads[0].listed.trimCode, 502);
+    assert.equal(filledDefender.ads[0].status, "pending");
+    assert.equal(filledDefender.currentIndex, 0);
+    assert.equal(captureOverride.facts.trim.value, trim);
+    assert.equal(trimLookupCalls.length - trimsBefore, 1);
+    assert.ok(modelSearchCalls.slice(queriesBefore).includes("Land Rover Defender 110"));
+    assert.ok(modelSearchCalls.length - queriesBefore <= 7);
+    assert.equal(groqCalls, callsBeforeDefender, "An evidenced model and trim need no AI request");
+    assert.equal(updatedTabs.length, tabUpdatesBeforeFill, "Model refinement must not navigate");
+  }
+  modelSearchOverride = null;
+  trimCatalogOverride = null;
   captureOverride = null;
   modelCatalogOverride = null;
 
@@ -627,7 +693,7 @@ const waitForAsyncWork = () =>
   assert.equal(savedValues.length, savesBeforeBodyType, "Body Type must be answer-only");
 
   await elements["#queue-ai-model-trim"].listeners.get("click")();
-  assert.match(elements["#queue-ai-result"].textContent, /Recommendation: BMW 840Ci · M SPORT/);
+  assert.match(elements["#queue-ai-result"].textContent, /BMW 840Ci · M SPORT/);
   assert.equal(elements["#queue-ai-fill"].hidden, false);
   const callsBeforeRecommendationFill = groqCalls;
   await elements["#queue-ai-fill"].listeners.get("click")();
@@ -642,7 +708,7 @@ const waitForAsyncWork = () =>
     tabUpdatesBeforeFill,
     "AI tools must not navigate or update tabs"
   );
-  assert.match(elements["#queue-ai-result"].textContent, /Status remains Pending/);
+  assert.match(elements["#queue-ai-result"].textContent, /Review before saving/);
 
   await elements["#queue-mark-review"].listeners.get("click")();
   await waitForAsyncWork();
