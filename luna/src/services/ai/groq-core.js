@@ -131,7 +131,7 @@ globalThis.LunaGroqCore = (() => {
     if (!task) throw new TypeError("Groq vehicle-analysis task is invalid.");
     const factNames =
       task === "description"
-        ? ["sourceText", "title"]
+        ? ["sourceText", "title", "format"]
         : task === "bodyType"
           ? ["make", "model", "title", "year"]
           : task === "color"

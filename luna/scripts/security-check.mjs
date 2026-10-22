@@ -15,7 +15,9 @@ const patterns = [
   ],
   ["live Apps Script deployment", /\bAKfy[a-zA-Z0-9_-]{35,}\b/],
   ["spreadsheet link", /docs\.google\.com\/spreadsheets\/d\/[A-Za-z0-9_-]{20,}/],
-  ["account ID", /"(?:account_id|spreadsheetId)"\s*:\s*"[a-zA-Z0-9_-]{20,}"/]
+  ["account ID", /"(?:account_id|spreadsheetId)"\s*:\s*"[a-zA-Z0-9_-]{20,}"/],
+  ["non-example SharePoint tenant", /https:\/\/(?!example(?:[-.]|\/))[a-z0-9-]+\.sharepoint\.com/i],
+  ["local user path", /[A-Z]:[\\/]+Users[\\/]+(?!Public(?:[\\/]|$))/i]
 ];
 function walk(folder) {
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
@@ -41,7 +43,7 @@ function walk(folder) {
       continue;
     }
     if (
-      /^(?:\.env(?:\.|$)|\.dev\.vars|config\.(?:local|private)\.|credentials|cookies)|\.(?:pem|key|sqlite|db)$/i.test(
+      /^(?:\.env(?:\.|$)|\.dev\.vars|config\.(?:local|private)\.|credentials|cookies)|\.(?:pem|key|sqlite|db|xlsx|xls|har)$/i.test(
         entry.name
       )
     )

@@ -309,7 +309,7 @@ assert.doesNotMatch(
   /comparison\.extra|totals\.extra|inventory-total-extra|inventory-list-extra/
 );
 
-assert.equal(manifest.version, "2.5.1");
+assert.equal(manifest.version, "2.6.0");
 assert.deepEqual(
   manifest.permissions.sort(),
   ["activeTab", "scripting", "sidePanel", "storage"].sort()

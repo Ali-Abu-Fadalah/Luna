@@ -253,7 +253,9 @@ globalThis.LunaImageScraper = (() => {
       lastRemoved = null;
       if (!draft.images.length) {
         throw new Error(
-          "No reliable car gallery was found. Open the advertisement detail page and try again."
+          /^[a-z0-9-]+\.sharepoint\.com$/i.test(new URL(verifiedTab.url).hostname)
+            ? "No image files were found in this OneDrive folder view. Open the folder containing the photos and try again."
+            : "No reliable car gallery was found. Open the advertisement detail page and try again."
         );
       }
       await save();
@@ -277,18 +279,28 @@ globalThis.LunaImageScraper = (() => {
     }
   };
 
-  const sendImagesToTab = async (tabId, onSelected) => {
-    const uploadId = typeof onSelected === "function" ? `${Date.now()}-${++uploadSequence}` : "";
+  const sendImagesToTab = async (tabId, onSelected, onMainRetained) => {
+    const uploadId = [onSelected, onMainRetained].some((callback) => typeof callback === "function")
+      ? `${Date.now()}-${++uploadSequence}`
+      : "";
+    let selected = false,
+      mainRetained = false;
     const selectedListener = (message, sender) => {
       if (
-        message?.type !== "luna.imageScraper.selected" ||
+        !["luna.imageScraper.selected", "luna.imageScraper.mainRetained"].includes(message?.type) ||
         message.uploadId !== uploadId ||
         sender?.id !== chrome.runtime.id ||
         sender?.tab?.id !== tabId
       )
         return;
-      chrome.runtime.onMessage.removeListener(selectedListener);
-      onSelected({ count: message.count, selected: true });
+      if (message.type === "luna.imageScraper.selected" && !selected) {
+        selected = true;
+        onSelected?.({ count: message.count, selected: true });
+      }
+      if (message.type === "luna.imageScraper.mainRetained" && !mainRetained) {
+        mainRetained = true;
+        onMainRetained?.({ count: message.count, mainRetained: true });
+      }
     };
     if (uploadId) chrome.runtime.onMessage.addListener(selectedListener);
     try {
@@ -302,7 +314,9 @@ globalThis.LunaImageScraper = (() => {
       const response = await withTimeout(
         chrome.tabs.sendMessage(tabId, {
           images: draft.images,
-          type: globalThis.LunaFoundation?.messageTypes.imageUpload || "luna.imageScraper.upload",
+          sourceUrl: draft.sourceUrl,
+          type:
+            globalThis.LunaFoundation?.messageTypes.imageUpload || "luna.imageScraper.upload.v2",
           uploadId
         }),
         UPLOAD_TIMEOUT_MS,
@@ -320,7 +334,7 @@ globalThis.LunaImageScraper = (() => {
     }
   };
 
-  const verifyImagesOnTab = async (tabId, expectedCount) => {
+  const verifyImagesOnTab = async (tabId, expectedCount, expectedMain = "") => {
     await chrome.scripting.executeScript({
       files: [
         "src/features/images/image-upload-core.js",
@@ -331,7 +345,8 @@ globalThis.LunaImageScraper = (() => {
     const response = await withTimeout(
       chrome.tabs.sendMessage(tabId, {
         expectedCount,
-        type: "luna.imageScraper.verify"
+        expectedMain,
+        type: "luna.imageScraper.verify.v2"
       }),
       5000,
       "Ayshei did not confirm that the vehicle images are still present."
@@ -362,7 +377,7 @@ globalThis.LunaImageScraper = (() => {
       const { imported, normalized, skipped } = await sendImagesToTab(tab.id);
       setStatus("done", "Imported");
       setMessage(
-        `${imported} images imported in this order; image 1 is main.${
+        `${imported} images imported; image 1 is main.${
           normalized
             ? ` ${normalized} image${normalized === 1 ? " was" : "s were"} resized or converted for Ayshei.`
             : ""
@@ -411,6 +426,15 @@ globalThis.LunaImageScraper = (() => {
     .catch(() => render());
 
   return Object.freeze({
+    async loadReviewedCapture(capture) {
+      if (busy) throw new Error("An image operation is still running.");
+      const next = globalThis.LunaImageScraperCore.sanitizeCapture(capture);
+      if (!next.images.length) throw new Error("The reviewed capture has no images.");
+      draft = next;
+      lastRemoved = null;
+      await save();
+      render();
+    },
     async clearForManualAd() {
       await clear();
     },
@@ -436,14 +460,14 @@ globalThis.LunaImageScraper = (() => {
       if (sectionId === "manual-ad-assistant") render();
     },
     render,
-    async uploadToAysheiTab(tabId, onSelected) {
+    async uploadToAysheiTab(tabId, onSelected, onMainRetained) {
       const validation = globalThis.LunaImageScraperCore.validate(draft);
       if (!validation.isReady) throw new Error(validation.message);
       busy = true;
       render();
       setStatus("working", "Importing");
       try {
-        const result = await sendImagesToTab(tabId, onSelected);
+        const result = await sendImagesToTab(tabId, onSelected, onMainRetained);
         setStatus("ready", "Uploaded");
         setMessage(
           `${result.imported} images were retained by Ayshei. Finishing the vehicle details…`,
@@ -455,8 +479,8 @@ globalThis.LunaImageScraper = (() => {
         render();
       }
     },
-    async verifyOnAysheiTab(tabId, expectedCount) {
-      return verifyImagesOnTab(tabId, expectedCount);
+    async verifyOnAysheiTab(tabId, expectedCount, expectedMain = "") {
+      return verifyImagesOnTab(tabId, expectedCount, expectedMain);
     }
   });
 })();

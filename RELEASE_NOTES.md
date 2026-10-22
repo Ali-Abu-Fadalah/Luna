@@ -1,20 +1,13 @@
-# Luna 2.5.1 public edition
+# Luna 2.6 public edition
 
-This update brings the latest applicable local extension changes into Luna's public-safe source.
+Release date: 22 October 2026.
 
-- More precise model and trim evidence handling, including GLS 450 and Golf GTI regressions.
-- Safer handling of generic Other options, missing trims and ambiguous AI recommendations in the shared matching code.
-- Correct Work Queue field reset, persistence during slow saves and undo behavior.
-- Vehicle capture that excludes related listings and retains explicit mechanical specifications.
-- Updated reusable reporting logic for unlisted dates and cache invalidation.
-- Version-aligned metadata, footer and repeatable ZIP packaging.
+Auction import now adds pasted rows immediately, including headerless rows copied from the middle of a sheet. Matching fields are preserved, uncertain cells can be corrected in the form, and exact duplicates are skipped. A unique SharePoint folder can supply the photo source for headerless rows; known headers preserve the Descale Photoes and Description rules.
 
-Company spreadsheet connections, private catalog and AI transports, backend deployments, internal addresses, credentials and private development history remain excluded. Features requiring those services are unavailable in the public edition. Regression fixtures use synthetic listing URLs and catalog identifiers; tests do not contact live services.
+The optional local workbook reader lets you choose a worksheet and its rows without copying headers. It preserves hyperlinks, hidden columns, date systems and cached formula values. The workbook stays local, with packaged dependencies and bounded worker parsing.
 
-## Install
+The public edition includes local auction editing and workbook tools. Private account connections, authenticated downloads, saved-draft transports, backend deployments and work data are not included. Account-connected filling remains unavailable in this edition.
 
-Build the reviewed package with `cd luna` followed by `npm run package`, then extract `dist/Luna-2.5.1-public.zip` from the repository root. In `chrome://extensions`, enable Developer mode and select the extracted `luna` folder using Load unpacked. Chrome 116 or later is required.
+Chrome and package metadata use 2.6.0, with the interface and Chrome version name displaying 2.6. Build the reviewed package using `cd luna` followed by `npm run package`; the output is `dist/Luna-2.6.0-public.zip` with a SHA-256 checksum.
 
-For an existing installation, replace the unpacked files, click Reload on Luna's extension card, and reopen its panel. Confirm the footer says Luna 2.5.1.
-
-See README.md, PRIVACY.md and SECURITY.md for permissions and privacy details.
+Reload Luna at chrome://extensions and reopen its side panel. Confirm the footer shows Luna 2.6.

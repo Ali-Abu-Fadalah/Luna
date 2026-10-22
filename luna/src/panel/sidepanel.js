@@ -5,6 +5,7 @@ const sections = {
   "inventory-checker": "Inventory Checker",
   "scraper-images": "Listings Scraper",
   "manual-ad-assistant": "Manual Ad Assistant",
+  auctions: "Auctions",
   "jenkins-assistant": "Jenkins Assistant",
   settings: "Settings"
 };
@@ -19,6 +20,7 @@ const workQueueView = document.querySelector(".work-queue-view");
 const inventoryCheckerView = document.querySelector(".inventory-checker-view");
 const listingsScraperView = document.querySelector(".listings-scraper-view");
 const manualAdView = document.querySelector(".manual-ad-view");
+const auctionsView = document.querySelector(".auctions-view");
 const jenkinsAssistantView = document.querySelector(".jenkins-assistant-view");
 const settingsView = document.querySelector(".settings-view");
 const localStorageArea = globalThis.chrome?.storage?.local;
@@ -52,6 +54,7 @@ const showSection = (sectionId) => {
   inventoryCheckerView.hidden = !isInventoryChecker;
   listingsScraperView.hidden = !isListingsScraper;
   manualAdView.hidden = !isManualAdAssistant;
+  if (auctionsView) auctionsView.hidden = safeSectionId !== "auctions";
   jenkinsAssistantView.hidden = !isJenkinsAssistant;
   settingsView.hidden = !isSettings;
   globalThis.LunaConnection?.onSectionShown(safeSectionId);
@@ -59,6 +62,7 @@ const showSection = (sectionId) => {
   globalThis.LunaImageScraper?.onSectionShown(safeSectionId);
   globalThis.LunaListingsScraper?.onSectionShown(safeSectionId);
   globalThis.LunaManualAdAssistant?.onSectionShown(safeSectionId);
+  globalThis.LunaAuctions?.onSectionShown(safeSectionId);
   globalThis.LunaJenkinsAssistant?.onSectionShown(safeSectionId);
   globalThis.LunaWorkQueueNotes?.onSectionShown(safeSectionId);
   globalThis.LunaUI?.sectionChanged(safeSectionId);

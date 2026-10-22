@@ -8,7 +8,13 @@ const source = fs.readFileSync(
   "utf8"
 );
 
-const check = async (previewCounts, expectedSuccess, operation = "verify") => {
+const check = async (
+  previewCounts,
+  expectedSuccess,
+  operation = "verify",
+  expectedMain = "",
+  photoSource = "blob:https://marketplace.example.invalid/preview"
+) => {
   let tick = 0;
   let listener;
   let changeFired = false;
@@ -18,7 +24,8 @@ const check = async (previewCounts, expectedSuccess, operation = "verify") => {
     querySelector: () => null,
     querySelectorAll: () =>
       Array.from({ length: previewCounts[Math.min(tick, previewCounts.length - 1)] }, () => ({
-        src: "blob:https://marketplace.example.invalid/preview"
+        src: photoSource,
+        getAttribute: () => photoSource
       }))
   };
   const layout = { querySelector: () => gallery };
@@ -86,10 +93,10 @@ const check = async (previewCounts, expectedSuccess, operation = "verify") => {
       operation === "upload"
         ? {
             images: [1, 2, 3].map((i) => ({ url: `https://vendor.test/${i}.jpg` })),
-            type: "luna.imageScraper.upload",
+            type: "luna.imageScraper.upload.v2",
             uploadId: "test-upload"
           }
-        : { expectedCount: 3, type: "luna.imageScraper.verify" };
+        : { expectedCount: 3, expectedMain, type: "luna.imageScraper.verify.v2" };
     listener(message, { id: "luna-test" }, (value) => {
       order.push("completed");
       resolve(value);
@@ -115,6 +122,14 @@ const check = async (previewCounts, expectedSuccess, operation = "verify") => {
   await check([0], false, "upload");
   await check([3, 3, 0], false, "upload");
   await check([3], true, "upload");
+  await check([3], true, "verify", "https://cdn.test/main.jpg", "https://cdn.test/main.jpg");
+  await check(
+    [3],
+    false,
+    "verify",
+    "https://cdn.test/main.jpg",
+    "https://cdn.test/changed-main.jpg"
+  );
   assert.doesNotMatch(source, /lastState\.fileCount\s*>=\s*expectedCount/);
   assert.match(source, /stableRequired = 16/);
   assert.doesNotMatch(source, /assignFiles\(retryInput/);

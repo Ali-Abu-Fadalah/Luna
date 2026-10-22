@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6 � Easier auction imports
+
+- Pasted auction rows are added immediately, including headerless rows copied from the middle of a worksheet.
+- Column inference preserves agreed fields and exposes uncertain values for editing; malformed amounts cannot select neighboring financial columns.
+- Optional local .xlsx import preserves headers, hyperlink targets, hidden columns and workbook date systems. Dependencies are packaged locally and parsing runs in a dedicated worker.
+- Image preparation confirms the main image before sending the remaining batch, with progress and retention checks.
+- Version metadata is 2.6.0; the interface and Chrome version name display 2.6.
+- Private account transports, production addresses, credentials, deployments, workbooks and development history remain excluded.
+
 ## 2.5.1 — Matching and queue reliability
 
 - Model matching separates class names, full model identifiers and trim evidence, with regression coverage for GLS 450 and Golf GTI.

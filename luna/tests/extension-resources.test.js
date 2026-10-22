@@ -117,6 +117,11 @@ assert.deepEqual(
     "listings-scraper.js",
     "manual-ad-core.js",
     "manual-ad-assistant.js",
+    "auction-core.js",
+    "auction-draft-core.js",
+    "auction-api.js",
+    "auction-workbook.js",
+    "auctions.js",
     "jenkins-core.js",
     "jenkins-page.js",
     "jenkins-assistant.js",
@@ -137,6 +142,7 @@ assert.deepEqual(
     "image-scraper.css",
     "manual-ad-assistant.css",
     "jenkins-assistant.css",
+    "auctions.css",
     "luna-polish.css",
     "luna-neumorphism.css"
   ],
@@ -151,6 +157,7 @@ const entrypoints = [
   ...manifest.content_scripts.flatMap((entry) => entry.js.map((url) => resource(url)))
 ];
 const expectedInjections = {
+  "auctions.js": [["auction-page.js"], ["image-scraper-source.js"]],
   "image-scraper.js": [
     ["image-scraper-source.js"],
     ["image-upload-core.js", "image-scraper-fill.js"],
@@ -176,6 +183,16 @@ while (queue.length) {
   const source = fs.readFileSync(file, "utf8");
   const imports = [...source.matchAll(/\bimportScripts\s*\(([\s\S]*?)\)/g)];
   for (const match of imports) {
+    if (path.basename(file) === "auction-workbook.js") {
+      assert.equal(match[1].replace(/\s/g, ""), "localZipLibrary,localLibrary");
+      for (const name of ["vendor/xlsx-0.20.3.full.min.js", "vendor/fflate-0.8.3.min.js"])
+        resource(name);
+      assert.match(
+        source,
+        /data\.libraryUrl !== localLibrary \|\| data\.zipUrl !== localZipLibrary/
+      );
+      continue;
+    }
     const urls = strings(match[1]);
     if (file === workerPath)
       assert.deepEqual(

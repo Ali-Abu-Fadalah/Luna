@@ -24,6 +24,51 @@
       return "";
     }
   };
+  // OneDrive folder tiles expose authenticated thumbnail URLs, not public
+  // product galleries. Keep only image file tiles and request their originals.
+  if (location.protocol === "https:" && /^[a-z0-9-]+\.sharepoint\.com$/i.test(location.hostname)) {
+    const images = [];
+    const seen = new Set();
+    for (const row of document.querySelectorAll(
+      "[role='gridcell'],[data-automationid='DetailsRow']"
+    )) {
+      if (!visible(row)) continue;
+      const name = row.querySelector(
+        "[data-automationid='name'],[data-automationid='FieldRenderer-name']"
+      );
+      const filename = clean(
+        name?.getAttribute("title") || name?.getAttribute("aria-label") || name?.textContent
+      );
+      if (!/\.(?:jpe?g|png|webp|avif)$/i.test(filename)) continue;
+      for (const image of row.querySelectorAll("img")) {
+        try {
+          const url = new URL(image.currentSrc || image.src, location.href);
+          const itemPath = url.pathname.match(
+            /^(\/_api\/v2\.0\/drives\/[^/]+\/items\/[^/]+)\/thumbnails\/[^/]+\/[^/]+\/content$/i
+          )?.[1];
+          if (url.origin !== location.origin || !itemPath) continue;
+          const original = `${url.origin}${itemPath}/content`;
+          if (seen.has(original)) continue;
+          seen.add(original);
+          images.push({ alt: filename, url: original });
+        } catch {
+          // Ignore decorative icons and unsupported/non-image rows.
+        }
+      }
+    }
+    // Main.jpeg is the cover in shared product folders; keep all other files
+    // in the folder's displayed order and retain the existing review controls.
+    images.sort(
+      (left, right) =>
+        Number(/^main\.(?:jpe?g|png|webp|avif)$/i.test(right.alt)) -
+        Number(/^main\.(?:jpe?g|png|webp|avif)$/i.test(left.alt))
+    );
+    return {
+      images: images.slice(0, 20),
+      sourceTitle: clean(document.title),
+      sourceUrl: location.href
+    };
+  }
   const originalSizeUrl = (value) => {
     const absolute = absoluteUrl(value);
     if (!absolute) return "";

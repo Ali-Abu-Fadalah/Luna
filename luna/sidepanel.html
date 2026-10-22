@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="src/features/images/image-scraper.css" />
     <link rel="stylesheet" href="src/features/manual-ad/manual-ad-assistant.css" />
     <link rel="stylesheet" href="src/features/jenkins/jenkins-assistant.css" />
+    <link rel="stylesheet" href="src/features/auctions/auctions.css" />
     <link rel="stylesheet" href="styles/luna-polish.css" />
     <link rel="stylesheet" href="styles/luna-neumorphism.css" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   </head>
-  <body class="public-edition">
+  <body>
     <svg class="icon-sprite" aria-hidden="true">
       <symbol id="icon-home" viewbox="0 0 24 24">
         <path d="M4 11.5 12 5l8 6.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"></path>
@@ -180,7 +181,11 @@
           <span class="nav-icon" aria-hidden="true"
             ><svg><use href="#icon-scraper"></use></svg
           ></span>
-          <span>Manual Ad</span>
+          <span>Manual Ad</span></button
+        ><button class="nav-item" type="button" data-section="auctions">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-queue"></use></svg></span
+          ><span>Auctions</span>
         </button>
       </nav>
 
@@ -195,7 +200,7 @@
               </p>
             </div>
 
-            <div class="lunar-art" aria-hidden="true">
+            <div class="lunar-art lunar-eclipse-hero" aria-hidden="true">
               <span class="lunar-halo"></span>
               <svg class="lunar-sculpture" viewbox="0 0 260 260" focusable="false">
                 <defs>
@@ -220,6 +225,7 @@
                     <circle cx="159" cy="111" r="80" fill="black"></circle>
                   </mask>
                 </defs>
+                <circle class="lunar-corona" cx="130" cy="130" r="92"></circle>
                 <g class="lunar-orbits" fill="none" stroke="#8195ab">
                   <circle cx="130" cy="130" r="109" opacity=".13"></circle>
                   <circle cx="130" cy="130" r="96" opacity=".2"></circle>
@@ -242,6 +248,7 @@
                     fill="url(#lunar-pearl)"
                     mask="url(#lunar-cut)"
                   ></circle>
+                  <circle class="lunar-umbra" cx="153" cy="108" r="70"></circle>
                   <path
                     d="M151 57a79 79 0 1 0 54 97"
                     fill="none"
@@ -274,7 +281,7 @@
             </div>
             <div
               id="home-queue-progress"
-              class="luna-progress-track"
+              class="luna-progress-track luna-eclipse-progress"
               role="progressbar"
               aria-label="Queue completed"
               aria-valuemin="0"
@@ -2110,6 +2117,194 @@
           </article>
         </section>
 
+        <section class="auctions-view" aria-label="Auctions" hidden>
+          <header class="auction-heading">
+            <h3>Auctions</h3>
+            <p>Paste rows. Prepare your next auction.</p>
+          </header>
+          <div class="auction-import">
+            <label class="auction-sr-only" for="auction-paste">Sheet rows</label>
+            <textarea
+              id="auction-paste"
+              rows="2"
+              placeholder="Paste rows here — headers optional"
+            ></textarea>
+            <div class="auction-import-actions">
+              <span class="auction-helper">Rows are added when you paste.</span>
+              <button id="auction-open-workbook" type="button" class="auction-text-button">
+                Open spreadsheet
+              </button>
+              <input id="auction-workbook-file" type="file" accept=".xlsx" hidden />
+              <button id="auction-import" type="button" class="settings-secondary-button" hidden>
+                Add typed rows
+              </button>
+            </div>
+            <div id="auction-workbook-panel" class="auction-workbook-panel" hidden>
+              <p id="auction-workbook-name" class="auction-helper"></p>
+              <label for="auction-workbook-sheet">Worksheet</label>
+              <select id="auction-workbook-sheet"></select>
+              <div class="auction-workbook-actions">
+                <label
+                  >Worksheet rows (optional)<input
+                    id="auction-workbook-range"
+                    type="text"
+                    placeholder="All rows, or 12–20, 24"
+                /></label>
+                <button id="auction-workbook-add" type="button" class="settings-secondary-button">
+                  Add rows
+                </button>
+              </div>
+              <p id="auction-workbook-info" class="auction-helper">
+                The file stays on your computer.
+              </p>
+            </div>
+            <details class="auction-import-options">
+              <summary>Import options</summary>
+              <label class="auction-sr-only" for="auction-layout">Column layout</label>
+              <select id="auction-layout">
+                <option value="auto">Columns: Auto</option>
+                <option value="saved">Last imported headers</option>
+                <option value="sheet24">24-column sheet</option>
+                <option value="visible24">24-column sheet · visible only</option>
+                <option value="sheet25">25-column sheet</option>
+                <option value="visible25">25-column sheet · visible only</option>
+              </select>
+              <label for="auction-date-format">Numeric dates</label
+              ><select id="auction-date-format">
+                <option value="strict">ISO / named months</option>
+                <option value="dmy">Day / Month / Year</option>
+                <option value="mdy">Month / Day / Year</option>
+              </select>
+              <p class="auction-helper">
+                Dates without a year use the current year. Times follow the 9 PM / Saturday 10 PM
+                rule.
+              </p>
+            </details>
+          </div>
+          <p
+            id="auction-message"
+            class="auction-message"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></p>
+          <p id="auction-empty" class="auction-empty">
+            Copy any rows from your sheet and paste above. Start from any row; no headers needed.
+          </p>
+          <div id="auction-work" hidden>
+            <nav class="auction-row-nav" aria-label="Auction rows">
+              <button
+                id="auction-prev"
+                type="button"
+                class="auction-arrow"
+                aria-label="Previous row"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>
+              </button>
+              <label class="auction-sr-only" for="auction-queue">Selected auction</label
+              ><select id="auction-queue"></select>
+              <button id="auction-next" type="button" class="auction-arrow" aria-label="Next row">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
+              </button>
+            </nav>
+            <ul id="auction-alerts" class="auction-alerts" aria-label="Row issues"></ul>
+            <div id="auction-import-review" class="auction-import-review" hidden></div>
+            <div class="auction-section">
+              <h4>Listing</h4>
+              <div class="auction-fields">
+                <label class="auction-wide">Title<input id="auction-title" type="text" /></label>
+                <label>Brand<input id="auction-brand" type="text" /></label
+                ><label>Category<input id="auction-category" type="text" /></label>
+                <label>Start date<input id="auction-startDate" type="date" /></label
+                ><label>End date<input id="auction-endDate" type="date" /></label>
+                <label
+                  >Starting price · AED<input
+                    id="auction-startPrice"
+                    type="text"
+                    inputmode="decimal" /></label
+                ><label>Reserve / No Reserve<input id="auction-reservePrice" type="text" /></label>
+              </div>
+              <p id="auction-schedule" class="auction-helper"></p>
+              <p id="auction-price-rule" class="auction-helper"></p>
+              <details id="auction-condition-options" class="auction-extras">
+                <summary>Condition &amp; delivery</summary>
+                <div class="auction-fields">
+                  <label>Condition<input id="auction-condition" type="text" /></label
+                  ><label
+                    >Tamara<input id="auction-tamara" type="text" placeholder="Yes / No / blank"
+                  /></label>
+                </div>
+              </details>
+            </div>
+            <div class="auction-section">
+              <div class="auction-section-heading">
+                <h4>Photos</h4>
+                <button id="auction-get-photos" type="button" class="settings-secondary-button">
+                  Get photos
+                </button>
+              </div>
+              <label
+                >Photo folder<input
+                  id="auction-photosUrl"
+                  type="url"
+                  placeholder="SharePoint folder link"
+              /></label>
+              <ul
+                id="auction-images"
+                class="auction-images"
+                aria-label="Auction photos, main first"
+              ></ul>
+              <p id="auction-images-status" class="auction-helper"></p>
+            </div>
+            <div class="auction-section">
+              <div class="auction-section-heading">
+                <h4>Description</h4>
+                <button id="auction-open-description" type="button" class="auction-text-button">
+                  Open source
+                </button>
+              </div>
+              <details class="auction-extras">
+                <summary>Source link</summary>
+                <label>Description link<input id="auction-descriptionUrl" type="url" /></label>
+              </details>
+              <label for="auction-descriptionSource">Source text</label
+              ><textarea
+                id="auction-descriptionSource"
+                rows="4"
+                placeholder="Paste product description here"
+              ></textarea
+              ><button
+                id="auction-rephrase"
+                type="button"
+                class="settings-secondary-button auction-rephrase"
+              >
+                Rephrase into points</button
+              ><label for="auction-description">Bullet points</label
+              ><textarea
+                id="auction-description"
+                rows="5"
+                placeholder="Your points appear after adding a source."
+                disabled
+              ></textarea>
+            </div>
+            <details id="auction-audit-details" class="auction-extras" hidden>
+              <summary>Field checks</summary>
+              <ul id="auction-audit" class="auction-audit"></ul>
+            </details>
+            <footer class="auction-footer">
+              <div>
+                <button id="auction-prepare" type="button" class="connection-button">
+                  Prepare &amp; fill Ayshei</button
+                ><button id="auction-next-row" type="button" class="settings-secondary-button">
+                  Next row
+                </button>
+              </div>
+              <p>
+                You post the ad on Ayshei. <a id="auction-draft-link" href="#" hidden>Open draft</a>
+              </p>
+            </footer>
+          </div>
+        </section>
         <section class="settings-view" aria-label="Settings" hidden>
           <nav
             class="luna-view-tabs"
@@ -2156,14 +2351,6 @@
             role="tabpanel"
             aria-labelledby="settings-connections-tab"
           >
-            <article class="settings-card public-edition-notice">
-              <h3>Public edition</h3>
-              <p>
-                Private work services and deployment configuration are not included. Local queues,
-                notes, capture, parsing and review remain available. No company connection or
-                credential is bundled.
-              </p>
-            </article>
             <div class="settings-card">
               <div class="settings-status-row">
                 <div>
@@ -2273,14 +2460,6 @@
             aria-labelledby="settings-ai-tab"
             hidden
           >
-            <article class="settings-card public-edition-notice">
-              <h3>Public edition</h3>
-              <p>
-                Private work services and deployment configuration are not included. Local queues,
-                notes, capture, parsing and review remain available. No company connection or
-                credential is bundled.
-              </p>
-            </article>
             <div class="settings-card">
               <div class="settings-status-row">
                 <div>
@@ -2302,7 +2481,7 @@
                 type="url"
                 autocomplete="off"
                 spellcheck="false"
-                placeholder="Private connector not included"
+                placeholder="https://luna-groq-proxy.your-name.workers.dev"
               />
               <p class="settings-metadata">
                 Paste only the deployed workers.dev URL—not any API key. Luna sends bounded vehicle
@@ -2536,7 +2715,7 @@
         </section>
       </main>
 
-      <footer>Luna 2.5.1</footer>
+      <footer>Luna 2.6</footer>
     </div>
 
     <dialog id="luna-module-dialog" class="luna-dialog" aria-label="All Luna sections">
@@ -2560,6 +2739,7 @@
         Work Queue</button
       ><button class="luna-drawer-item" type="button" data-luna-section="manual-ad-assistant">
         Manual Ad</button
+      ><button class="luna-drawer-item" type="button" data-luna-section="auctions">Auctions</button
       ><button class="luna-drawer-item" type="button" data-luna-section="scraper-images">
         Listings</button
       ><button class="luna-drawer-item" type="button" data-luna-section="inventory-checker">
@@ -2607,6 +2787,11 @@
     <script src="src/features/listings/listings-scraper.js"></script>
     <script src="src/features/manual-ad/manual-ad-core.js"></script>
     <script src="src/features/manual-ad/manual-ad-assistant.js"></script>
+    <script src="src/features/auctions/auction-core.js"></script>
+    <script src="src/features/auctions/auction-draft-core.js"></script>
+    <script src="src/features/auctions/auction-api.js"></script>
+    <script src="src/features/auctions/auction-workbook.js"></script>
+    <script src="src/features/auctions/auctions.js"></script>
     <script src="src/features/jenkins/jenkins-core.js"></script>
     <script src="src/features/jenkins/jenkins-page.js"></script>
     <script src="src/features/jenkins/jenkins-assistant.js"></script>

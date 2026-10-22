@@ -109,9 +109,19 @@ globalThis.LunaImageScraperCore = (() => {
     };
   };
 
-  const isAysheiPlaceAdTab = (tab) =>
-    Number.isInteger(tab?.id) &&
-    /^https:\/\/marketplace\.example\.invalid\/place-ad\//i.test(String(tab?.url || ""));
+  const isAysheiPlaceAdTab = (tab) => {
+    if (!Number.isInteger(tab?.id)) return false;
+    try {
+      const url = new URL(tab.url);
+      return (
+        url.origin === "https://marketplace.example.invalid" &&
+        url.pathname.startsWith("/place-ad/") &&
+        (!url.searchParams.has("step") || url.searchParams.get("step") === "2")
+      );
+    } catch {
+      return false;
+    }
+  };
 
   const selectAysheiTargetTab = (activeTab, openTabs) => {
     if (isAysheiPlaceAdTab(activeTab)) {

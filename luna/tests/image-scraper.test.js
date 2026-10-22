@@ -283,7 +283,7 @@ assert.match(ui, /url: "https:\/\/marketplace\.example\.invalid\/place-ad\/\*"/)
 assert.match(ui, /selectAysheiTargetTab/);
 assert.match(ui, /sectionId === "manual-ad-assistant"/);
 assert.match(ui, /const UPLOAD_TIMEOUT_MS = 90000/);
-assert.match(ui, /const sendImagesToTab = async \(tabId, onSelected\)/);
+assert.match(ui, /const sendImagesToTab = async \(tabId, onSelected, onMainRetained\)/);
 assert.match(ui, /chrome\.runtime\.onMessage\.addListener\(selectedListener\)/);
 assert.match(ui, /sender\?\.tab\?\.id !== tabId/);
 assert.match(ui, /uploadId/);
@@ -296,7 +296,7 @@ assert.match(
   /files:\s*\[\s*"src\/features\/images\/image-upload-core\.js",\s*"src\/features\/images\/image-scraper-fill\.js"\s*\]/
 );
 assert.match(ui, /async collectForManualAd\(\)/);
-assert.match(ui, /async uploadToAysheiTab\(tabId, onSelected\)/);
+assert.match(ui, /async uploadToAysheiTab\(tabId, onSelected, onMainRetained\)/);
 assert.match(ui, /verifyOnAysheiTab/);
 assert.match(ui, /response\.result\?\.retained !== true/);
 assert.match(ui, /async clearForManualAd\(\)/);
@@ -366,7 +366,7 @@ assert.match(
   /@media \(max-width: 420px\)[\s\S]*\.image-scraper-item-actions \.is-remove[\s\S]*grid-column:\s*1 \/ -1/
 );
 assert.doesNotMatch(css, /overflow-x:\s*auto/);
-assert.equal(manifest.version, "2.5.1");
+assert.equal(manifest.version, "2.6.0");
 assert.ok(manifest.optional_host_permissions.includes("https://*/*"));
 
 console.log("Image scraper tests passed.");

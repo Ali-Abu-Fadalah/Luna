@@ -34,7 +34,7 @@ assert.ok(manifest.host_permissions.every((origin) => !origin.includes("example.
 assert.ok(manifest.host_permissions.every((origin) => !origin.includes("example.invalid")));
 assert.ok(manifest.host_permissions.every((origin) => !origin.includes("example.invalid")));
 assert.deepEqual(manifest.content_scripts, []);
-assert.equal((sidePanelHtml.match(/class="nav-item/g) || []).length, 8);
+assert.equal((sidePanelHtml.match(/class="nav-item/g) || []).length, 9);
 const moduleButtons = [...sidePanelHtml.matchAll(/<button\b([^>]*\bclass="nav-item\b[^>]*)>/g)];
 assert.deepEqual(
   moduleButtons.map(([, attributes]) => /data-section="([^"]+)"/.exec(attributes)?.[1]).sort(),
@@ -45,6 +45,7 @@ assert.deepEqual(
     "inventory-checker",
     "scraper-images",
     "manual-ad-assistant",
+    "auctions",
     "jenkins-assistant",
     "settings"
   ].sort(),
@@ -151,6 +152,7 @@ const backgroundContext = {
   importScripts() {}
 };
 
+vm.runInNewContext(readExtensionFile("src/services/ai/groq-core.js"), backgroundContext);
 vm.runInNewContext(readExtensionFile("src/background/background.js"), backgroundContext);
 assert.equal(panelBehaviorCalls.length, 1);
 assert.equal(panelBehaviorCalls[0].openPanelOnActionClick, true);
@@ -203,6 +205,7 @@ const sectionIds = [
   "inventory-checker",
   "scraper-images",
   "manual-ad-assistant",
+  "auctions",
   "jenkins-assistant",
   "settings"
 ];
@@ -256,6 +259,7 @@ const sidePanelContext = {
         ".inventory-checker-view": inventoryCheckerView,
         ".listings-scraper-view": listingsScraperView,
         ".manual-ad-view": manualAdView,
+        ".auctions-view": { hidden: true },
         ".jenkins-assistant-view": jenkinsAssistantView,
         ".settings-view": settingsView
       };

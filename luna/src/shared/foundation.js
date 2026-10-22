@@ -1,6 +1,7 @@
 globalThis.LunaFoundation = (() => {
   const storageKeys = Object.freeze({
     activeSection: "luna.activeSection",
+    auctions: "luna.auctions.v1",
     aysheiEndpoint: "luna.aysheiEndpoint.v1",
     aysheiEndpointStatus: "luna.aysheiEndpointStatus.v1",
     diagnostics: "luna.diagnostics.v1",
@@ -24,13 +25,14 @@ globalThis.LunaFoundation = (() => {
     aysheiLookup: "luna.ayshei.lookup",
     groq: "luna.groq",
     imageFetch: "luna.manualAd.fetchImage",
-    imageUpload: "luna.imageScraper.upload",
+    imageUpload: "luna.imageScraper.upload.v2",
     inventoryCapture: "luna.inventory.capture",
     manualAdFill: "luna.manualAd.fill"
   });
 
   const storageSchemas = Object.freeze({
     activeSection: Object.freeze({ area: "local", key: storageKeys.activeSection, version: 0 }),
+    auctions: Object.freeze({ area: "local", key: storageKeys.auctions, version: 1 }),
     aysheiEndpoint: Object.freeze({ area: "local", key: storageKeys.aysheiEndpoint, version: 1 }),
     aysheiEndpointStatus: Object.freeze({
       area: "local",
