@@ -83,6 +83,19 @@ if (manifest.content_scripts?.length)
 if (JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://*/*"]))
   failures.push("Unexpected optional host access.");
 const background = readFileSync(path.join(extension, "src/background/background.js"), "utf8");
+const auctionFolder = path.join(extension, "src/features/auctions");
+if (readdirSync(auctionFolder).includes("auction-republish-page.js"))
+  failures.push("The authenticated admin page adapter is excluded from the public edition.");
+const republishTransport = readFileSync(
+  path.join(auctionFolder, "auction-republish-api.js"),
+  "utf8"
+);
+if (
+  /\bfetch\s*\(|executeScript|credentials\s*:|Authorization|operation-v\d+\./i.test(
+    republishTransport
+  )
+)
+  failures.push("An authenticated admin transport was added to the public edition.");
 if (
   /api\.groq\.com|generativelanguage\.googleapis\.com|openrouter\.ai\/api|\/api\/v\d+\/search/.test(
     background

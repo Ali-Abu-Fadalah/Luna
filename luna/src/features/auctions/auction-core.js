@@ -609,6 +609,46 @@ globalThis.LunaAuctionCore = (() => {
       }
       return headers;
     }
+    // Copies can start at Tag or Model - Title and stop at Duration. Align a
+    // catalog slice using the title/link, condition and adjacent dates, never
+    // by looking for a plausible amount. All surviving slices must agree on
+    // each money column; otherwise consensus keeps that field unresolved.
+    const anchors = populated.map((row) => anchorHeaders(row, format, year));
+    if (anchors.every(Boolean)) {
+      const maps = anchors.map(columnMap),
+        first = maps[0];
+      if (
+        first.title >= 0 &&
+        first.condition >= 0 &&
+        first.startDate >= 0 &&
+        first.endDate === first.startDate + 1 &&
+        maps.every((map) =>
+          ["title", "condition", "startDate", "endDate"].every(
+            (field) => map[field] === first[field]
+          )
+        )
+      ) {
+        const cropped = [];
+        for (const source of [...Object.values(layouts), ...workbookLayouts]) {
+          const offset = columnMap(source).title - first.title;
+          if (offset <= 0 || offset + width > source.length) continue;
+          const slice = source.slice(offset, offset + width),
+            map = columnMap(slice);
+          if (
+            ["title", "condition", "startDate", "endDate"].every(
+              (field) => map[field] === first[field]
+            )
+          )
+            cropped.push(slice);
+        }
+        const eligible = cropped.filter((headers) => evidence(headers) >= 0);
+        if (eligible.length) {
+          const headers = consensusHeaders(eligible, width);
+          headers.importMethod = "cropped-catalog";
+          return headers;
+        }
+      }
+    }
     // Mixed or unfamiliar rows are handled separately so one changed/invalid
     // row cannot discard every other auction pasted alongside it.
     const headers = inferredColumns(Array(width).fill(""), "anchors");

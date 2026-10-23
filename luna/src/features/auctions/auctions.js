@@ -2,7 +2,7 @@ globalThis.LunaAuctions = (() => {
   const core = globalThis.LunaAuctionCore;
   const $ = (id) => document.getElementById(`auction-${id}`);
   const storageKey = "luna.auctions.v1";
-  let state = { version: 1, rows: [], index: 0, mappings: {}, headers: [] };
+  let state = { version: 1, rows: [], index: 0, mappings: {}, headers: [], workflow: "placement" };
   let busy = false,
     richTable = null,
     pasteError = "",
@@ -14,6 +14,8 @@ globalThis.LunaAuctions = (() => {
   const current = () => state.rows[state.index];
   const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const message = (text, kind = "info") => {
+    if (republishMode() && globalThis.LunaAuctionRepublish?.notify)
+      return globalThis.LunaAuctionRepublish.notify(text, kind);
     $("message").hidden = !text;
     $("message").textContent = text;
     $("message").dataset.kind = kind;
@@ -23,8 +25,43 @@ globalThis.LunaAuctions = (() => {
     row.audit = null;
     if (row.status !== "posted") row.status = "pending";
   };
+  const republishMode = () => $("workflow")?.value === "republish";
   const checks = (row, details = false) =>
     core.validate(row, { details, today: new Date().toLocaleDateString("en-CA") });
+  const source = () => $("paste").value;
+  const bindingStamp = (row) =>
+    JSON.stringify([
+      row.title,
+      row.photosUrl,
+      row.startDate,
+      row.endDate,
+      row.startPrice,
+      row.reservePrice
+    ]);
+  const keepBinding = (row) => {
+    if (row.draftId || row.creatingDraft || row.awaitingCategory) {
+      state.bindings ||= {};
+      state.bindings[bindingStamp(row)] = row;
+    }
+  };
+  const sourceTable = (table) =>
+    table
+      .map((row) =>
+        row
+          .map((cell) => {
+            const value = cell?.url
+              ? `[${cell.text || cell.url}](${cell.url})`
+              : String(typeof cell === "object" ? (cell?.text ?? "") : (cell ?? ""));
+            return /[\t\n"]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+          })
+          .join("\t")
+      )
+      .join("\n");
+  const rememberSource = (cells = richTable) => {
+    state.pastes ||= {};
+    state.pastes[republishMode() ? "republish" : "placement"] = { text: source(), cells };
+    save().catch(() => message("The pasted rows could not be saved locally.", "error"));
+  };
   const run = async (task) => {
     if (busy) return;
     busy = true;
@@ -201,8 +238,6 @@ globalThis.LunaAuctions = (() => {
     return false;
   };
   const capturePhotos = async (row) => {
-    if (globalThis.LunaConfig?.publicBuild)
-      throw new Error("Account-connected photo preparation is not included in the public edition.");
     const expected = new URL(core.safeUrl(row.photosUrl) || "https://invalid.test");
     if (!/^[a-z0-9-]+\.sharepoint\.com$/i.test(expected.hostname))
       throw new Error("Add the actual Descale Photoes folder link in Links & options.");
@@ -437,8 +472,6 @@ globalThis.LunaAuctions = (() => {
     );
   };
   const prepare = async () => {
-    if (globalThis.LunaConfig?.publicBuild)
-      throw new Error("Account-connected auction filling is not included in the public edition.");
     const row = current();
     if (!row) return;
     if (row.status === "posted")
@@ -532,8 +565,14 @@ globalThis.LunaAuctions = (() => {
   ];
   const render = () => {
     const row = current();
-    $("work").hidden = !row;
-    $("empty").hidden = !!row;
+    const admin = republishMode();
+    $("republish-panel").hidden = !admin;
+    $("placement-panel").hidden = admin;
+    $("message").hidden = admin || !$("message").textContent;
+    $("work").hidden = admin || !row;
+    $("empty").hidden = admin || !!row;
+    $("tab-republish").setAttribute("aria-selected", String(admin));
+    $("tab-placement").setAttribute("aria-selected", String(!admin));
     document
       .querySelectorAll(
         ".auctions-view button,.auctions-view input,.auctions-view textarea,.auctions-view select"
@@ -541,6 +580,15 @@ globalThis.LunaAuctions = (() => {
       .forEach((node) => {
         node.disabled = busy;
       });
+    $("import").hidden = false;
+    $("import").disabled = busy || (!source().trim() && !richTable);
+    $("clear").disabled = busy;
+    $("workbook-add").disabled = busy || !worksheetCells;
+    $("workbook-sheet").disabled = busy || !workbook;
+    if (admin) {
+      globalThis.LunaAuctionRepublish?.render();
+      return;
+    }
     $("queue").replaceChildren();
     state.rows.forEach((entry, index) => {
       const option = document.createElement("option");
@@ -550,10 +598,12 @@ globalThis.LunaAuctions = (() => {
     });
     $("workbook-add").disabled = busy || !worksheetCells;
     $("workbook-sheet").disabled = busy || !workbook;
-    $("paste").placeholder = state.rows.length
-      ? "Paste more rows — headers optional"
-      : "Paste rows here — headers optional";
-    if (!row) return;
+    $("paste").placeholder = "Paste sheet rows here — headers optional";
+    $("remove-row").disabled = busy || !row;
+    if (!row) {
+      globalThis.LunaAuctionRepublish?.render();
+      return;
+    }
     $("queue").value = String(state.index);
     for (const name of fields)
       if (document.activeElement !== $(name)) $(name).value = row[name] || "";
@@ -681,13 +731,6 @@ globalThis.LunaAuctions = (() => {
         : row.audit?.ok
           ? "Update & check Ayshei"
           : "Prepare & fill Ayshei";
-    if (globalThis.LunaConfig?.publicBuild) {
-      $("prepare").disabled = true;
-      $("prepare").textContent = "Private connection required";
-      $("get-photos").disabled = true;
-      $("images-status").textContent =
-        "Local row and workbook tools are included. Account-connected photo preparation is private.";
-    }
     if (row.awaitingCategory && $("message").hidden) message(categoryInstructions);
   };
   const htmlTable = (html) => {
@@ -727,8 +770,8 @@ globalThis.LunaAuctions = (() => {
   };
   const importRows = async (input, sourceLabel = "") => {
     if (pasteError) throw new Error(pasteError);
-    const rows = core.parseSheet(input, $("date-format").value, {
-      layout: $("layout").value,
+    const rows = core.parseSheet(input, $("date-format").value || "strict", {
+      layout: $("layout").value || "auto",
       savedHeaders: $("layout").value === "saved" ? state.headers || [] : [],
       allowHeaderlessPhotoSource: true
     });
@@ -736,88 +779,90 @@ globalThis.LunaAuctions = (() => {
       state.headers = rows.layoutHeaders;
       state.headersVerified = true;
     }
-    const signature = (row) =>
-      JSON.stringify([row.title, row.photosUrl, row.startDate, row.startPrice]);
-    const known = new Set(state.rows.map(signature));
-    const updated = [];
-    let corrected = 0;
-    const added = rows.filter((row) => {
-      const stamp = signature(row);
-      if (known.has(stamp)) return false;
-      const old = state.rows.filter(
-        (entry) =>
-          entry.title === row.title &&
-          entry.brand === row.brand &&
-          (entry.serial || "") === (row.serial || "") &&
-          !entry.draftId &&
-          !entry.creatingDraft &&
-          !entry.imagesImported &&
-          !entry.capture
+    if (!rows.length)
+      throw new Error(
+        "No listing rows were found. Your paste is still above; review the copied cells."
       );
-      if (
-        old.length === 1 &&
-        (old[0].importReview?.length ||
-          old[0].importError ||
-          core
-            .validate(old[0])
-            .issues.some((issue) =>
-              /Invalid price:|missing|unsupported|SharePoint|no Descale/i.test(issue)
-            ))
-      ) {
-        const entry = old[0],
-          source = entry.descriptionSource,
-          description = entry.description;
-        known.delete(signature(entry));
-        Object.assign(entry, row, { id: entry.id });
-        if (source && !entry.descriptionSource)
-          Object.assign(entry, { descriptionSource: source, description });
-        invalidate(entry);
-        updated.push(entry);
-        known.add(stamp);
-        corrected++;
-        return false;
-      }
-      known.add(stamp);
-      return true;
-    });
-    const first = state.rows.length;
-    for (const row of added) {
-      row.id = `auction-${crypto.randomUUID()}`;
-      state.rows.push(row);
+    if (republishMode()) {
+      await globalThis.LunaAuctionRepublish.setRows(rows, source());
+      message("");
+      return;
     }
-    updated.push(...added);
-    const incomplete = state.rows.findIndex((row) => updated.includes(row) && !checks(row).valid);
-    if (incomplete >= 0) state.index = incomplete;
-    else if (added.length) state.index = first;
-    $("paste").value = "";
-    $("import").hidden = true;
-    richTable = null;
-    const needing = updated.filter((row) => !checks(row).valid).length;
+    state.bindings ||= {};
+    for (const row of state.rows) keepBinding(row);
+    state.rows = rows.map((row) => {
+      const previous = state.bindings[bindingStamp(row)];
+      return previous
+        ? {
+            ...previous,
+            ...row,
+            id: previous.id,
+            tabId: previous.tabId,
+            draftId: previous.draftId,
+            categoryPath: previous.categoryPath,
+            awaitingCategory: previous.awaitingCategory,
+            creatingDraft: previous.creatingDraft,
+            capture: previous.capture,
+            imagesImported: previous.imagesImported,
+            importedCount: previous.importedCount,
+            mainImage: previous.mainImage,
+            descriptionSource: previous.descriptionSource || row.descriptionSource,
+            description: previous.description || row.description
+          }
+        : { ...row, id: `auction-${crypto.randomUUID()}` };
+    });
+    state.index = 0;
     message(
-      `${added.length} auctions added${corrected ? ` · ${corrected} misaligned rows corrected` : ""}${rows.length > added.length + corrected ? ` · ${rows.length - added.length - corrected} duplicates skipped` : ""}.${sourceLabel ? ` ${sourceLabel}.` : ""}${needing ? ` ${needing} ${needing === 1 ? "row needs" : "rows need"} a field completed below.` : ""}${rows.inferredYear ? ` Dates without a year use ${rows.inferredYear}.` : ""}`,
-      needing ? "info" : "success"
+      `${rows.length} ${rows.length === 1 ? "row" : "rows"} in this preview. Previous rows were replaced.${sourceLabel ? ` ${sourceLabel}.` : ""}`,
+      "success"
     );
   };
   $("paste").addEventListener("paste", (event) => {
     event.preventDefault();
     if (busy) return;
-    const text = event.clipboardData.getData("text/plain");
-    $("paste").value = text;
+    $("paste").value = event.clipboardData.getData("text/plain");
     pasteError = "";
     try {
       richTable = htmlTable(event.clipboardData.getData("text/html"));
     } catch (error) {
       richTable = null;
-      if (!text.trim()) pasteError = error.message;
+      if (!source().trim()) pasteError = error.message;
     }
-    return run(() => importRows(richTable || text));
+    if (!source().trim() && richTable) $("paste").value = sourceTable(richTable);
+    rememberSource();
+    render();
   });
   $("paste").addEventListener("input", () => {
     richTable = null;
     pasteError = "";
-    $("import").hidden = !$("paste").value.trim();
+    rememberSource();
+    render();
   });
-  $("import").addEventListener("click", () => run(() => importRows(richTable || $("paste").value)));
+  $("import").addEventListener("click", () => run(() => importRows(richTable || source())));
+  $("clear").addEventListener("click", () =>
+    run(async () => {
+      if (republishMode()) await globalThis.LunaAuctionRepublish.setRows([], "");
+      else {
+        for (const row of state.rows) keepBinding(row);
+        state.rows = [];
+        state.index = 0;
+      }
+      $("paste").value = "";
+      richTable = null;
+      pasteError = "";
+      rememberSource();
+      message("");
+    })
+  );
+  $("remove-row").addEventListener("click", () =>
+    run(async () => {
+      const row = current();
+      if (!row) return;
+      keepBinding(row);
+      state.rows.splice(state.index, 1);
+      state.index = Math.max(0, Math.min(state.index, state.rows.length - 1));
+    })
+  );
   $("open-workbook").addEventListener("click", () => $("workbook-file").click());
   $("workbook-file").addEventListener("change", () =>
     run(async () => {
@@ -895,6 +940,9 @@ globalThis.LunaAuctions = (() => {
         ];
       }
       pasteError = "";
+      richTable = selected;
+      $("paste").value = sourceTable(selected);
+      rememberSource();
       await importRows(selected, "From workbook headers");
     })
   );
@@ -945,6 +993,22 @@ globalThis.LunaAuctions = (() => {
   $("open-description").addEventListener("click", () => run(() => openDescription(current())));
   $("rephrase").addEventListener("click", () => run(() => rephrase(current())));
   $("prepare").addEventListener("click", () => run(prepare));
+  $("workflow").addEventListener("change", () => {
+    state.workflow = $("workflow").value;
+    const saved = state.pastes?.[state.workflow];
+    $("paste").value = saved?.text || "";
+    richTable = saved?.cells || null;
+    pasteError = "";
+    $("workbook-panel").hidden = true;
+    save().catch(() => message("The workflow could not be saved locally.", "error"));
+    render();
+  });
+  for (const mode of ["republish", "placement"])
+    $("tab-" + mode).addEventListener("click", () => {
+      if (busy) return;
+      $("workflow").value = mode;
+      $("workflow").dispatchEvent(new Event("change"));
+    });
   $("draft-link").addEventListener("click", (event) => {
     event.preventDefault();
     run(() => ensureDraft(current()));
@@ -963,10 +1027,21 @@ globalThis.LunaAuctions = (() => {
         }
       }
       state.index = Math.max(0, Math.min(state.index, Math.max(0, state.rows.length - 1)));
+      $("workflow").value = state.workflow === "republish" ? "republish" : "placement";
+      const pasted = state.pastes?.[$("workflow").value];
+      $("paste").value = pasted?.text || "";
+      richTable = pasted?.cells || null;
       render();
     })
     .catch(() => message("The local auction queue could not be restored.", "error"));
   return Object.freeze({
+    rows: () => state.rows,
+    sourceText: source,
+    selectRow,
+    run,
+    isBusy: () => busy,
+    refresh: render,
+    notify: message,
     onSectionShown(section) {
       if (section === "auctions") render();
     }

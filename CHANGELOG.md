@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.7 — Simpler auction batches
+
+- Separate Republish and New placement previews; paste remains visible until Review rows.
+- New imports replace old previews. Clear, Remove, Select all and Select none simplify row management.
+- Cropped headerless Gold rows retain their correct initial/reserve columns.
+- Compact summaries, inline editing, one main action and collapsed local History.
+- Metadata is 2.7.0 with the displayed version 2.7. Private connections and work data remain excluded.
+
 ## 2.6 � Easier auction imports
 
 - Pasted auction rows are added immediately, including headerless rows copied from the middle of a worksheet.

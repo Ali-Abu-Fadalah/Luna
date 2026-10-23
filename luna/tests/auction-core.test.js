@@ -40,6 +40,76 @@ const data = [
   "https://example-my.sharepoint.com/personal/example/_layouts/15/onedrive.aspx?id=%2FDocuments%2FImages%2Fitem"
 ];
 const parse = (row = data) => core.parseSheet([headers, row])[0];
+
+// A copy beginning at Tag, with no vendor/category/brand columns, and ending
+// at Duration. Weight, listing code and threshold are deliberately plausible
+// positive prices so only structural column alignment can identify the money.
+const croppedGold = [
+  "New Arrival",
+  "",
+  "Example Gold 250 Grams 999.9 Pure Gold Bar with Certificate",
+  "250",
+  "https://marketplace.example.invalid/auctions/detail/1234567890-example-gold-250-grams-999-9-pure-gold-bar-with-certificate",
+  "1234567890",
+  "https://shop.example/product/gold-bar",
+  "",
+  "75000",
+  "145000",
+  "",
+  "",
+  "150000",
+  "",
+  "New",
+  "https://shop.example/product/gold-bar",
+  "24th Oct 2026",
+  "27th Oct 2026",
+  "3 Days"
+];
+test("cropped Gold rows identify prices by the catalog slice in Markdown, TSV and rich cells", () => {
+  const markdown = [croppedGold, croppedGold.map(() => "---")]
+    .map((cells) => `| ${cells.join(" | ")} |`)
+    .join("\n");
+  for (const input of [markdown, croppedGold.join("\t"), [croppedGold.map((text) => ({ text }))]]) {
+    const rows = core.parseSheet(input),
+      row = rows[0];
+    assert.equal(rows.length, 1);
+    assert.equal(row.title, croppedGold[2]);
+    assert.equal(row.startPrice, "75000");
+    assert.equal(row.reservePrice, "145000");
+    assert.equal(row.condition, "New");
+    assert.equal(row.startDate, "2026-10-24");
+    assert.equal(row.endDate, "2026-10-27");
+    assert.equal(row.descriptionUrl, croppedGold[6]);
+    assert.equal(row.tamara, "");
+    assert.equal(row.importMethod, "cropped-catalog");
+  }
+});
+test("cropped Gold copies may begin at the title and retain the same money columns", () => {
+  for (const offset of [0, 1, 2]) {
+    const row = core.parseSheet([croppedGold.slice(offset)])[0];
+    assert.equal(row.title, croppedGold[2]);
+    assert.equal(row.startPrice, "75000");
+    assert.equal(row.reservePrice, "145000");
+  }
+});
+test("a cropped invalid initial price never shifts into the reserve or threshold column", () => {
+  const cells = [...croppedGold];
+  cells[8] = "not an amount";
+  const row = core.parseSheet([cells])[0];
+  assert.equal(row.startPrice, "not an amount");
+  assert.equal(row.reservePrice, "145000");
+  assert.ok(core.validate(row).issues.some((issue) => /price/.test(issue)));
+});
+test("cropped money requires complete condition and adjacent date anchors", () => {
+  for (const index of [14, 16, 17]) {
+    const cells = [...croppedGold];
+    cells[index] = "";
+    const row = core.parseSheet([cells])[0];
+    assert.equal(row.startPrice, "");
+    assert.equal(row.reservePrice, "");
+    assert.ok(row.importReview.some((entry) => entry.field === "startPrice"));
+  }
+});
 test("headerless workbook layouts, visible columns and remembered headers preserve every mapped field", () => {
   for (const [layout, names] of Object.entries(core.layouts)) {
     const values = names.map((name) => {

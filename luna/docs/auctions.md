@@ -1,11 +1,13 @@
-# Auctions in Luna 2.6
+# Auctions in Luna 2.7
 
-Paste rows to add them immediately. Headerless TSV, rich clipboard tables and Markdown tables are supported. The importer preserves agreed fields, exposes source-cell choices for uncertain fields and skips exact duplicates.
+Republish and New placement keep separate pasted sources and previews. Paste TSV, rich clipboard tables or Markdown, inspect the still-visible text, then click **Review rows**. Each new reviewed paste replaces its preview. Use **Clear**, **Remove**, **Select all** or **Select none** rather than managing an accumulating queue.
 
-For headerless rows, one unique SharePoint folder can supply the photo source. With actual headers, only Descale Photoes supplies the folder and only Description supplies the description. Missing or ambiguous amounts and dates remain editable. Numeric dates with one component above 12 are unambiguous; other numeric dates need the explicit date order in Import options.
+The compact republish preview shows title, start/end, initial/reserve and Tamara. **Edit** temporarily opens those fields. Unfinished or completed outcomes from older jobs stay in collapsed History. Changing the source disables execution until it has been reviewed again.
 
-Open spreadsheet optionally reads a local .xlsx workbook. Choose the worksheet and add all rows or physical worksheet row numbers such as 12-20, 24. Hidden columns, internal blanks, hyperlink targets, date systems and cached formula results are preserved. Formula evaluation, macros and external-link requests are not used. No workbook upload is performed.
+Headerless copies may begin at Tag or Model - Title and stop at Duration. Catalog slices must agree on prices using title/listing, condition and adjacent date anchors. Weights, codes and thresholds never replace an uncertain price. Ambiguous amounts remain editable with source suggestions. Dates without a year use the current year; Saturday starts use 10 PM, other starts 9 PM, and republish end dates 9 PM.
 
-The local reader uses packaged SheetJS and fflate libraries in a dedicated worker. Embedded media is omitted in memory for speed. Limits are 100 MB per file, 600 worksheets, 5,000 rows, 256 columns, 300,000 returned cells and 128 MB unpacked XML. Oversized sources are rejected rather than silently truncated.
+For headerless rows, one unique SharePoint folder can supply the photo source. With actual headers, only Descale Photoes supplies photos and only Description supplies description text or its link.
 
-This public edition includes local row import, editing and workbook tools. Private account connections, authenticated downloads and saved-draft transports are excluded. It cannot prepare or publish an auction on an organization's systems.
+Open spreadsheet optionally reads a local .xlsx workbook with actual headers and physical row ranges. Hidden columns, internal blanks, hyperlinks, date systems and cached formula values are preserved. Formula evaluation, macros, external-link requests and workbook uploads are not used. Parsing uses packaged SheetJS/fflate in a bounded worker.
+
+The public edition includes local import, editing, preview and workbook tools. Private account connections, authenticated downloads, admin/draft transports and saved-draft schemas are excluded. It cannot prepare, publish or republish an auction on an organization's systems.

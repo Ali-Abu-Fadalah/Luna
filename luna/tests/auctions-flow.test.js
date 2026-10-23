@@ -56,7 +56,6 @@ const create = async ({
   fillError = "",
   auditMismatch = false,
   imagesImported = false,
-  publicBuild = false,
   workbookRows = [],
   selectedCategory = ["Lifestyle", "Beauty & Health", "Fragrance"]
 } = {}) => {
@@ -101,7 +100,6 @@ const create = async ({
     status: "complete"
   };
   const context = {
-    LunaConfig: { publicBuild },
     URL,
     Intl,
     crypto: webcrypto,
@@ -109,11 +107,17 @@ const create = async ({
     document: {
       activeElement: null,
       getElementById: (id) => nodes[id.replace("auction-", "")],
-      querySelectorAll: () => Object.values(nodes),
+      querySelectorAll: (selector) =>
+        selector === "[data-auction-placement]" ? [] : Object.values(nodes),
       createElement: () => new Element()
     },
     chrome: {
-      storage: { local: { get: async () => ({ "luna.auctions.v1": state }), set: async () => {} } },
+      storage: {
+        local: {
+          get: async () => ({ "luna.auctions.v1": state }),
+          set: async (patch) => Object.assign(state, patch["luna.auctions.v1"] || {})
+        }
+      },
       scripting: { executeScript: async () => [] },
       runtime: {},
       tabs: {
@@ -395,7 +399,7 @@ test("an unfinished manual category handoff cannot create a duplicate after its 
   }
 });
 
-test("reimport corrects a previously shifted pending row and preserves its manually pasted description", async () => {
+test("reviewing a new paste replaces an old unbound placement preview", async () => {
   const app = await create();
   Object.assign(app.row, {
     serial: "1",
@@ -404,7 +408,6 @@ test("reimport corrects a previously shifted pending row and preserves its manua
     photosUrl: "",
     condition: "https://wrong.example"
   });
-  const source = app.row.descriptionSource;
   app.nodes.paste.value = [
     "1",
     "Ayshei",
@@ -433,19 +436,22 @@ test("reimport corrects a previously shifted pending row and preserves its manua
     ""
   ].join("\t");
   await app.nodes.import.fire("click");
-  assert.equal(app.row.startPrice, "1");
-  assert.equal(app.row.condition, "New");
-  assert.equal(app.row.photosUrl, "https://example-my.sharepoint.com/folder");
-  assert.equal(app.row.descriptionSource, source);
-  assert.equal(app.row.id, "test-row");
+  assert.equal(app.state.rows.length, 1);
+  const imported = app.state.rows[0];
+  assert.equal(imported.startPrice, "1");
+  assert.equal(imported.condition, "New");
+  assert.equal(imported.photosUrl, "https://example-my.sharepoint.com/folder");
+  assert.equal(imported.descriptionUrl, "https://shop.example/product");
+  assert.notEqual(imported.id, "test-row");
+  assert.match(imported.startDate, new RegExp(`^${new Date().getFullYear()}-10-10$`));
   assert.equal(app.nodes.queue.children.length, 1);
-  assert.match(app.nodes.message.textContent, /1 misaligned rows corrected/);
-  assert.match(app.nodes.message.textContent, /Dates without a year use/);
+  assert.match(app.nodes.message.textContent, /1 row in this preview/);
+  assert.ok(app.nodes.paste.value.includes("No Reserve"));
   assert.equal(app.writes.length, 0);
   assert.equal(app.uploads.length, 0);
 });
 
-test("pasting middle-sheet Gold rows imports immediately without headers or a Load rows click", async () => {
+test("paste stays visible until Review rows and each reviewed batch replaces its old preview", async () => {
   const app = await create();
   const make = (serial, reserve, title) => [
     String(serial),
@@ -480,24 +486,29 @@ test("pasting middle-sheet Gold rows imports immediately without headers or a Lo
     .join("\n");
   const event = { clipboardData: { getData: (type) => (type === "text/plain" ? text : "") } };
   await app.nodes.paste.fire("paste", event);
-  assert.equal(app.state.rows.length, 3);
-  assert.equal(app.state.rows[1].title, "Example gold 10 g");
-  assert.equal(app.state.rows[1].startPrice, "1");
-  assert.equal(app.state.rows[1].reservePrice, "5,500");
-  assert.equal(app.state.rows[2].reservePrice, "3025");
+  assert.equal(app.state.rows.length, 1, "Pasting alone must not import or alter the preview.");
+  assert.equal(app.nodes.paste.value, text);
+  assert.deepEqual(app.writes, []);
+  await app.nodes.import.fire("click");
+  assert.equal(app.state.rows.length, 2);
+  assert.equal(app.state.rows[0].title, "Example gold 10 g");
+  assert.equal(app.state.rows[0].startPrice, "1");
+  assert.equal(app.state.rows[0].reservePrice, "5,500");
+  assert.equal(app.state.rows[1].reservePrice, "3025");
   assert.equal(
-    app.state.rows[1].photosUrl,
+    app.state.rows[0].photosUrl,
     "https://example-my.sharepoint.com/:f:/g/personal/example/folder-9"
   );
   assert.equal(app.nodes.startDate.value, "2026-10-24");
   assert.equal(app.nodes.endDate.value, "2026-10-27");
-  assert.match(app.nodes.message.textContent, /2 auctions added/);
-  assert.equal(app.nodes.import.hidden, true);
+  assert.match(app.nodes.message.textContent, /2 rows in this preview/);
+  assert.equal(app.nodes.import.hidden, false);
+  assert.equal(app.nodes.paste.value, text);
   assert.equal(app.nodes.work.hidden, false);
   assert.equal(app.nodes.alerts.children.length, 0);
   await app.nodes.paste.fire("paste", event);
-  assert.equal(app.state.rows.length, 3, "A repeated paste must not duplicate the auctions.");
-  assert.match(app.nodes.message.textContent, /2 duplicates skipped/);
+  await app.nodes.import.fire("click");
+  assert.equal(app.state.rows.length, 2, "A repeated review replaces the current preview.");
   assert.deepEqual(app.writes, []);
   assert.deepEqual(app.uploads, []);
 });
@@ -543,15 +554,56 @@ test("local worksheet ranges retain actual headers and physical row numbers", as
   await app.nodes["workbook-sheet"].fire("change");
   app.nodes["workbook-range"].value = "3";
   await app.nodes["workbook-add"].fire("click");
-  assert.equal(app.state.rows.length, 2);
-  assert.equal(app.state.rows[1].title, "Example gold from workbook");
-  assert.equal(app.state.rows[1].descriptionSource, "Example gold bar, 10 g.");
+  assert.equal(app.state.rows.length, 1);
+  assert.equal(app.state.rows[0].title, "Example gold from workbook");
+  assert.equal(app.state.rows[0].descriptionSource, "Example gold bar, 10 g.");
   assert.equal(
-    app.state.rows[1].photosUrl,
+    app.state.rows[0].photosUrl,
     "https://example-my.sharepoint.com/:f:/g/personal/example/folder"
   );
   assert.match(app.nodes.message.textContent, /From workbook headers/);
   assert.deepEqual(app.writes, []);
+});
+
+test("clearing a placement preview retains bound and unresolved draft identities for an identical reimport", async () => {
+  for (const options of [{ draftId: "saved-draft" }, { creatingDraft: true }]) {
+    const app = await create(options);
+    await app.nodes.clear.fire("click");
+    assert.equal(app.state.rows.length, 0);
+    app.nodes.paste.value = [
+      [
+        "Model - Title",
+        "Category",
+        "Brand",
+        "Start Price",
+        "Reserve Price",
+        "Condition",
+        "Start Date",
+        "End Date",
+        "Descale Photoes"
+      ],
+      [
+        app.row.title,
+        "Perfume",
+        "Example",
+        "1",
+        "No Reserve",
+        "New",
+        "2026-10-24",
+        "2026-10-25",
+        app.row.photosUrl
+      ]
+    ]
+      .map((cells) => cells.join("\t"))
+      .join("\n");
+    await app.nodes.import.fire("click");
+    assert.equal(app.state.rows.length, 1);
+    assert.equal(app.state.rows[0].id, app.row.id);
+    assert.equal(app.state.rows[0].draftId, app.row.draftId);
+    assert.equal(app.state.rows[0].creatingDraft, app.row.creatingDraft);
+    assert.deepEqual(app.writes, []);
+    assert.deepEqual(app.operations, []);
+  }
 });
 
 test("an incomplete middle-sheet row remains editable and is selected instead of rejecting the batch", async () => {
@@ -586,11 +638,12 @@ test("an incomplete middle-sheet row remains editable and is selected instead of
   await app.nodes.paste.fire("paste", {
     clipboardData: { getData: (type) => (type === "text/plain" ? cells.join("\t") : "") }
   });
-  assert.equal(app.state.rows.length, 2);
+  await app.nodes.import.fire("click");
+  assert.equal(app.state.rows.length, 1);
   assert.equal(app.nodes.work.hidden, false);
   assert.equal(app.nodes.title.value, "Example incomplete gold");
   assert.ok(app.nodes.alerts.children.length > 0);
-  assert.match(app.nodes.message.textContent, /1 row needs a field completed/);
+  assert.ok(app.nodes.paste.value.includes("not an amount"));
   assert.deepEqual(app.writes, []);
   assert.deepEqual(app.uploads, []);
 });
@@ -676,16 +729,4 @@ test("lost draft-creation responses never trigger a duplicate draft", async () =
   await app.nodes.prepare.fire("click");
   assert.match(app.nodes.message.textContent, /will not create a duplicate/);
   assert.deepEqual(app.operations, []);
-});
-
-test("public edition keeps account-connected preparation disabled without opening a tab or uploading", async () => {
-  const app = await create({ publicBuild: true });
-  assert.equal(app.nodes.prepare.disabled, true);
-  assert.equal(app.nodes["get-photos"].disabled, true);
-  assert.equal(app.nodes.prepare.textContent, "Private connection required");
-  await app.nodes.prepare.fire("click");
-  assert.match(app.nodes.message.textContent, /not included in the public edition/);
-  assert.deepEqual(app.operations, []);
-  assert.deepEqual(app.writes, []);
-  assert.deepEqual(app.uploads, []);
 });

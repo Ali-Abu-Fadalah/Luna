@@ -2117,28 +2117,39 @@
           </article>
         </section>
 
-        <section class="auctions-view" aria-label="Auctions" hidden>
-          <header class="auction-heading">
-            <h3>Auctions</h3>
-            <p>Paste rows. Prepare your next auction.</p>
-          </header>
+        <section class="auctions-view" id="auction-view" aria-label="Auctions" hidden>
+          <header class="auction-heading"><h3>Auctions</h3></header>
+          <div class="auction-tabs" role="tablist" aria-label="Auction workflow">
+            <button id="auction-tab-republish" type="button" role="tab" aria-selected="false">
+              Republish
+            </button>
+            <button id="auction-tab-placement" type="button" role="tab" aria-selected="true">
+              New placement
+            </button>
+          </div>
+          <select id="auction-workflow" aria-label="Auction workflow" hidden>
+            <option value="placement">New placement</option>
+            <option value="republish">Republish</option>
+          </select>
           <div class="auction-import">
-            <label class="auction-sr-only" for="auction-paste">Sheet rows</label>
+            <h4>Paste your rows</h4>
+            <p class="auction-helper">Your paste stays here until you review it.</p>
+            <label for="auction-paste">Sheet rows</label>
             <textarea
               id="auction-paste"
-              rows="2"
-              placeholder="Paste rows here — headers optional"
+              rows="7"
+              placeholder="Paste sheet rows here — headers optional"
             ></textarea>
-            <div class="auction-import-actions">
-              <span class="auction-helper">Rows are added when you paste.</span>
-              <button id="auction-open-workbook" type="button" class="auction-text-button">
-                Open spreadsheet
+            <div class="auction-source-actions">
+              <button id="auction-import" type="button" class="connection-button">
+                Review rows
               </button>
-              <input id="auction-workbook-file" type="file" accept=".xlsx" hidden />
-              <button id="auction-import" type="button" class="settings-secondary-button" hidden>
-                Add typed rows
-              </button>
+              <button id="auction-clear" type="button" class="auction-text-button">Clear</button>
             </div>
+            <button id="auction-open-workbook" type="button" class="auction-text-button">
+              Open spreadsheet
+            </button>
+            <input id="auction-workbook-file" type="file" accept=".xlsx" hidden />
             <div id="auction-workbook-panel" class="auction-workbook-panel" hidden>
               <p id="auction-workbook-name" class="auction-helper"></p>
               <label for="auction-workbook-sheet">Worksheet</label>
@@ -2151,7 +2162,7 @@
                     placeholder="All rows, or 12–20, 24"
                 /></label>
                 <button id="auction-workbook-add" type="button" class="settings-secondary-button">
-                  Add rows
+                  Review worksheet
                 </button>
               </div>
               <p id="auction-workbook-info" class="auction-helper">
@@ -2177,7 +2188,7 @@
               </select>
               <p class="auction-helper">
                 Dates without a year use the current year. Times follow the 9 PM / Saturday 10 PM
-                rule.
+                rule. Admin republishing always ends at 9 PM.
               </p>
             </details>
           </div>
@@ -2188,122 +2199,201 @@
             aria-live="polite"
             hidden
           ></p>
-          <p id="auction-empty" class="auction-empty">
-            Copy any rows from your sheet and paste above. Start from any row; no headers needed.
-          </p>
-          <div id="auction-work" hidden>
-            <nav class="auction-row-nav" aria-label="Auction rows">
-              <button
-                id="auction-prev"
-                type="button"
-                class="auction-arrow"
-                aria-label="Previous row"
-              >
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>
+          <div id="auction-placement-panel">
+            <p id="auction-empty" class="auction-empty">
+              Copy any rows from your sheet and paste above. Start from any row; no headers needed.
+            </p>
+            <div id="auction-work" hidden>
+              <button id="auction-remove-row" type="button" class="auction-text-button">
+                Remove row
               </button>
-              <label class="auction-sr-only" for="auction-queue">Selected auction</label
-              ><select id="auction-queue"></select>
-              <button id="auction-next" type="button" class="auction-arrow" aria-label="Next row">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
-              </button>
-            </nav>
-            <ul id="auction-alerts" class="auction-alerts" aria-label="Row issues"></ul>
-            <div id="auction-import-review" class="auction-import-review" hidden></div>
-            <div class="auction-section">
-              <h4>Listing</h4>
-              <div class="auction-fields">
-                <label class="auction-wide">Title<input id="auction-title" type="text" /></label>
-                <label>Brand<input id="auction-brand" type="text" /></label
-                ><label>Category<input id="auction-category" type="text" /></label>
-                <label>Start date<input id="auction-startDate" type="date" /></label
-                ><label>End date<input id="auction-endDate" type="date" /></label>
-                <label
-                  >Starting price · AED<input
-                    id="auction-startPrice"
-                    type="text"
-                    inputmode="decimal" /></label
-                ><label>Reserve / No Reserve<input id="auction-reservePrice" type="text" /></label>
-              </div>
-              <p id="auction-schedule" class="auction-helper"></p>
-              <p id="auction-price-rule" class="auction-helper"></p>
-              <details id="auction-condition-options" class="auction-extras">
-                <summary>Condition &amp; delivery</summary>
+              <nav class="auction-row-nav" aria-label="Auction rows">
+                <button
+                  id="auction-prev"
+                  type="button"
+                  class="auction-arrow"
+                  aria-label="Previous row"
+                >
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>
+                </button>
+                <label class="auction-sr-only" for="auction-queue">Selected auction</label
+                ><select id="auction-queue"></select>
+                <button id="auction-next" type="button" class="auction-arrow" aria-label="Next row">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
+                </button>
+              </nav>
+              <ul id="auction-alerts" class="auction-alerts" aria-label="Row issues"></ul>
+              <div id="auction-import-review" class="auction-import-review" hidden></div>
+              <div class="auction-section">
+                <h4>Listing</h4>
                 <div class="auction-fields">
-                  <label>Condition<input id="auction-condition" type="text" /></label
+                  <label class="auction-wide">Title<input id="auction-title" type="text" /></label>
+                  <label data-auction-placement>Brand<input id="auction-brand" type="text" /></label
+                  ><label data-auction-placement
+                    >Category<input id="auction-category" type="text"
+                  /></label>
+                  <label>Start date<input id="auction-startDate" type="date" /></label
+                  ><label>End date<input id="auction-endDate" type="date" /></label>
+                  <label
+                    >Starting price · AED<input
+                      id="auction-startPrice"
+                      type="text"
+                      inputmode="decimal" /></label
                   ><label
-                    >Tamara<input id="auction-tamara" type="text" placeholder="Yes / No / blank"
+                    >Reserve / No Reserve<input id="auction-reservePrice" type="text"
                   /></label>
                 </div>
-              </details>
-            </div>
-            <div class="auction-section">
-              <div class="auction-section-heading">
-                <h4>Photos</h4>
-                <button id="auction-get-photos" type="button" class="settings-secondary-button">
-                  Get photos
-                </button>
+                <p id="auction-schedule" class="auction-helper"></p>
+                <p id="auction-price-rule" class="auction-helper"></p>
+                <details id="auction-condition-options" class="auction-extras">
+                  <summary>Condition &amp; delivery</summary>
+                  <div class="auction-fields">
+                    <label data-auction-placement
+                      >Condition<input id="auction-condition" type="text" /></label
+                    ><label
+                      >Tamara<input id="auction-tamara" type="text" placeholder="Yes / No / blank"
+                    /></label>
+                  </div>
+                </details>
               </div>
-              <label
-                >Photo folder<input
-                  id="auction-photosUrl"
-                  type="url"
-                  placeholder="SharePoint folder link"
-              /></label>
-              <ul
-                id="auction-images"
-                class="auction-images"
-                aria-label="Auction photos, main first"
-              ></ul>
-              <p id="auction-images-status" class="auction-helper"></p>
-            </div>
-            <div class="auction-section">
-              <div class="auction-section-heading">
-                <h4>Description</h4>
-                <button id="auction-open-description" type="button" class="auction-text-button">
-                  Open source
-                </button>
+              <div class="auction-section" data-auction-placement>
+                <div class="auction-section-heading">
+                  <h4>Photos</h4>
+                  <button id="auction-get-photos" type="button" class="settings-secondary-button">
+                    Get photos
+                  </button>
+                </div>
+                <label
+                  >Photo folder<input
+                    id="auction-photosUrl"
+                    type="url"
+                    placeholder="SharePoint folder link"
+                /></label>
+                <ul
+                  id="auction-images"
+                  class="auction-images"
+                  aria-label="Auction photos, main first"
+                ></ul>
+                <p id="auction-images-status" class="auction-helper"></p>
               </div>
-              <details class="auction-extras">
-                <summary>Source link</summary>
-                <label>Description link<input id="auction-descriptionUrl" type="url" /></label>
-              </details>
-              <label for="auction-descriptionSource">Source text</label
-              ><textarea
-                id="auction-descriptionSource"
-                rows="4"
-                placeholder="Paste product description here"
-              ></textarea
-              ><button
-                id="auction-rephrase"
-                type="button"
-                class="settings-secondary-button auction-rephrase"
+              <div class="auction-section" data-auction-placement>
+                <div class="auction-section-heading">
+                  <h4>Description</h4>
+                  <button id="auction-open-description" type="button" class="auction-text-button">
+                    Open source
+                  </button>
+                </div>
+                <details class="auction-extras">
+                  <summary>Source link</summary>
+                  <label>Description link<input id="auction-descriptionUrl" type="url" /></label>
+                </details>
+                <label for="auction-descriptionSource">Source text</label
+                ><textarea
+                  id="auction-descriptionSource"
+                  rows="4"
+                  placeholder="Paste product description here"
+                ></textarea
+                ><button
+                  id="auction-rephrase"
+                  type="button"
+                  class="settings-secondary-button auction-rephrase"
+                >
+                  Rephrase into points</button
+                ><label for="auction-description">Bullet points</label
+                ><textarea
+                  id="auction-description"
+                  rows="5"
+                  placeholder="Your points appear after adding a source."
+                  disabled
+                ></textarea>
+              </div>
+              <details
+                id="auction-audit-details"
+                class="auction-extras"
+                data-auction-placement
+                hidden
               >
-                Rephrase into points</button
-              ><label for="auction-description">Bullet points</label
-              ><textarea
-                id="auction-description"
-                rows="5"
-                placeholder="Your points appear after adding a source."
-                disabled
-              ></textarea>
+                <summary>Field checks</summary>
+                <ul id="auction-audit" class="auction-audit"></ul>
+              </details>
+              <footer class="auction-footer" data-auction-placement>
+                <div>
+                  <button id="auction-prepare" type="button" class="connection-button">
+                    Prepare &amp; fill Ayshei</button
+                  ><button id="auction-next-row" type="button" class="settings-secondary-button">
+                    Next row
+                  </button>
+                </div>
+                <p>
+                  You post the ad on Ayshei.
+                  <a id="auction-draft-link" href="#" hidden>Open draft</a>
+                </p>
+              </footer>
             </div>
-            <details id="auction-audit-details" class="auction-extras" hidden>
-              <summary>Field checks</summary>
-              <ul id="auction-audit" class="auction-audit"></ul>
-            </details>
-            <footer class="auction-footer">
-              <div>
-                <button id="auction-prepare" type="button" class="connection-button">
-                  Prepare &amp; fill Ayshei</button
-                ><button id="auction-next-row" type="button" class="settings-secondary-button">
-                  Next row
+          </div>
+          <section
+            id="auction-republish-panel"
+            class="auction-republish"
+            aria-label="Admin republish batch"
+            hidden
+          >
+            <div id="auction-republish-preview" hidden>
+              <div class="auction-preview-heading">
+                <h4>This batch</h4>
+                <span id="auction-republish-count"></span>
+              </div>
+              <div class="auction-selection">
+                <button id="auction-republish-all" type="button" class="auction-text-button">
+                  Select all</button
+                ><button id="auction-republish-none" type="button" class="auction-text-button">
+                  Select none
                 </button>
               </div>
-              <p>
-                You post the ad on Ayshei. <a id="auction-draft-link" href="#" hidden>Open draft</a>
+              <ol
+                id="auction-republish-rows"
+                class="auction-preview-rows"
+                aria-label="Rows to republish"
+              ></ol>
+              <label class="auction-mode-switch"
+                ><span>Review each auction</span
+                ><input id="auction-republish-review" type="checkbox" role="switch" checked
+              /></label>
+              <button
+                id="auction-republish-primary"
+                class="connection-button auction-primary"
+                type="button"
+              >
+                Open admin review
+              </button>
+              <button id="auction-republish-pause" class="auction-text-button" type="button" hidden>
+                Pause after current row
+              </button>
+              <p id="auction-republish-mode" class="auction-helper">
+                You click Republish in the admin window.
               </p>
-            </footer>
-          </div>
+            </div>
+            <p
+              id="auction-republish-status"
+              class="auction-message"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></p>
+            <details id="auction-republish-results" class="auction-extras" hidden>
+              <summary>Auction links · sheet order</summary>
+              <ol id="auction-republish-links" class="auction-batch-links"></ol>
+              <button id="auction-republish-copy" type="button" class="auction-text-button">
+                Copy auction links
+              </button>
+            </details>
+            <p class="auction-helper auction-source-note">
+              Each paste replaces the preview. Previous results stay in History.
+            </p>
+            <details id="auction-republish-history" class="auction-history">
+              <summary>History <span id="auction-republish-history-count"></span></summary>
+              <ol id="auction-republish-history-list" class="auction-batch-links"></ol>
+            </details>
+          </section>
         </section>
         <section class="settings-view" aria-label="Settings" hidden>
           <nav
@@ -2715,7 +2805,7 @@
         </section>
       </main>
 
-      <footer>Luna 2.6</footer>
+      <footer>Luna 2.7</footer>
     </div>
 
     <dialog id="luna-module-dialog" class="luna-dialog" aria-label="All Luna sections">
@@ -2791,7 +2881,10 @@
     <script src="src/features/auctions/auction-draft-core.js"></script>
     <script src="src/features/auctions/auction-api.js"></script>
     <script src="src/features/auctions/auction-workbook.js"></script>
+    <script src="src/features/auctions/auction-republish-core.js"></script>
+    <script src="src/features/auctions/auction-republish-api.js"></script>
     <script src="src/features/auctions/auctions.js"></script>
+    <script src="src/features/auctions/auction-republish.js"></script>
     <script src="src/features/jenkins/jenkins-core.js"></script>
     <script src="src/features/jenkins/jenkins-page.js"></script>
     <script src="src/features/jenkins/jenkins-assistant.js"></script>

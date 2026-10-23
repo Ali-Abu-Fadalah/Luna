@@ -188,7 +188,7 @@ assert.match(css, /\.jenkins-preview-fields/);
 assert.match(css, /overflow-wrap:\s*anywhere/);
 assert.match(css, /@media \(max-width: 340px\)/);
 assert.doesNotMatch(css, /cursor:\s*(?:wait|not-allowed)/);
-assert.equal(manifest.version, "2.6.0");
+assert.equal(manifest.version, "2.7.0");
 assert.ok(manifest.host_permissions.every((origin) => !origin.includes("example.invalid")));
 assert.equal(manifest.permissions.includes("cookies"), false);
 assert.equal(manifest.permissions.includes("webRequest"), false);
