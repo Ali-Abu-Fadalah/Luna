@@ -14,7 +14,14 @@ const patterns = [
     /(?:gsk_[A-Za-z0-9]{40,}|sk-(?:proj-)?[A-Za-z0-9_-]{40,}|AIza[A-Za-z0-9_-]{35})/
   ],
   ["live Apps Script deployment", /\bAKfy[a-zA-Z0-9_-]{35,}\b/],
-  ["spreadsheet link", /docs\.google\.com\/spreadsheets\/d\/[A-Za-z0-9_-]{20,}/],
+  [
+    "spreadsheet link",
+    /docs\.google\.com\/spreadsheets\/(?:u\/\d+\/)?d\/(?:e\/)?[A-Za-z0-9_-]{20,}/i
+  ],
+  [
+    "online sheet/file link",
+    /(?:docs\.google\.com\/open\?id=|drive\.google\.com\/(?:file\/d\/|drive\/folders\/))[A-Za-z0-9_-]{20,}/i
+  ],
   ["account ID", /"(?:account_id|spreadsheetId)"\s*:\s*"[a-zA-Z0-9_-]{20,}"/],
   ["non-example SharePoint tenant", /https:\/\/(?!example(?:[-.]|\/))[a-z0-9-]+\.sharepoint\.com/i],
   ["local user path", /[A-Z]:[\\/]+Users[\\/]+(?!Public(?:[\\/]|$))/i]
@@ -43,11 +50,17 @@ function walk(folder) {
       continue;
     }
     if (
-      /^(?:\.env(?:\.|$)|\.dev\.vars|config\.(?:local|private)\.|credentials|cookies)|\.(?:pem|key|sqlite|db|xlsx|xls|har)$/i.test(
+      /^(?:\.env(?:\.|$)|\.dev\.vars|config\.(?:local|private)\.|credentials|cookies)|\.(?:pem|key|sqlite|db|har|zip|7z|rar|tar|gz)$/i.test(
         entry.name
       )
     )
       failures.push(`${relative}: private file name`);
+    if (
+      /\.(?:xlsx?|xlsm|xlsb|xltx?|xltm|xlam?|csv|tsv|ods|ots|fods|numbers|gsheet|iqy|odc|dbf)(?:$|\.)/i.test(
+        entry.name
+      )
+    )
+      failures.push(`${relative}: worksheet or spreadsheet export must not be published`);
     checked++;
     if (!/\.(?:js|mjs|json|html|css|svg|md|txt|yml|yaml)$/.test(entry.name)) continue;
     const text = readFileSync(file, "utf8");
