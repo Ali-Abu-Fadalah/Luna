@@ -1,0 +1,3797 @@
+/* Luna Friendly Workspace — approved 25 October 2026 reference.
+   This layer adapts Appendix A's ordered material recipes to Luna's real tools.
+   Feature styles continue to own layout contracts, hidden states, and workflows. */
+@property --q-base {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #141924;
+}
+@property --q-surface {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1b2334;
+}
+@property --q-text {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e5eaf4;
+}
+@property --q-muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #afbdd3;
+}
+@property --q-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #bacaf3;
+}
+@property --q-recess {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #151b29;
+}
+@property --q-keytext {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #11192b;
+}
+@property --q-lens {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #28344d;
+}
+
+html {
+  min-width: 0;
+  background: #141924;
+}
+html:has(body.friendly-workspace) {
+  scroll-padding-block: 12px 110px;
+  color-scheme: dark;
+  background: #141924;
+  --luna-scroll-thumb: #697791;
+  --luna-scroll-track: #141924;
+  scrollbar-color: var(--luna-scroll-thumb) var(--luna-scroll-track);
+}
+html:has(body.friendly-workspace[data-appearance="daylight"]) {
+  color-scheme: light;
+  background: #eaeaf0;
+  --luna-scroll-thumb: #82738f;
+  --luna-scroll-track: #eaeaf0;
+}
+body.friendly-workspace {
+  --q-base: #141924;
+  --q-surface: #1b2334;
+  --q-text: #e5eaf4;
+  --q-muted: #afbdd3;
+  --q-accent: #bacaf3;
+  --q-link: var(--q-accent);
+  --q-recess: #151b29;
+  --q-keytext: #11192b;
+  --q-lens: #28344d;
+  --q-shine: rgba(222, 234, 255, 0.12);
+  --q-shine-soft: rgba(222, 234, 255, 0.035);
+  --q-shadow: rgba(3, 7, 17, 0.28);
+  --q-deep-shadow: rgba(3, 7, 17, 0.35);
+  --q-haze: rgba(92, 121, 194, 0.14);
+  --q-haze-two: rgba(133, 126, 215, 0.09);
+  --q-edge: rgba(200, 219, 255, 0.1);
+  --q-orb-a: #eff5ff;
+  --q-orb-b: #9baedc;
+  --q-orb-c: #293c67;
+  --q-orb-cut: #1b263d;
+  --q-quiet: #a3b0c7;
+  --q-okay: #b5c8c0;
+  --u-error: #efb1bf;
+  --q-warning: #e5c591;
+  --q-curve: cubic-bezier(0.22, 0.8, 0.23, 1);
+  /* Existing modules use these semantic aliases; keep one palette everywhere. */
+  --luna-bg: var(--q-base);
+  --luna-bg-deep: var(--q-base);
+  --luna-surface: var(--q-surface);
+  --luna-surface-raised: var(--q-lens);
+  --luna-surface-soft: var(--q-recess);
+  --luna-line: var(--q-edge);
+  --luna-line-strong: color-mix(in srgb, var(--q-muted) 27%, transparent);
+  --luna-text: var(--q-text);
+  --luna-muted: var(--q-muted);
+  --luna-faint: var(--q-muted);
+  --luna-accent: var(--q-accent);
+  --luna-accent-strong: var(--q-accent);
+  --luna-accent-ink: var(--q-link);
+  --luna-pink: var(--q-lens);
+  --luna-success: var(--q-okay);
+  --luna-warning: var(--q-warning);
+  --luna-danger: var(--u-error);
+  --luna-shadow: inset 0 1px 1px var(--q-shine), 0 7px 17px var(--q-shadow);
+  --luna-shadow-small: inset 0 1px 1px var(--q-shine), 0 2px 5px var(--q-shadow);
+  --luna-inset: inset 0 2px 4px var(--q-shadow), 0 1px 0 var(--q-shine-soft);
+  --luna-radius: 19px;
+  --luna-motion-fast: 180ms;
+  --luna-motion-page: 240ms;
+  --text: var(--q-text);
+  --muted: var(--q-muted);
+  --violet: var(--q-accent);
+  --danger: var(--u-error);
+  --surface: var(--q-surface);
+  --raised: var(--q-lens);
+  --soft-border: var(--q-edge);
+  --bg-space: var(--q-base);
+  --surface-lunar: var(--q-surface);
+  --surface-raised: var(--q-lens);
+  --text-main: var(--q-text);
+  --text-strong: var(--q-text);
+  --text-muted: var(--q-muted);
+  --accent-dove: var(--q-orb-b);
+  --accent-ice: var(--q-accent);
+  --glow-crimson: var(--u-error);
+  --border-soft: var(--q-edge);
+  --shadow-lunar: var(--luna-shadow);
+  min-width: 0;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--q-base);
+  color: var(--q-text);
+  color-scheme: dark;
+  font:
+    400 13px/1.45 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  scrollbar-color: var(--luna-scroll-thumb) var(--luna-scroll-track);
+  transition:
+    --q-base 0.6s,
+    --q-surface 0.6s,
+    --q-text 0.45s,
+    --q-muted 0.45s,
+    --q-accent 0.6s,
+    --q-recess 0.6s,
+    --q-keytext 0.6s,
+    --q-lens 0.6s;
+}
+body.friendly-workspace[data-appearance="daylight"] {
+  --q-base: #eaeaf0;
+  --q-surface: #f5f4f8;
+  --q-text: #343242;
+  --q-muted: #595368;
+  --q-accent: #73678f;
+  --q-link: color-mix(in srgb, var(--q-accent) 88%, var(--q-text));
+  --q-recess: #e8e6ef;
+  --q-keytext: #faf7ff;
+  --q-lens: #d8d3e6;
+  --q-shine: rgba(255, 255, 255, 0.92);
+  --q-shine-soft: rgba(255, 255, 255, 0.5);
+  --q-shadow: rgba(106, 96, 132, 0.12);
+  --q-deep-shadow: rgba(91, 83, 120, 0.13);
+  --q-haze: rgba(174, 157, 219, 0.2);
+  --q-haze-two: rgba(161, 203, 218, 0.2);
+  --q-edge: rgba(255, 255, 255, 0.7);
+  --q-orb-a: #fff;
+  --q-orb-b: #c9c2e6;
+  --q-orb-c: #9b9dc3;
+  --q-orb-cut: #e2e1ed;
+  --q-quiet: #777084;
+  --q-okay: #566c5b;
+  --u-error: #96384d;
+  --q-warning: #775e26;
+  color-scheme: light;
+}
+body.friendly-workspace *,
+body.friendly-workspace *::before,
+body.friendly-workspace *::after {
+  box-sizing: border-box;
+}
+body.friendly-workspace * {
+  scrollbar-color: var(--luna-scroll-thumb) var(--luna-scroll-track);
+}
+html:has(body.friendly-workspace)::-webkit-scrollbar,
+body.friendly-workspace ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html:has(body.friendly-workspace)::-webkit-scrollbar-track,
+body.friendly-workspace ::-webkit-scrollbar-track {
+  background: var(--luna-scroll-track);
+  box-shadow: none;
+}
+html:has(body.friendly-workspace)::-webkit-scrollbar-thumb,
+body.friendly-workspace ::-webkit-scrollbar-thumb {
+  background: var(--luna-scroll-thumb);
+  background-clip: padding-box;
+  border: 2px solid var(--luna-scroll-track);
+  border-radius: 10px;
+  box-shadow: none;
+}
+body.friendly-workspace [hidden] {
+  display: none !important;
+}
+body.friendly-workspace :is(button, input, select, textarea) {
+  font-family: inherit;
+}
+body.friendly-workspace :is(button, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+body.friendly-workspace button {
+  cursor: pointer;
+}
+body.friendly-workspace :is(button, input, select, textarea):disabled {
+  cursor: default;
+  opacity: 0.52;
+}
+body.friendly-workspace [aria-disabled="true"] {
+  cursor: default;
+}
+body.friendly-workspace :focus-visible {
+  outline: 2px solid var(--q-accent);
+  outline-offset: 3px;
+}
+body.friendly-workspace ::selection {
+  background: var(--q-accent);
+  color: var(--q-keytext);
+}
+body.friendly-workspace ::placeholder {
+  color: var(--q-muted) !important;
+  opacity: 1;
+}
+body.friendly-workspace :is(h1, h2, h3, h4) {
+  color: var(--q-text);
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+body.friendly-workspace :is(h3, h4) {
+  font-size: 14px;
+  line-height: 1.4;
+}
+body.friendly-workspace p {
+  overflow-wrap: anywhere;
+}
+body.friendly-workspace a {
+  color: var(--q-link);
+  text-underline-offset: 3px;
+}
+body.friendly-workspace .app-shell {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0 20px 110px;
+  border: 0;
+  border-radius: 0;
+  background: var(--q-base);
+  box-shadow: inset 0 1px 1px var(--q-shine);
+}
+body.friendly-workspace .app-shell::before,
+body.friendly-workspace .content::before,
+body.friendly-workspace .brand::after,
+body.friendly-workspace :is(.star-field, .ambient) {
+  display: none;
+}
+body.friendly-workspace .lunar-atmosphere {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+  contain: paint;
+}
+body.friendly-workspace .ambient-wash {
+  position: absolute;
+  top: -60px;
+  right: -30px;
+  width: 380px;
+  height: 370px;
+  opacity: 1;
+  background: radial-gradient(ellipse at center, var(--q-haze), transparent 68%);
+  transform: none;
+  transition: transform 1.1s var(--q-curve);
+}
+body.friendly-workspace .ambient-horizon {
+  position: absolute;
+  bottom: -60px;
+  left: -120px;
+  width: 450px;
+  height: 420px;
+  opacity: 1;
+  background: radial-gradient(ellipse at center, var(--q-haze-two), transparent 67%);
+  transition: transform 1.1s var(--q-curve);
+}
+body.friendly-workspace[data-appearance="daylight"] .ambient-wash {
+  transform: translate(-70px, 50px) rotate(25deg);
+}
+body.friendly-workspace[data-appearance="daylight"] .ambient-horizon {
+  transform: translate(50px, -25px) rotate(-15deg);
+}
+body.friendly-workspace .content {
+  position: relative;
+  min-width: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+body.friendly-workspace .content.is-entering {
+  animation: none;
+}
+body.friendly-workspace #section-title {
+  margin: 7px 0 17px;
+  font:
+    400 29px/1.1 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.9px;
+}
+
+/* Header and the persistent lunar introduction. */
+body.friendly-workspace .luna-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 73px;
+  height: 73px;
+  padding: 0 5px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace .luna-home-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--q-text);
+  box-shadow: none;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -1.2px;
+}
+body.friendly-workspace .friendly-brand-dot {
+  color: var(--q-accent);
+}
+body.friendly-workspace .brand-mark {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--q-accent);
+  box-shadow: inset -7px 1px 0 var(--q-base);
+  transform: rotate(-27deg);
+}
+body.friendly-workspace .brand-mark > svg {
+  display: none;
+}
+body.friendly-workspace .luna-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+body.friendly-workspace .header-status {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  color: var(--q-muted);
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+}
+body.friendly-workspace #header-overall-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+body.friendly-workspace .status-dot {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: var(--q-okay);
+  box-shadow: none;
+}
+body.friendly-workspace #header-status[data-overall-state="attention"] .status-dot {
+  background: var(--q-warning);
+}
+body.friendly-workspace :is(#luna-jump-open, .friendly-jump) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--q-recess);
+  color: var(--q-muted);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+body.friendly-workspace :is(#luna-jump-open, .friendly-jump) > svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+body.friendly-workspace :is(.friendly-shortcut, #luna-jump-open kbd) {
+  font:
+    400 11px/1.3 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: var(--q-muted);
+  background: var(--q-surface);
+  border: 0;
+  border-radius: 4px;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+body.friendly-workspace #luna-appearance-toggle {
+  height: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px 0 7px;
+  border: 0;
+  border-radius: 25px;
+  background: var(--q-surface);
+  color: var(--q-muted);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 2px 5px var(--q-shadow);
+  font-size: 11px;
+  font-weight: 400;
+  transition: transform 0.4s var(--q-curve);
+}
+body.friendly-workspace #luna-appearance-toggle:active {
+  transform: scale(0.96);
+}
+body.friendly-workspace :is(.friendly-theme-disc, .friendly-appearance-disc) {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 25%,
+    var(--q-orb-a),
+    var(--q-orb-b) 65%,
+    var(--q-orb-c)
+  );
+  box-shadow:
+    0 1px 3px var(--q-shadow),
+    inset 0 1px 1px var(--q-shine);
+  transition: transform 0.7s var(--q-curve);
+}
+body.friendly-workspace[data-appearance="daylight"]
+  :is(.friendly-theme-disc, .friendly-appearance-disc) {
+  transform: rotate(160deg);
+}
+body.friendly-workspace :is(.luna-icon-button, .luna-settings-button) {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--q-muted);
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace :is(.luna-icon-button, .luna-settings-button) svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.friendly-workspace .friendly-intro {
+  min-height: 112px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 5px 15px;
+}
+body.friendly-workspace .friendly-intro-copy {
+  min-width: 0;
+}
+body.friendly-workspace .friendly-intro-copy :is(h2, p) {
+  overflow-wrap: anywhere;
+}
+body.friendly-workspace :is(.friendly-overline, .friendly-intro-eyebrow) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+body.friendly-workspace :is(.friendly-overline, .friendly-intro-eyebrow)::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  flex: 0 0 4px;
+  border-radius: 50%;
+  background: var(--q-accent);
+}
+body.friendly-workspace .friendly-intro :is(h1, h2, h3) {
+  margin: 10px 0 0;
+  font:
+    400 29px/1.1 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.9px;
+  color: var(--q-text);
+}
+body.friendly-workspace .friendly-orb-trigger {
+  position: relative;
+  flex: 0 0 88px;
+  width: 88px;
+  height: 88px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+  perspective: 450px;
+  transform-style: preserve-3d;
+}
+body.friendly-workspace .friendly-orb {
+  position: absolute;
+  inset: 11px;
+  z-index: 2;
+  display: block;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(
+    circle at 28% 23%,
+    var(--q-orb-a),
+    var(--q-orb-b) 32%,
+    var(--q-orb-c) 77%
+  );
+  box-shadow:
+    inset 1px 2px 2px var(--q-shine),
+    inset -7px -6px 12px var(--q-shadow),
+    0 10px 20px var(--q-shadow);
+  transform: perspective(350px) rotateX(var(--r-orbit-x, 0deg)) rotateY(var(--r-orbit-y, 0deg))
+    rotate(-25deg);
+  transition:
+    transform 0.45s var(--q-curve),
+    box-shadow 0.6s;
+}
+body.friendly-workspace .friendly-orb::before {
+  content: "";
+  position: absolute;
+  inset: -8px -12px 3px 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 28% 24%, var(--q-orb-cut), var(--q-base) 65%);
+  box-shadow: -1px 0 3px var(--q-shadow);
+  transform: translateX(var(--r-tide, 0px));
+  transition: transform 0.8s var(--q-curve);
+}
+body.friendly-workspace .friendly-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 20% 20%, var(--q-shine), transparent 62%),
+    radial-gradient(ellipse at 28% 32%, var(--q-orb-c) 0 8%, transparent 12%),
+    radial-gradient(ellipse at 40% 57%, var(--q-orb-c) 0 6%, transparent 10%);
+  opacity: 0.38;
+  pointer-events: none;
+}
+body.friendly-workspace[data-appearance="daylight"] .friendly-orb::before {
+  transform: translateX(calc(31px + var(--r-tide, 0px)));
+}
+body.friendly-workspace .friendly-orb-trigger::before,
+body.friendly-workspace .friendly-orb-trigger::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 2px solid var(--q-edge);
+  border-top-color: var(--q-orb-b);
+  border-radius: 50%;
+  transform: rotateX(65deg) rotateY(-15deg) rotateZ(-32deg);
+  box-shadow: 0 1px 1px var(--q-shadow);
+  z-index: 1;
+  transition: transform 0.75s var(--q-curve);
+  pointer-events: none;
+}
+body.friendly-workspace .friendly-orb-trigger::after {
+  z-index: 3;
+  border-color: transparent;
+  border-bottom-color: color-mix(in srgb, var(--q-orb-b) 75%, transparent);
+  box-shadow: none;
+}
+body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"]) .friendly-orb {
+  transform: perspective(350px) rotateX(var(--r-orbit-x, -6deg)) rotateY(var(--r-orbit-y, 15deg))
+    rotate(-12deg) scale(1.04);
+}
+body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::before,
+body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::after {
+  transform: rotateX(54deg) rotateY(18deg) rotateZ(10deg);
+}
+body.friendly-workspace :is(.friendly-orb-label, .friendly-quick-label) {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+body.friendly-workspace .friendly-orbit-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  right: 4px;
+  top: 27px;
+  z-index: 4;
+  border-radius: 50%;
+  background: var(--q-accent);
+  box-shadow: 0 1px 4px var(--q-shadow);
+}
+
+/* Compact lunar menus — the final Appendix A radius and row dimensions. */
+body.friendly-workspace #luna-quick-menu {
+  position: fixed;
+  top: 93px;
+  right: auto;
+  z-index: 100;
+  isolation: isolate;
+  width: min(222px, 100%);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 5px 5px;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(145deg, var(--q-surface), var(--q-base) 160%);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 12px 30px var(--q-deep-shadow);
+}
+body.friendly-workspace :is(.friendly-menu-caption, #luna-quick-menu > p) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 0 8px 7px;
+  font-size: 11px;
+  color: var(--q-muted);
+}
+body.friendly-workspace #luna-quick-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 30px;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--q-text);
+  box-shadow: none;
+  text-align: start;
+  font:
+    400 12px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+body.friendly-workspace #luna-quick-menu > button:is(:hover, :focus-visible) {
+  background: var(--q-lens);
+}
+body.friendly-workspace #luna-quick-menu > button > svg {
+  height: 14px;
+  width: 14px;
+  fill: none;
+  stroke: var(--q-accent);
+  stroke-width: 1.6;
+}
+body.friendly-workspace :is(.friendly-menu-value, #luna-quick-menu [data-quick-value]) {
+  margin-inline-start: auto;
+  font-size: 11px;
+  color: var(--q-muted);
+}
+body.friendly-workspace :is(.friendly-menu-divider, #luna-quick-menu hr) {
+  display: block;
+  height: 1px;
+  border: 0;
+  background: var(--q-edge);
+  margin: 5px 8px;
+}
+
+/* The shared dock retains Luna's four real destinations. */
+body.friendly-workspace :is(.luna-primary-nav, .friendly-dock) {
+  position: fixed;
+  left: 35px;
+  right: 35px;
+  bottom: 34px;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  min-height: 53px;
+  padding: 5px;
+  margin: 0;
+  isolation: isolate;
+  border: 0;
+  border-radius: 32px;
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 2px 5px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft),
+    0 5px 18px var(--q-deep-shadow);
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  min-width: 0;
+  width: auto;
+  height: 43px;
+  min-height: 43px;
+  margin: 0;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 28px;
+  color: var(--q-muted);
+  background: transparent;
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  text-align: center;
+  transition:
+    color 0.35s,
+    transform 0.4s var(--q-curve);
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button::after {
+  display: none;
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button[aria-current="page"] {
+  color: var(--q-text);
+  background: var(--q-lens);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 3px 8px var(--q-shadow);
+}
+body.friendly-workspace
+  .luna-primary-nav:has(.friendly-dock-lens)
+  .luna-group-button[aria-current="page"] {
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace .friendly-dock-lens {
+  position: absolute;
+  inset: 5px auto 5px 5px;
+  width: calc((100% - 10px) / 4);
+  border-radius: 28px;
+  background: linear-gradient(150deg, var(--q-lens), var(--q-surface));
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 3px 8px var(--q-shadow);
+  transform: translateX(calc(var(--friendly-dock-index, 0) * 100%));
+  transition: transform 0.7s cubic-bezier(0.2, 0.92, 0.24, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+body.friendly-workspace .friendly-dock-lens::before {
+  content: "";
+  position: absolute;
+  inset: 4px 16px auto;
+  height: 1px;
+  border-radius: 100%;
+  background: linear-gradient(90deg, transparent, var(--q-shine), transparent);
+}
+body.friendly-workspace .luna-primary-nav .nav-icon {
+  display: none;
+}
+body.friendly-workspace .friendly-phase {
+  display: inline-block;
+  position: relative;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--q-accent);
+}
+body.friendly-workspace .friendly-phase-crescent {
+  mask: radial-gradient(circle at 72% 29%, transparent 0 49%, #000 53%);
+}
+body.friendly-workspace .friendly-phase-half {
+  background: linear-gradient(90deg, var(--q-accent) 0 50%, var(--q-lens) 50% 100%);
+}
+body.friendly-workspace .friendly-phase-new {
+  border: 1px solid var(--q-accent);
+  background: transparent;
+}
+body.friendly-workspace #luna-appearance-caption {
+  position: fixed;
+  z-index: 59;
+  bottom: 12px;
+  left: 15px;
+  right: 15px;
+  display: block;
+  margin: 0;
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+}
+body.friendly-workspace .luna-module-nav {
+  display: flex;
+  gap: 3px;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  align-items: center;
+  padding: 3px;
+  margin: 0 0 16px;
+  border: 0;
+  border-radius: 19px;
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  scrollbar-width: thin;
+}
+body.friendly-workspace .luna-module-nav .nav-item {
+  display: block;
+  flex: 1 0 auto;
+  width: auto;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 16px;
+  color: var(--q-muted);
+  background: transparent;
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+body.friendly-workspace .luna-module-nav .nav-item.is-active {
+  background: var(--q-lens);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 1px 0 var(--q-shine),
+    0 2px 3px var(--q-shadow);
+}
+body.friendly-workspace .luna-module-nav .nav-icon,
+body.friendly-workspace .luna-module-nav .nav-item::after {
+  display: none;
+}
+
+/* Existing working surfaces all share the approved rounded opaque card. */
+body.friendly-workspace
+  .app-shell
+  :is(
+    .queue-card,
+    .manual-ad-card,
+    .image-scraper-card,
+    .scraper-card,
+    .inventory-card,
+    .jenkins-card,
+    .settings-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card,
+    .monthly-performance-card,
+    .daily-interactions-card,
+    .home-notes-card,
+    .luna-home-queue,
+    .luna-home-connections,
+    .sheet-report-action,
+    .welcome-card,
+    .auctions-view
+  ) {
+  min-width: 0;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 0;
+  border-radius: 29px;
+  color: var(--q-text);
+  background: linear-gradient(150deg, var(--q-surface), var(--q-base) 145%);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    inset -1px 0 0 var(--q-edge),
+    0 7px 17px var(--q-shadow);
+  transition: box-shadow 0.65s var(--q-curve);
+}
+body.friendly-workspace
+  .app-shell
+  :is(.queue-card, .settings-card, .jenkins-start-card, .welcome-card)::after,
+body.friendly-workspace
+  .app-shell
+  :is(
+    .queue-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card,
+    .welcome-card
+  )::before {
+  content: none;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .queue-card,
+    .manual-ad-card,
+    .image-scraper-card,
+    .scraper-card,
+    .inventory-card,
+    .jenkins-card,
+    .settings-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card
+  ):hover {
+  border-color: transparent;
+}
+body.friendly-workspace :is(.sheet-connection-view, .settings-view, .home-dashboard) {
+  gap: 14px;
+  min-width: 0;
+}
+body.friendly-workspace .settings-view {
+  grid-template-columns: minmax(0, 1fr);
+}
+body.friendly-workspace .jenkins-assistant-view {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+body.friendly-workspace .luna-tab-panel {
+  min-width: 0;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .inventory-result-card,
+    .home-note-vendor,
+    .settings-local-ai-provider,
+    .manual-ad-images-optional,
+    .source-facts-preview,
+    .queue-import-preview,
+    .monthly-explorer,
+    .manual-ad-ai-disclosure,
+    .auction-preview-row,
+    .auction-batch-review,
+    .jenkins-result,
+    .queue-live-result,
+    .queue-ai-strip,
+    .jenkins-field-preview
+  ) {
+  border: 0;
+  border-radius: 19px;
+  color: var(--q-text);
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-heading,
+    .counter-heading,
+    .tracker-heading,
+    .scraper-heading,
+    .image-scraper-heading,
+    .manual-ad-heading,
+    .jenkins-heading,
+    .inventory-heading
+  )
+  h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-badge,
+    .counter-badge,
+    .tracker-badge,
+    .scraper-badge,
+    .image-scraper-status,
+    .manual-ad-badge,
+    .jenkins-badge,
+    .inventory-badge,
+    .scraper-mode,
+    .queue-status,
+    .settings-provider-state,
+    .home-notes-count,
+    .inventory-result-heading span,
+    .queue-live-badge
+  ) {
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 20px;
+  color: var(--q-muted);
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 2px var(--q-shadow);
+  font-size: 11px;
+  font-weight: 400;
+}
+body.friendly-workspace .app-shell :is(label, .tracker-label, .settings-endpoint-label) {
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+body.friendly-workspace :is(.card-kicker, .eyebrow, .section-label) {
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Recessed inputs stay native; custom selects retain their underlying values. */
+body.friendly-workspace
+  .app-shell
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+    select,
+    textarea
+  ),
+body.friendly-workspace .luna-dialog input,
+body.friendly-workspace .select-search,
+body.friendly-workspace .app-shell .select-trigger {
+  min-width: 0;
+  min-height: 39px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 19px;
+  background: var(--q-recess);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 2px 4px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+body.friendly-workspace
+  .app-shell
+  :is(input:not([type="checkbox"]):not([type="radio"]), textarea):hover,
+body.friendly-workspace .app-shell .select-trigger:hover {
+  border-color: var(--q-edge);
+}
+body.friendly-workspace
+  .app-shell
+  :is(input:not([type="checkbox"]):not([type="radio"]), textarea):focus,
+body.friendly-workspace .app-shell .select-trigger[aria-expanded="true"] {
+  border-color: var(--q-edge);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 0 0 1px var(--q-edge);
+}
+body.friendly-workspace .app-shell :is(input, textarea)[readonly] {
+  color: var(--q-muted);
+}
+body.friendly-workspace .app-shell textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+body.friendly-workspace .app-shell select {
+  background-image: none;
+}
+body.friendly-workspace select option {
+  background: var(--q-surface);
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell :is(input[type="checkbox"], input[type="radio"]) {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+  accent-color: var(--q-accent);
+}
+body.friendly-workspace .app-shell :is(input, textarea)[aria-invalid="true"],
+body.friendly-workspace
+  .app-shell
+  .manual-ad-grid
+  label.is-missing
+  :is(input, textarea, .select-trigger) {
+  border-color: var(--u-error);
+  background: color-mix(in srgb, var(--u-error) 8%, var(--q-recess));
+}
+body.friendly-workspace .luna-select {
+  position: relative;
+  min-width: 0;
+}
+body.friendly-workspace .select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: start;
+}
+body.friendly-workspace .select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.friendly-workspace .select-chevron {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  fill: none;
+  stroke: var(--q-muted);
+  stroke-width: 1.6;
+}
+body.friendly-workspace .select-popover {
+  position: fixed;
+  z-index: 400;
+  overflow: hidden;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--q-surface), var(--q-base) 160%);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    inset 1px 0 0 var(--q-shine-soft),
+    0 10px 24px var(--q-deep-shadow);
+}
+body.friendly-workspace .select-popover .select-search {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+body.friendly-workspace .select-options {
+  overflow-y: auto;
+  max-height: 218px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+body.friendly-workspace .select-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 29px;
+  padding: 4px 28px 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--q-text);
+  background: transparent;
+  box-shadow: none;
+  font:
+    400 12px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  text-align: start;
+}
+body.friendly-workspace .select-option:is(.is-selected, .is-active, :hover) {
+  background: var(--q-lens);
+  color: var(--q-text);
+  box-shadow: inset 0 1px 0 var(--q-shine-soft);
+}
+body.friendly-workspace .select-option.is-selected::after {
+  content: "✓";
+  position: absolute;
+  right: 9px;
+  width: auto;
+  height: auto;
+  border: 0;
+  color: var(--q-link);
+  transform: none;
+  font-size: 11px;
+}
+body.friendly-workspace .select-option[aria-disabled="true"] {
+  opacity: 0.45;
+}
+body.friendly-workspace .select-empty {
+  padding: 10px 8px;
+  color: var(--q-muted);
+  font-size: 12px;
+}
+
+/* Buttons have local depth; primary actions carry the filled reference material. */
+body.friendly-workspace
+  .app-shell
+  :where(
+    button:not(.luna-home-button):not(.luna-group-button):not(.nav-item):not(
+        .friendly-orb-trigger
+      ):not(.select-option)
+  ),
+body.friendly-workspace .luna-dialog button {
+  min-height: 35px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 22px;
+  color: var(--q-text);
+  background: var(--q-surface);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 2px 5px var(--q-shadow);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  transition:
+    transform 0.4s var(--q-curve),
+    box-shadow 0.4s;
+}
+body.friendly-workspace
+  .app-shell
+  button:not(:disabled):not(.luna-home-button):not(.friendly-orb-trigger):hover,
+body.friendly-workspace .luna-dialog button:not(:disabled):hover {
+  color: var(--q-text);
+  background-color: var(--q-lens);
+  filter: none;
+}
+body.friendly-workspace .app-shell button:not(:disabled):active,
+body.friendly-workspace .luna-dialog button:not(:disabled):active {
+  transform: scale(0.985);
+}
+body.friendly-workspace .app-shell .luna-home-button:is(:hover, :active) {
+  color: var(--q-text);
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary
+  ),
+body.friendly-workspace .luna-dialog-body > button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 30px;
+  color: var(--q-keytext);
+  background: var(--q-accent);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 7px 12px var(--q-shadow);
+  font-size: 13px;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary
+  ):hover:not(:disabled),
+body.friendly-workspace .luna-dialog-body > button:hover:not(:disabled) {
+  color: var(--q-keytext);
+  background: var(--q-accent);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 10px 16px var(--q-shadow);
+}
+body.friendly-workspace .app-shell button:disabled {
+  box-shadow: none;
+  transform: none;
+}
+body.friendly-workspace .app-shell button.select-trigger {
+  padding: 8px 12px;
+  min-height: 39px;
+  border-radius: 19px;
+  background: var(--q-recess);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 2px 4px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  text-align: start;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .luna-view-tabs,
+    .queue-view-tabs,
+    .sheet-statistics-tabs,
+    .auction-tabs,
+    .monthly-explorer-tabs
+  ) {
+  display: grid;
+  gap: 3px;
+  padding: 3px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .luna-view-tabs,
+    .queue-view-tabs,
+    .sheet-statistics-tabs,
+    .auction-tabs,
+    .monthly-explorer-tabs
+  )
+  > button {
+  min-height: 31px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 17px;
+  background: transparent;
+  color: var(--q-muted);
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 400;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .luna-view-tabs,
+    .queue-view-tabs,
+    .sheet-statistics-tabs,
+    .auction-tabs,
+    .monthly-explorer-tabs
+  )
+  > button:is([aria-selected="true"], [aria-pressed="true"], .is-active) {
+  color: var(--q-text);
+  background: var(--q-lens);
+  box-shadow:
+    inset 0 1px 0 var(--q-shine),
+    0 2px 3px var(--q-shadow);
+}
+body.friendly-workspace .app-shell :is(.tracker-period, .interaction-period) {
+  min-height: 31px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 17px;
+  color: var(--q-muted);
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 2px var(--q-shadow);
+  font-size: 11px;
+}
+body.friendly-workspace .app-shell :is(.tracker-period, .interaction-period).is-active {
+  background: var(--q-lens);
+  color: var(--q-text);
+  box-shadow: inset 0 1px 0 var(--q-shine);
+}
+
+/* Feedback keeps states readable in either appearance. */
+body.friendly-workspace
+  .app-shell
+  :is(
+    .scraper-detail,
+    .scraper-message,
+    .scraper-settings-copy,
+    .image-scraper-copy,
+    .image-scraper-message,
+    .image-scraper-help,
+    .manual-ad-message,
+    .manual-ad-field-note,
+    .jenkins-detail,
+    .jenkins-message,
+    .inventory-detail,
+    .inventory-message,
+    .inventory-empty,
+    .inventory-result-empty,
+    .queue-message,
+    .settings-metadata,
+    .connection-detail,
+    .connection-safety,
+    .tracker-message,
+    .tracker-window,
+    .counter-window,
+    .counter-message,
+    .monthly-definition,
+    .luna-report-summary,
+    .luna-empty,
+    .home-notes-empty,
+    .auction-helper,
+    .auction-empty
+  ) {
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .scraper-safety,
+    .inventory-safety,
+    .jenkins-safety,
+    .scraper-duplicate-option,
+    .scraper-separator-option
+  ) {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--q-recess);
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    [data-kind="error"],
+    [data-kind="danger"],
+    [data-status="error"],
+    [data-queue-status="error"]
+  ) {
+  color: var(--u-error);
+}
+body.friendly-workspace
+  .app-shell
+  :is([data-kind="success"], [data-status="success"], [data-queue-status="listed"]) {
+  color: var(--q-okay);
+}
+body.friendly-workspace .app-shell :is([data-kind="warning"], [data-queue-status="review-later"]) {
+  color: var(--q-warning);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .manual-ad-message,
+    .image-scraper-message,
+    .inventory-message,
+    .jenkins-message,
+    .queue-message
+  )[data-kind="error"] {
+  background: color-mix(in srgb, var(--u-error) 8%, var(--q-recess));
+}
+
+/* Home: small sculptures and connected records use the collection language. */
+body.friendly-workspace .home-intro {
+  display: block;
+  min-height: auto;
+}
+body.friendly-workspace .home-intro .welcome-copy {
+  max-width: none;
+}
+body.friendly-workspace .home-intro h3 {
+  margin: 0 0 7px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+body.friendly-workspace .home-intro p {
+  margin: 0;
+  color: var(--q-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+body.friendly-workspace .home-intro .lunar-art {
+  display: none;
+}
+body.friendly-workspace .luna-home-queue {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  grid-template-rows: auto;
+  min-height: 0;
+}
+body.friendly-workspace .luna-home-queue p {
+  margin: 0;
+}
+body.friendly-workspace .luna-home-queue p :is(strong, small) {
+  display: block;
+}
+body.friendly-workspace .luna-home-queue strong {
+  color: var(--q-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+body.friendly-workspace .luna-home-queue small {
+  margin-top: 3px;
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace .luna-home-queue .status-icon {
+  display: none;
+}
+body.friendly-workspace .luna-home-queue .home-resume-button {
+  grid-column: 1/-1;
+  width: 100%;
+}
+body.friendly-workspace .luna-progress-track {
+  height: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+  border-radius: 99px;
+  background: var(--q-recess);
+}
+body.friendly-workspace .luna-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--q-accent);
+}
+body.friendly-workspace .luna-eclipse-progress {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: conic-gradient(var(--q-accent) var(--luna-progress, 0%), var(--q-recess) 0);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace .luna-eclipse-progress span {
+  display: none;
+  font-size: 11px;
+  color: var(--q-muted);
+}
+body.friendly-workspace .luna-eclipse-progress::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: var(--q-surface);
+}
+body.friendly-workspace .luna-shortcuts h3 {
+  margin: 0 0 10px;
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+body.friendly-workspace .luna-shortcuts > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+body.friendly-workspace .app-shell .luna-shortcuts button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  min-height: 72px;
+  padding: 13px;
+  border-radius: 23px;
+  text-align: start;
+  background: linear-gradient(145deg, var(--q-surface), var(--q-base));
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 4px 12px var(--q-shadow);
+}
+body.friendly-workspace .luna-shortcuts strong {
+  color: var(--q-text);
+  font-size: 12px;
+  font-weight: 400;
+}
+body.friendly-workspace .luna-shortcuts span {
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace .app-shell .luna-home-connections {
+  padding: 8px 13px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+body.friendly-workspace .luna-home-connections .mini-status {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 7px;
+  align-items: center;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--q-edge);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 0;
+}
+body.friendly-workspace .luna-home-connections .mini-status:last-child {
+  border-bottom: 0;
+}
+body.friendly-workspace .luna-home-connections .mini-status > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 10px;
+}
+body.friendly-workspace .luna-home-connections .mini-status p {
+  margin: 0;
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace .luna-home-connections .mini-status strong {
+  color: var(--q-text);
+  font-size: 11px;
+  font-weight: 400;
+  max-width: 23ch;
+  text-align: end;
+}
+body.friendly-workspace .luna-home-connections .mini-status small {
+  display: block;
+  color: var(--q-muted);
+  font-size: 11px;
+  grid-column: 1 / -1;
+  margin: 0;
+}
+body.friendly-workspace .luna-home-connections .status-icon {
+  display: none;
+}
+body.friendly-workspace .home-note-item {
+  padding: 10px;
+  border-radius: 13px;
+  background: var(--q-surface);
+}
+body.friendly-workspace .home-note-item strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+body.friendly-workspace .home-note-item p {
+  font-size: 11px;
+  color: var(--q-muted);
+}
+body.friendly-workspace .home-note-vendor summary {
+  color: var(--q-text);
+  font-size: 12px;
+  font-weight: 400;
+}
+body.friendly-workspace .home-note-vendor summary small {
+  color: var(--q-muted);
+  font-size: 11px;
+}
+
+/* Work Queue and input grids preserve their native grouping and copy behavior. */
+body.friendly-workspace
+  .app-shell
+  :is(.queue-form-grid, .manual-ad-grid, .interaction-filters, .settings-facts) {
+  min-width: 0;
+  gap: 12px 9px;
+}
+body.friendly-workspace .queue-listed-layout {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+body.friendly-workspace .queue-listed-layout > label,
+body.friendly-workspace .app-shell .queue-detail-grid > label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+body.friendly-workspace .app-shell .queue-form-grid.queue-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+body.friendly-workspace .queue-form-column {
+  gap: 12px;
+}
+body.friendly-workspace .queue-trim-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: stretch;
+  gap: 5px;
+  min-width: 0;
+}
+body.friendly-workspace .app-shell .queue-trim-copy {
+  width: 100%;
+  min-width: 0;
+  user-select: text;
+  cursor: text;
+}
+body.friendly-workspace .queue-trim-control .luna-select {
+  width: 34px;
+}
+body.friendly-workspace .app-shell .queue-trim-control .select-trigger {
+  width: 34px;
+  min-width: 34px;
+  padding-inline: 8px;
+  justify-content: center;
+}
+body.friendly-workspace .queue-trim-control .select-value {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+body.friendly-workspace .queue-listed-actions {
+  position: static;
+  z-index: auto;
+  margin: 16px 0 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  gap: 7px;
+}
+body.friendly-workspace .queue-listed-actions > button {
+  min-height: 43px;
+  border-radius: 24px;
+}
+body.friendly-workspace .app-shell .queue-open-ad {
+  border: 0;
+  border-radius: 22px;
+  background: var(--q-recess);
+  color: var(--q-text);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace .queue-open-icon {
+  width: 24px;
+  height: 24px;
+  fill: var(--q-accent);
+}
+body.friendly-workspace .queue-open-arrow {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.friendly-workspace .queue-open-copy {
+  min-width: 0;
+}
+body.friendly-workspace .queue-open-copy strong {
+  display: block;
+  color: var(--q-text);
+  font-size: 12px;
+}
+body.friendly-workspace .queue-open-copy small {
+  display: block;
+  margin-top: 2px;
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace :is(.ad-vendor, #queue-ad-number, .queue-open-arrow) {
+  color: var(--q-link);
+}
+body.friendly-workspace .queue-url-text {
+  border: 0;
+  border-radius: 10px;
+  background: var(--q-recess);
+  color: var(--q-muted);
+}
+body.friendly-workspace .color-swatch {
+  border-color: var(--q-muted);
+  box-shadow: 0 0 0 2px var(--q-surface);
+}
+body.friendly-workspace .color-swatch[data-has-color="false"] {
+  background: var(--q-lens) !important;
+}
+body.friendly-workspace .empty-state-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 10px;
+  fill: none;
+  stroke: var(--q-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.friendly-workspace :is(.workspace-view-switcher, .connected-view-switcher) {
+  margin-block: 0 13px;
+  padding: 5px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+}
+body.friendly-workspace .workspace-view-switcher label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+body.friendly-workspace .workspace-view-switcher label > span {
+  padding-inline-start: 7px;
+  color: var(--q-muted);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+body.friendly-workspace .connected-view-switcher {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 5px;
+}
+body.friendly-workspace .app-shell .view-step-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  min-width: 32px;
+  min-height: 35px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--q-muted);
+  background: var(--q-surface);
+}
+body.friendly-workspace .view-step-button svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+body.friendly-workspace .play-glyph {
+  display: none;
+}
+body.friendly-workspace [aria-pressed="true"] .pause-glyph {
+  display: none;
+}
+body.friendly-workspace [aria-pressed="true"] .play-glyph {
+  display: block;
+}
+
+/* Statistics, inventories, image lists, and settings use the same solid pairs. */
+body.friendly-workspace
+  .app-shell
+  :is(.agent-results-wrap, .monthly-explorer-list, .scraper-accepted-list, .image-scraper-list) {
+  border-color: var(--q-edge);
+  border-radius: 18px;
+  background: var(--q-recess);
+}
+body.friendly-workspace .app-shell table {
+  color: var(--q-text);
+  font-size: 12px;
+}
+body.friendly-workspace .app-shell :is(th, td) {
+  border-color: var(--q-edge);
+  padding-block: 10px;
+}
+body.friendly-workspace .app-shell th {
+  color: var(--q-muted);
+  background: var(--q-recess);
+  font-weight: 400;
+  font-size: 11px;
+}
+body.friendly-workspace .app-shell tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--q-surface) 50%, var(--q-recess));
+}
+body.friendly-workspace
+  .app-shell
+  :is(.counter-totals, .interaction-totals, .scraper-totals)
+  article,
+body.friendly-workspace .app-shell :is(.inventory-summary, .jenkins-totals) div {
+  padding: 11px;
+  border: 0;
+  border-radius: 18px;
+  color: var(--q-text);
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace .app-shell :is(.counter-totals, .interaction-totals, .scraper-totals) span {
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace
+  .app-shell
+  :is(.counter-totals, .interaction-totals, .scraper-totals)
+  strong {
+  font-size: 20px;
+  font-weight: 400;
+}
+body.friendly-workspace .monthly-metric-card {
+  padding: 10px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--q-surface);
+}
+body.friendly-workspace .monthly-metric-heading strong {
+  color: var(--q-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+body.friendly-workspace .monthly-metric-heading span {
+  color: var(--q-link);
+  font-size: 13px;
+}
+body.friendly-workspace .monthly-metric-card small,
+body.friendly-workspace .monthly-metric-card .monthly-metric-meta,
+body.friendly-workspace .monthly-explorer-description {
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+body.friendly-workspace .monthly-metric-bar {
+  background: var(--q-recess);
+}
+body.friendly-workspace .monthly-metric-bar i {
+  background: var(--q-accent);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .scraper-accepted-row,
+    .scraper-accepted-list li,
+    .scraper-excluded-list li,
+    .inventory-result-list li,
+    .inventory-result-card li
+  ) {
+  border-color: var(--q-edge);
+  border-radius: 12px;
+  background: var(--q-surface);
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell .image-scraper-list > li {
+  border-color: var(--q-edge);
+  border-radius: 17px;
+  background: var(--q-surface);
+}
+body.friendly-workspace .app-shell .image-scraper-list > li.is-main {
+  border-color: var(--q-accent);
+  box-shadow: inset 0 0 0 1px var(--q-accent);
+}
+body.friendly-workspace .app-shell .image-scraper-list .is-main .image-scraper-item-label {
+  color: var(--q-link);
+}
+body.friendly-workspace .app-shell .scraper-last-send {
+  color: var(--q-okay);
+  border-color: var(--q-edge);
+  background: var(--q-recess);
+}
+body.friendly-workspace .settings-key-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+body.friendly-workspace .app-shell .settings-key-row > .connection-button {
+  min-height: 39px;
+  margin: 0;
+  padding: 8px 13px;
+  border-radius: 20px;
+}
+body.friendly-workspace .settings-facts dt {
+  color: var(--q-muted);
+}
+body.friendly-workspace .settings-facts dd {
+  color: var(--q-text);
+}
+body.friendly-workspace .connection-meta div {
+  border-color: var(--q-edge);
+}
+body.friendly-workspace .connection-meta :is(dt, dd) {
+  font-size: 11px;
+}
+body.friendly-workspace .connection-meta dt {
+  color: var(--q-muted);
+}
+body.friendly-workspace .connection-meta dd {
+  color: var(--q-text);
+}
+body.friendly-workspace .settings-local-ai-provider[open] summary {
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell .inventory-result-card li button {
+  min-height: 29px;
+  padding: 4px 9px;
+  font-size: 11px;
+}
+body.friendly-workspace .app-shell :is(.scraper-border-legend [data-mark="accepted"]) {
+  border-color: var(--q-okay);
+}
+body.friendly-workspace .app-shell :is(.scraper-border-legend [data-mark="unlisted"]) {
+  border-color: var(--q-warning);
+}
+body.friendly-workspace .app-shell :is(.scraper-border-legend [data-mark="excluded"]) {
+  border-color: var(--u-error);
+}
+
+/* Auctions: retained controls, compact request activity, and complete theme coverage. */
+body.friendly-workspace .auctions-view {
+  --auction-ink: var(--q-text);
+  --auction-muted: var(--q-muted);
+  gap: 14px;
+  font: inherit;
+}
+body.friendly-workspace .auctions-view[data-workflow="republish"] {
+  gap: 9px;
+}
+body.friendly-workspace
+  .app-shell
+  #auction-view
+  :is(#auction-import, #auction-republish-primary, #auction-prepare) {
+  min-height: 44px;
+  border: 0 !important;
+  border-radius: 30px;
+  color: var(--q-keytext) !important;
+  background: var(--q-accent) !important;
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 7px 12px var(--q-shadow) !important;
+  font-size: 13px;
+  font-weight: 400;
+}
+body.friendly-workspace
+  .app-shell
+  #auction-view
+  :is(#auction-import, #auction-republish-primary, #auction-prepare):hover:not(:disabled) {
+  color: var(--q-keytext) !important;
+  background: var(--q-accent) !important;
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 10px 16px var(--q-shadow) !important;
+}
+body.friendly-workspace .app-shell #auction-view #auction-paste {
+  min-height: 116px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 18px;
+  color: var(--q-text) !important;
+  background: var(--q-recess) !important;
+  box-shadow:
+    inset 0 2px 4px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+body.friendly-workspace .app-shell #auction-view .auction-tabs {
+  border: 0;
+  border-radius: 20px;
+  background: var(--q-recess);
+}
+body.friendly-workspace .app-shell #auction-view .auction-tabs button {
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 17px;
+  color: var(--q-muted) !important;
+  background: transparent !important;
+  font-size: 11px;
+  font-weight: 400;
+}
+body.friendly-workspace .app-shell #auction-view .auction-tabs button[aria-selected="true"] {
+  color: var(--q-text) !important;
+  background: var(--q-lens) !important;
+  box-shadow:
+    inset 0 1px 0 var(--q-shine),
+    0 2px 3px var(--q-shadow) !important;
+}
+body.friendly-workspace .app-shell #auction-view button.auction-text-button,
+body.friendly-workspace .app-shell #auction-view button.auction-text-button:hover:not(:disabled) {
+  min-height: 28px;
+  padding: 3px 0;
+  border: 0;
+  border-radius: 5px;
+  color: var(--q-link) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 11px;
+}
+body.friendly-workspace
+  .auctions-view
+  :is(
+    .auction-heading p,
+    .auction-helper,
+    .auction-empty,
+    .auction-preview-heading > span,
+    .auction-row-values dt,
+    .auction-review-values dt,
+    .auction-import-options summary,
+    .auction-extras summary,
+    .auction-batch-count,
+    .auction-batch-eta,
+    .auction-column-note,
+    .auction-activity > summary,
+    .auction-republish .auction-history > summary
+  ) {
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace
+  .auctions-view
+  :is(
+    .auction-import,
+    .auction-workbook-panel,
+    .auction-row-nav,
+    .auction-section + .auction-section,
+    .auction-history,
+    .auction-mode-switch
+  ) {
+  border-color: var(--q-edge);
+}
+body.friendly-workspace
+  .auctions-view
+  :is(.auction-import > h4, .auction-preview-heading h4, .auction-section h4) {
+  color: var(--q-text);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+}
+body.friendly-workspace .auction-section {
+  margin: 17px 0;
+}
+body.friendly-workspace .auction-section + .auction-section {
+  padding-top: 17px;
+}
+body.friendly-workspace .auction-row-nav {
+  margin-bottom: 16px;
+  padding-bottom: 13px;
+}
+body.friendly-workspace #auction-view .auction-row-title {
+  color: var(--q-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+body.friendly-workspace .auction-row-values dd {
+  color: var(--q-text);
+}
+body.friendly-workspace .auction-row-values {
+  font-size: 12px;
+}
+body.friendly-workspace .auction-preview-row {
+  padding: 13px;
+}
+body.friendly-workspace .auction-preview-row[data-kind="error"] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--u-error) 45%, transparent);
+}
+body.friendly-workspace .app-shell #auction-view .auction-mode-switch {
+  gap: 10px;
+  padding: 12px 0 8px;
+  color: var(--q-text);
+  font-size: 12px;
+  font-weight: 400;
+}
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 36px;
+  height: 22px;
+  flex: 0 0 36px;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 25px;
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 2px 4px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+}
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 22%, var(--q-orb-a), var(--q-orb-b));
+  box-shadow:
+    0 2px 3px var(--q-shadow),
+    inset 0 1px 1px var(--q-shine);
+  transition: transform 0.45s var(--q-curve);
+}
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"]::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--q-recess);
+  transition: transform 0.5s var(--q-curve);
+  pointer-events: none;
+}
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"]:checked {
+  background: var(--q-lens);
+}
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"]:checked::before,
+body.friendly-workspace .auctions-view .auction-mode-switch input[role="switch"]:checked::after {
+  transform: translateX(14px);
+}
+body.friendly-workspace .auctions-view .auction-batch-mode {
+  margin: 0 0 9px;
+  padding: 0;
+  border: 0;
+  font-size: 11px;
+}
+body.friendly-workspace .auction-batch-actions {
+  gap: 7px;
+}
+body.friendly-workspace .auction-batch-rows {
+  padding: 0 10px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace .auction-batch-row + .auction-batch-row {
+  border-color: var(--q-edge);
+}
+body.friendly-workspace .auction-batch-title {
+  color: var(--q-text);
+}
+body.friendly-workspace :is(.auction-batch-index, .auction-batch-state) {
+  color: var(--q-muted);
+}
+body.friendly-workspace .auction-batch-row[data-status="complete"] .auction-batch-state {
+  color: var(--q-okay);
+}
+body.friendly-workspace
+  .auction-batch-row:is([data-status="failed"], [data-status="uncertain"], [data-status="review"])
+  .auction-batch-state {
+  color: var(--q-warning);
+}
+body.friendly-workspace
+  .auction-batch-row:is([data-status="sending"], [data-status="checking"])
+  .auction-batch-state {
+  color: var(--q-link);
+}
+body.friendly-workspace
+  :is(.auction-row-issue, .auction-alerts, .auction-audit li[data-ok="false"]) {
+  color: var(--u-error);
+}
+body.friendly-workspace :is(.auction-row-state, .auction-audit) {
+  color: var(--q-okay);
+}
+body.friendly-workspace .auction-batch-issue {
+  color: var(--q-warning);
+}
+body.friendly-workspace :is(.auction-batch-message, .auction-message) {
+  color: var(--q-muted);
+}
+body.friendly-workspace .auction-message {
+  border-radius: 17px;
+  background: var(--q-recess);
+}
+body.friendly-workspace :is(.auction-batch-message, .auction-message)[data-kind="error"] {
+  color: var(--u-error);
+}
+body.friendly-workspace .auction-message[data-kind="error"] {
+  background: color-mix(in srgb, var(--u-error) 8%, var(--q-recess));
+}
+body.friendly-workspace :is(.auction-batch-message, .auction-message)[data-kind="success"] {
+  color: var(--q-okay);
+}
+body.friendly-workspace .auction-message[data-kind="success"] {
+  background: color-mix(in srgb, var(--q-okay) 8%, var(--q-surface));
+}
+body.friendly-workspace .auction-request-log {
+  border-radius: 12px;
+  background: var(--q-recess);
+  color: var(--q-muted);
+  font:
+    11px/1.55 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+body.friendly-workspace .auction-request-log li[data-kind="error"] {
+  color: var(--u-error);
+}
+body.friendly-workspace .auction-request-log li[data-kind="success"] {
+  color: var(--q-okay);
+}
+body.friendly-workspace .auction-request-log li[data-kind="pending"] {
+  color: var(--q-link);
+}
+body.friendly-workspace .auction-request-log li[data-kind="warning"] {
+  color: var(--q-warning);
+}
+body.friendly-workspace .auction-images li {
+  border-color: var(--q-edge);
+  border-radius: 14px;
+  background: var(--q-recess);
+}
+body.friendly-workspace .auction-images li:first-child {
+  border-color: var(--q-accent);
+  box-shadow: 0 0 0 1px var(--q-accent);
+}
+body.friendly-workspace .auction-images button {
+  min-height: 25px;
+  color: var(--q-link);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: 11px;
+}
+body.friendly-workspace .auction-images .auction-image-remove {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--q-text);
+  background: var(--q-surface);
+}
+body.friendly-workspace .auction-footer {
+  margin: 17px 0 0;
+  padding: 12px 0 0;
+  border-color: var(--q-edge);
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+body.friendly-workspace .auction-footer p {
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace .auction-history > summary {
+  color: var(--q-text);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Dialogs sit inside the product, use opaque working surfaces, and stay compact. */
+body.friendly-workspace .luna-dialog {
+  z-index: 300;
+  width: min(440px, calc(100vw - 34px));
+  max-width: calc(100vw - 20px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 16px;
+  border: 0;
+  border-radius: 23px;
+  color: var(--q-text);
+  background: var(--q-surface);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 20px 40px var(--q-deep-shadow);
+  font: inherit;
+}
+body.friendly-workspace .luna-dialog::backdrop {
+  background: color-mix(in srgb, var(--q-base) 75%, transparent);
+  backdrop-filter: none;
+}
+body.friendly-workspace .luna-dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+body.friendly-workspace .luna-dialog-heading h3 {
+  margin: 0;
+  font:
+    500 13px/1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+body.friendly-workspace .luna-dialog-heading .luna-icon-button {
+  width: 27px;
+  height: 27px;
+  min-height: 27px;
+  padding: 0;
+  border-radius: 8px;
+  color: var(--q-muted);
+  background: transparent;
+  box-shadow: none;
+  margin-inline-start: auto;
+}
+body.friendly-workspace .luna-dialog-body {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+body.friendly-workspace .luna-dialog :is(p, label) {
+  color: var(--q-muted);
+  font-size: 12px;
+}
+body.friendly-workspace
+  .luna-dialog
+  :is(.queue-reason-chip, .queue-reason-suggestion, .luna-drawer-item) {
+  color: var(--q-text);
+  border: 0;
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 2px var(--q-shadow);
+}
+body.friendly-workspace .luna-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  text-align: start;
+}
+body.friendly-workspace .luna-reason-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+}
+body.friendly-workspace .luna-reason-suggestions {
+  display: grid;
+  gap: 5px;
+}
+body.friendly-workspace :is(.friendly-command-layer, .luna-command-layer) {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+}
+body.friendly-workspace :is(.friendly-command-scrim, .luna-command-scrim) {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--q-base) 75%, transparent);
+}
+body.friendly-workspace :is(.friendly-command-dialog, #luna-jump-dialog) {
+  position: fixed;
+  top: 65px;
+  left: 17px;
+  right: 17px;
+  width: auto;
+  margin: 0;
+  max-height: calc(100dvh - 90px);
+  padding: 13px;
+  border: 0;
+  border-radius: 23px;
+  background: var(--q-surface);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 20px 40px var(--q-deep-shadow);
+}
+body.friendly-workspace :is(.friendly-command-top, .friendly-command-heading) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px 10px;
+}
+body.friendly-workspace :is(.friendly-command-top, .friendly-command-heading) h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+body.friendly-workspace :is(.friendly-command-close, #luna-jump-close) {
+  width: 27px;
+  min-height: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  margin-inline-start: auto;
+  border: 0;
+  border-radius: 8px;
+  color: var(--q-muted);
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace :is(.friendly-command-close, #luna-jump-close) svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+body.friendly-workspace :is(.friendly-command-search, #luna-jump-dialog .friendly-search-label) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 13px;
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace :is(#luna-jump-input, .friendly-command-input) {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 2px 0;
+  background: transparent;
+  color: var(--q-text);
+  box-shadow: none;
+  font-size: 13px;
+}
+body.friendly-workspace :is(.friendly-command-results, #luna-jump-results) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 9px;
+}
+body.friendly-workspace :is(.friendly-command-result, #luna-jump-results > button) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 43px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 11px;
+  color: var(--q-text);
+  background: transparent;
+  box-shadow: none;
+  text-align: start;
+  font-size: 12px;
+}
+body.friendly-workspace
+  :is(.friendly-command-result, #luna-jump-results > button):is(:hover, :focus-visible) {
+  background: var(--q-lens);
+}
+body.friendly-workspace :is(.friendly-command-result, #luna-jump-results > button) small {
+  display: block;
+  margin-top: 2px;
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+body.friendly-workspace .friendly-command-go {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+  color: var(--q-muted);
+  font-size: 12px;
+}
+body.friendly-workspace :is(.friendly-command-bottom, .friendly-command-footer) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px 9px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding: 10px 2px 1px;
+  border-top: 1px solid var(--q-edge);
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace .friendly-command-empty {
+  padding: 12px 6px;
+  margin: 0;
+  color: var(--q-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* Concrete shell contracts: existing navigation indicator and local commands. */
+body.friendly-workspace .friendly-intro #section-title {
+  margin: 10px 0 0;
+  font:
+    400 29px/1.1 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.9px;
+}
+body.friendly-workspace #luna-friendly-description {
+  max-width: 34ch;
+  margin: 8px 0 0;
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+body.friendly-workspace .friendly-orb-caption {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--q-muted);
+}
+body.friendly-workspace .friendly-orb-cut,
+body.friendly-workspace .friendly-orb-ring {
+  display: none;
+}
+body.friendly-workspace .luna-primary-nav #luna-nav-indicator {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  width: var(--dock-width, calc((100% - 10px) / 4));
+  height: auto;
+  border: 0;
+  border-radius: 28px;
+  background: linear-gradient(150deg, var(--q-lens), var(--q-surface));
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 3px 8px var(--q-shadow);
+  transform: translateX(var(--dock-x, 5px));
+  transition:
+    transform 0.7s cubic-bezier(0.2, 0.92, 0.24, 1),
+    width 0.45s var(--q-curve);
+  pointer-events: none;
+  z-index: -1;
+}
+body.friendly-workspace .luna-primary-nav #luna-nav-indicator::before {
+  content: "";
+  position: absolute;
+  inset: 4px 16px auto;
+  height: 1px;
+  border-radius: 100%;
+  background: linear-gradient(90deg, transparent, var(--q-shine), transparent);
+}
+body.friendly-workspace .luna-primary-nav:not(:has([aria-current="page"])) #luna-nav-indicator {
+  opacity: 0;
+}
+body.friendly-workspace .luna-header-actions .luna-settings-button.is-active {
+  color: var(--q-link);
+  background: var(--q-lens);
+}
+body.friendly-workspace
+  .luna-primary-nav:has(#luna-nav-indicator)
+  .luna-group-button[aria-current="page"] {
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace .app-shell :is(.luna-icon-button, .luna-settings-button) {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--q-recess);
+  color: var(--q-muted);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace .app-shell #luna-appearance-toggle {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 11px 0 7px;
+  border-radius: 25px;
+  color: var(--q-muted);
+  background: var(--q-surface);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 2px 5px var(--q-shadow);
+  font-size: 11px;
+}
+body.friendly-workspace .app-shell #luna-jump-open {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 9px;
+  border-radius: 20px;
+  color: var(--q-muted);
+  background: var(--q-recess);
+  box-shadow:
+    inset 0 1px 3px var(--q-shadow),
+    0 1px 0 var(--q-shine-soft);
+  font-size: 11px;
+}
+body.friendly-workspace #luna-command-dialog {
+  position: fixed;
+  top: 65px;
+  bottom: auto;
+  left: 17px;
+  right: 17px;
+  width: auto;
+  margin: 0;
+  max-height: calc(100dvh - 90px);
+  padding: 13px;
+  border: 0;
+  border-radius: 23px;
+  background: var(--q-surface);
+  color: var(--q-text);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 20px 40px var(--q-deep-shadow);
+}
+body.friendly-workspace #luna-command-dialog .friendly-command-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 13px;
+  background: var(--q-recess);
+  box-shadow: inset 0 1px 3px var(--q-shadow);
+}
+body.friendly-workspace #luna-command-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body.friendly-workspace
+  #luna-command-dialog
+  :is(.friendly-command-heading, .friendly-command-search, .friendly-command-footer) {
+  flex: 0 0 auto;
+}
+body.friendly-workspace #luna-command-results {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+body.friendly-workspace #luna-command-results > button {
+  flex: 0 0 auto;
+}
+body.friendly-workspace .content :is(button, input, select, textarea, [tabindex]) {
+  scroll-margin-block: 10px;
+}
+body.friendly-workspace #luna-command-dialog .friendly-command-search > svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  fill: none;
+  stroke: var(--q-muted);
+  stroke-width: 1.6;
+}
+body.friendly-workspace #luna-command-dialog #luna-command-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 22px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--q-text);
+  box-shadow: none;
+  font-size: 13px;
+}
+body.friendly-workspace #luna-command-dialog .luna-command-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 43px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 11px;
+  color: var(--q-text);
+  background: transparent;
+  box-shadow: none;
+  font-size: 12px;
+  text-align: start;
+}
+body.friendly-workspace #luna-command-dialog .luna-command-result:is(:hover, :focus-visible) {
+  background: var(--q-lens);
+}
+body.friendly-workspace .luna-command-symbol {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border-radius: 50%;
+  background: var(--q-accent);
+}
+body.friendly-workspace .luna-command-symbol.r-phase-crescent {
+  mask: radial-gradient(circle at 72% 29%, transparent 0 49%, #000 53%);
+}
+body.friendly-workspace .luna-command-text {
+  display: block;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+body.friendly-workspace .luna-command-text small {
+  display: block;
+  margin-top: 2px;
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+body.friendly-workspace .luna-command-go {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+  color: var(--q-muted);
+  font-size: 12px;
+}
+body.friendly-workspace .luna-command-empty {
+  margin: 0;
+  padding: 12px 6px;
+  color: var(--q-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+body.friendly-workspace[data-focus="true"] .friendly-intro :is(h1, h2, h3) {
+  color: var(--q-muted);
+}
+body.friendly-workspace[data-focus="true"] .friendly-orb-trigger {
+  opacity: 0.55;
+}
+body.friendly-workspace[data-focus="true"]
+  .app-shell
+  :is(.queue-card, .manual-ad-card, .auctions-view, .inventory-card, .scraper-card) {
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 9px 24px var(--q-deep-shadow),
+    0 0 0 1px color-mix(in srgb, var(--q-accent) 35%, transparent);
+}
+
+/* Surface and depth are explicit choices; decoration is still at rest. */
+body.friendly-workspace .app-shell footer {
+  display: block;
+  flex: 0 0 auto;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--q-muted);
+  font-size: 11px;
+  text-align: center;
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  border-radius: 50%;
+  background: var(--q-accent);
+  opacity: 0.65;
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button[data-group="home"]::before {
+  mask: radial-gradient(circle at 72% 29%, transparent 0 49%, #000 53%);
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button[data-group="work"]::before {
+  background: linear-gradient(90deg, var(--q-accent) 0 50%, var(--q-recess) 50% 100%);
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button[data-group="tools"]::before {
+  border: 1px solid var(--q-accent);
+  background: transparent;
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button[aria-current="page"]::before {
+  opacity: 1;
+}
+body.friendly-workspace :is(#luna-surface-label, #luna-depth-label) {
+  margin-inline-start: auto;
+  color: var(--q-muted);
+  font-size: 11px;
+}
+body.friendly-workspace #luna-command-dialog::backdrop {
+  background: color-mix(in srgb, var(--q-base) 75%, transparent);
+}
+body.friendly-workspace #luna-command-close {
+  width: 27px;
+  height: 27px;
+  min-height: 27px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace #luna-module-dialog {
+  padding: 13px;
+  border-radius: 23px;
+}
+body.friendly-workspace #luna-module-dialog .luna-drawer-item {
+  min-height: 32px;
+  margin: 2px 0;
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace #luna-module-dialog .luna-drawer-item:hover {
+  background: var(--q-lens);
+}
+body.friendly-workspace .app-shell :is(small, dt) {
+  font-size: 11px;
+  line-height: 1.45;
+}
+body.friendly-workspace .app-shell summary {
+  color: var(--q-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .image-scraper-preview-heading strong,
+    .manual-ad-ai-disclosure h3,
+    .jenkins-start-summary strong,
+    .scraper-result-heading h3,
+    .inventory-result-heading h3
+  ) {
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell .image-scraper-preview-heading span {
+  color: var(--q-okay);
+  font-size: 11px;
+}
+body.friendly-workspace
+  .app-shell
+  :is(.inventory-page-list article, .jenkins-preview, .jenkins-step, .jenkins-result-row) {
+  border-color: var(--q-edge);
+  background: var(--q-recess);
+}
+body.friendly-workspace
+  .app-shell
+  :is(.scraper-warning, .scraper-last-send[data-kind="warning"] strong) {
+  color: var(--q-warning);
+  background: var(--q-recess);
+  border-color: var(--q-edge);
+}
+body.friendly-workspace .app-shell .scraper-border-legend [data-mark="accepted"] {
+  color: var(--q-okay);
+}
+body.friendly-workspace .app-shell .scraper-border-legend [data-mark="unlisted"] {
+  color: var(--q-warning);
+}
+body.friendly-workspace .app-shell .scraper-border-legend [data-mark="excluded"] {
+  color: var(--u-error);
+}
+body.friendly-workspace[data-surface="mineral"]
+  .app-shell
+  :is(
+    .queue-card,
+    .manual-ad-card,
+    .image-scraper-card,
+    .scraper-card,
+    .inventory-card,
+    .jenkins-card,
+    .settings-card,
+    .connection-card,
+    .vendor-counter-card,
+    .agent-tracker-card,
+    .monthly-performance-card,
+    .daily-interactions-card,
+    .home-notes-card,
+    .luna-home-queue,
+    .luna-home-connections,
+    .sheet-report-action,
+    .welcome-card,
+    .auctions-view
+  ) {
+  background: var(--q-surface);
+  box-shadow: 0 4px 10px var(--q-shadow);
+}
+body.friendly-workspace[data-surface="mineral"] .app-shell :is(input, textarea, .select-trigger) {
+  box-shadow: inset 0 1px 2px var(--q-shadow);
+}
+body.friendly-workspace[data-surface="mineral"] .friendly-dock-lens {
+  background: var(--q-lens);
+  box-shadow: 0 2px 5px var(--q-shadow);
+}
+body.friendly-workspace[data-depth="quiet"],
+body.friendly-workspace[data-depth="quiet"] *,
+body.friendly-workspace[data-depth="quiet"] *::before,
+body.friendly-workspace[data-depth="quiet"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+body.friendly-workspace[data-depth="quiet"]
+  .friendly-orb-trigger:is(:hover, [aria-expanded="true"])
+  .friendly-orb {
+  transform: rotate(-25deg);
+}
+body.friendly-workspace[data-depth="quiet"]
+  .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::before,
+body.friendly-workspace[data-depth="quiet"]
+  .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::after {
+  transform: rotateX(65deg) rotateY(-15deg) rotateZ(-32deg);
+}
+
+@media (min-width: 600px) {
+  body.friendly-workspace .app-shell {
+    padding-inline: 30px;
+  }
+  body.friendly-workspace .luna-header {
+    padding-inline: 5px;
+  }
+  body.friendly-workspace :is(.luna-primary-nav, .friendly-dock) {
+    left: 50%;
+    right: auto;
+    width: min(430px, calc(100% - 70px));
+    transform: translateX(-50%);
+  }
+  body.friendly-workspace :is(.friendly-command-dialog, #luna-jump-dialog) {
+    left: 50%;
+    right: auto;
+    width: 436px;
+    transform: translateX(-50%);
+  }
+  body.friendly-workspace #luna-command-dialog {
+    left: 50%;
+    right: auto;
+    width: 436px;
+    transform: translateX(-50%);
+  }
+}
+@media (max-width: 430px) {
+  body.friendly-workspace :is(.friendly-shortcut, #luna-jump-open kbd) {
+    display: none;
+  }
+  body.friendly-workspace #luna-jump-open {
+    padding-inline: 8px;
+  }
+}
+@media (max-width: 400px) {
+  body.friendly-workspace .app-shell {
+    padding-inline: 13px;
+  }
+  body.friendly-workspace .luna-header {
+    padding-inline: 6px;
+  }
+  body.friendly-workspace .friendly-intro :is(h1, h2, h3),
+  body.friendly-workspace #section-title {
+    font-size: 26px;
+  }
+  body.friendly-workspace .friendly-intro #section-title {
+    font-size: 26px;
+  }
+  body.friendly-workspace .friendly-orb-trigger {
+    flex-basis: 72px;
+    width: 72px;
+    height: 72px;
+  }
+  body.friendly-workspace
+    .app-shell
+    :is(
+      .queue-card,
+      .manual-ad-card,
+      .image-scraper-card,
+      .scraper-card,
+      .inventory-card,
+      .jenkins-card,
+      .settings-card,
+      .connection-card,
+      .vendor-counter-card,
+      .agent-tracker-card,
+      .monthly-performance-card,
+      .daily-interactions-card,
+      .home-notes-card,
+      .luna-home-queue,
+      .luna-home-connections,
+      .sheet-report-action,
+      .welcome-card,
+      .auctions-view
+    ) {
+    padding: 14px;
+  }
+  body.friendly-workspace :is(.luna-primary-nav, .friendly-dock) {
+    left: 23px;
+    right: 23px;
+  }
+  body.friendly-workspace .luna-primary-nav .luna-group-button {
+    gap: 4px;
+    padding-inline: 3px;
+  }
+}
+@media (max-width: 370px) {
+  body.friendly-workspace .jenkins-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.friendly-workspace #luna-jump-open > span,
+  body.friendly-workspace #luna-jump-open > .friendly-jump-label {
+    display: none;
+  }
+  body.friendly-workspace #luna-jump-open {
+    justify-content: center;
+    width: 32px;
+    padding: 0;
+  }
+  body.friendly-workspace .luna-header-actions {
+    gap: 7px;
+  }
+  body.friendly-workspace :is(.friendly-command-dialog, #luna-jump-dialog) {
+    left: 10px;
+    right: 10px;
+    padding: 11px;
+  }
+  body.friendly-workspace #luna-command-dialog {
+    left: 10px;
+    right: 10px;
+    padding: 11px;
+  }
+  body.friendly-workspace .app-shell #luna-jump-open {
+    width: 32px;
+    padding: 0;
+  }
+  body.friendly-workspace .auction-fields {
+    gap: 8px;
+  }
+}
+@media (max-width: 310px) {
+  body.friendly-workspace .app-shell {
+    padding-inline: 10px;
+  }
+  body.friendly-workspace .luna-header {
+    gap: 5px;
+    padding-inline: 2px;
+  }
+  body.friendly-workspace .luna-header-actions {
+    gap: 5px;
+  }
+  body.friendly-workspace .luna-home-button {
+    gap: 5px;
+    font-size: 22px;
+  }
+  body.friendly-workspace .brand-mark {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+  }
+  body.friendly-workspace #luna-appearance-toggle {
+    padding-right: 7px;
+    gap: 5px;
+  }
+  body.friendly-workspace #luna-appearance-label {
+    display: none;
+  }
+  body.friendly-workspace .app-shell #luna-appearance-toggle {
+    width: 32px;
+    padding: 0 6px;
+  }
+  body.friendly-workspace .friendly-intro {
+    gap: 6px;
+    padding-inline: 2px;
+  }
+  body.friendly-workspace .friendly-intro :is(h1, h2, h3),
+  body.friendly-workspace #section-title {
+    font-size: 24px;
+  }
+  body.friendly-workspace .friendly-intro #section-title {
+    font-size: 24px;
+  }
+  body.friendly-workspace .friendly-orb-trigger {
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
+  }
+  body.friendly-workspace :is(.luna-primary-nav, .friendly-dock) {
+    left: 10px;
+    right: 10px;
+  }
+  body.friendly-workspace .luna-primary-nav .friendly-phase {
+    display: none;
+  }
+  body.friendly-workspace .luna-primary-nav .luna-group-button::before {
+    display: none;
+  }
+  body.friendly-workspace
+    .app-shell
+    :is(
+      .queue-form-grid,
+      .queue-form-grid.queue-detail-grid,
+      .manual-ad-grid,
+      .interaction-filters,
+      .settings-facts,
+      .auction-fields,
+      .auction-row-editor
+    ) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.friendly-workspace .auction-batch-line {
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 6px;
+  }
+  body.friendly-workspace .auction-batch-state {
+    grid-column: 2;
+    max-width: none;
+    text-align: start;
+  }
+  body.friendly-workspace .auction-row-values {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1px;
+  }
+  body.friendly-workspace .auction-row-values dd {
+    margin-bottom: 5px;
+  }
+  body.friendly-workspace .luna-shortcuts > div {
+    grid-template-columns: 1fr;
+  }
+  body.friendly-workspace .settings-key-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.friendly-workspace .workspace-view-switcher label {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  body.friendly-workspace .header-status {
+    display: none;
+  }
+  body.friendly-workspace
+    .app-shell
+    :is(.connection-heading, .counter-heading, .tracker-heading, .inventory-heading) {
+    flex-wrap: wrap;
+  }
+}
+@media (pointer: coarse) {
+  body.friendly-workspace
+    :is(#luna-jump-open, #luna-appearance-toggle, .luna-icon-button, .luna-settings-button),
+  body.friendly-workspace .luna-primary-nav .luna-group-button {
+    min-height: 44px;
+  }
+  body.friendly-workspace .select-option,
+  body.friendly-workspace #luna-quick-menu > button {
+    min-height: 44px;
+  }
+  body.friendly-workspace
+    .app-shell
+    :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+  body.friendly-workspace #luna-jump-input,
+  body.friendly-workspace #luna-command-dialog #luna-command-input {
+    font-size: 16px;
+  }
+  body.friendly-workspace .friendly-command-result {
+    min-height: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.friendly-workspace,
+  body.friendly-workspace *,
+  body.friendly-workspace *::before,
+  body.friendly-workspace *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"]) .friendly-orb {
+    transform: rotate(-25deg);
+  }
+  body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::before,
+  body.friendly-workspace .friendly-orb-trigger:is(:hover, [aria-expanded="true"])::after {
+    transform: rotateX(65deg) rotateY(-15deg) rotateZ(-32deg);
+  }
+}
+@media (forced-colors: active) {
+  body.friendly-workspace .app-shell {
+    border: 1px solid CanvasText;
+  }
+  body.friendly-workspace
+    .app-shell
+    :is(
+      button,
+      input,
+      select,
+      textarea,
+      .queue-card,
+      .manual-ad-card,
+      .auctions-view,
+      .settings-card,
+      .connection-card,
+      .inventory-card,
+      .luna-home-queue
+    ),
+  body.friendly-workspace :is(.luna-dialog, .select-popover) {
+    border: 1px solid ButtonText;
+    box-shadow: none;
+  }
+  body.friendly-workspace
+    :is([aria-current="page"], [aria-selected="true"], [aria-pressed="true"]) {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  body.friendly-workspace .friendly-orb-trigger::before,
+  body.friendly-workspace .friendly-orb-trigger::after {
+    border-color: CanvasText;
+  }
+  body.friendly-workspace .friendly-orb {
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+  body.friendly-workspace .friendly-orb::before {
+    background: CanvasText;
+  }
+}
+
+/* Native markup compatibility: retain the original fields and tab contracts. */
+body.friendly-workspace .app-shell #queue-import-text {
+  color: var(--q-text);
+  background: var(--q-recess);
+  border-color: transparent;
+}
+body.friendly-workspace
+  :is(.luna-header, .content, .luna-primary-nav, .luna-dialog, .select-popover) {
+  backdrop-filter: none;
+}
+body.friendly-workspace
+  .app-shell
+  .content
+  :is(
+    textarea,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not(
+        [type="color"]
+      )
+  ),
+body.friendly-workspace .app-shell .content .select-trigger {
+  color: var(--q-text);
+  background: var(--q-recess);
+  border-color: transparent;
+}
+body.friendly-workspace
+  .app-shell
+  .content
+  :is(.luna-view-tabs, .queue-view-tabs, .sheet-statistics-tabs, .monthly-explorer-tabs) {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: none;
+  overflow-x: auto;
+}
+body.friendly-workspace .app-shell #header-status {
+  flex: 0 0 5px;
+  width: 5px;
+}
+body.friendly-workspace .luna-header-actions .nav-icon {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary,
+    #auction-republish-primary
+  ) {
+  position: relative;
+  min-height: 47px;
+  padding-inline: 19px 52px;
+  text-align: start;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary,
+    #auction-republish-primary
+  )::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  width: 33px;
+  height: 33px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--q-keytext) 7%, transparent);
+  box-shadow:
+    inset 0 1px 1px var(--q-shine),
+    0 2px 4px var(--q-shadow);
+  pointer-events: none;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary,
+    #auction-republish-primary
+  )::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 17 17 7M7 7h10v10' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  pointer-events: none;
+  z-index: 1;
+}
+body.friendly-workspace[data-surface="mineral"]
+  .app-shell
+  :is(
+    .connection-button,
+    .queue-action-listed,
+    .home-resume-button,
+    .counter-submit,
+    #manual-ad-fill-ayshei,
+    #image-scraper-collect,
+    #image-scraper-import,
+    .auction-primary,
+    #auction-republish-primary
+  )::after {
+  box-shadow: none;
+}
+body.friendly-workspace .luna-home-button {
+  flex: 0 0 auto;
+}
+body.friendly-workspace #luna-surface-label,
+body.friendly-workspace #luna-depth-label {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--q-muted);
+}
+body.friendly-workspace .luna-primary-nav .luna-group-button::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border-radius: 50%;
+  background: var(--q-accent);
+  opacity: 0.75;
+}
+body.friendly-workspace .luna-primary-nav [data-group="home"]::before {
+  mask: radial-gradient(circle at 73% 27%, transparent 0 50%, #000 54%);
+}
+body.friendly-workspace .luna-primary-nav [data-group="work"]::before {
+  background: linear-gradient(90deg, var(--q-accent) 50%, var(--q-lens) 50%);
+}
+body.friendly-workspace .luna-primary-nav [data-group="tools"]::before {
+  mask: radial-gradient(circle, transparent 0 37%, #000 43%);
+}
+body.friendly-workspace .luna-primary-nav [data-group="insights"]::before {
+  opacity: 0.55;
+}
+body.friendly-workspace .app-shell #header-status[data-overall-state="attention"] {
+  color: var(--q-warning);
+}
+body.friendly-workspace #section-title:focus:not(:focus-visible) {
+  outline: none;
+}
+body.friendly-workspace[data-surface="mineral"] .luna-primary-nav #luna-nav-indicator {
+  background: var(--q-lens);
+  box-shadow: 0 2px 5px var(--q-shadow);
+}
+@media (max-width: 430px) {
+  body.friendly-workspace .app-shell #header-status {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  body.friendly-workspace #luna-command-dialog .luna-command-result {
+    min-height: 44px;
+  }
+  body.friendly-workspace .select-search {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  body.friendly-workspace .app-shell .luna-header :is(button, .luna-icon-button),
+  body.friendly-workspace .luna-module-nav button,
+  body.friendly-workspace .luna-view-tabs button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  body.friendly-workspace .luna-header {
+    height: auto;
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+  body.friendly-workspace .luna-header-actions {
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: 6px;
+    max-width: 100%;
+  }
+  body.friendly-workspace
+    .content
+    :is(.select-trigger, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])) {
+    min-height: 44px;
+  }
+  body.friendly-workspace .queue-trim-control {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+  body.friendly-workspace .queue-trim-control .luna-select,
+  body.friendly-workspace .app-shell .queue-trim-control .select-trigger {
+    width: 44px;
+    min-width: 44px;
+  }
+  body.friendly-workspace .connected-view-switcher {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+  body.friendly-workspace .app-shell .view-step-button {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  body.friendly-workspace .app-shell .content :is(input, textarea, .select-trigger) {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid ButtonText;
+  }
+}
+@media (max-width: 310px) {
+  body.friendly-workspace .luna-header {
+    height: auto;
+    min-height: 96px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-block: 12px;
+  }
+  body.friendly-workspace .luna-header-actions {
+    margin-left: auto;
+  }
+  body.friendly-workspace .manual-ad-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.friendly-workspace .app-shell .content button {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Use the available panel height on laptops and zoomed browser windows. */
+@media (max-height: 650px) {
+  html:has(body.friendly-workspace) {
+    scroll-padding-block: 10px 96px;
+  }
+  body.friendly-workspace .app-shell {
+    padding-bottom: 96px;
+  }
+  body.friendly-workspace .luna-header {
+    min-height: 61px;
+    height: 61px;
+  }
+  body.friendly-workspace .friendly-intro {
+    min-height: 96px;
+    padding-bottom: 12px;
+  }
+  body.friendly-workspace .friendly-intro #section-title {
+    margin-top: 6px;
+  }
+  body.friendly-workspace #luna-friendly-description {
+    margin-top: 6px;
+  }
+  body.friendly-workspace .luna-module-nav {
+    margin-bottom: 10px;
+  }
+  body.friendly-workspace .luna-primary-nav {
+    bottom: 27px;
+  }
+  body.friendly-workspace #luna-appearance-caption {
+    bottom: 7px;
+  }
+  body.friendly-workspace #luna-command-dialog {
+    top: 12px;
+    max-height: calc(100dvh - 24px);
+  }
+  body.friendly-workspace .luna-dialog {
+    max-height: calc(100dvh - 24px);
+  }
+}
+@media (max-height: 650px) and (max-width: 310px), (max-height: 650px) and (pointer: coarse) {
+  body.friendly-workspace .luna-header {
+    height: auto;
+  }
+}
+@media (max-height: 450px) {
+  body.friendly-workspace .friendly-command-footer > span:last-child {
+    display: none;
+  }
+}
+
+/* Retained feature details share the active palette, including their hidden/review states. */
+body.friendly-workspace
+  .app-shell
+  :is(
+    .connection-meta > div,
+    .settings-facts > div,
+    .queue-counts > span,
+    .queue-import-summary > div,
+    .jenkins-totals > div
+  ) {
+  color: var(--q-text);
+  background: var(--q-recess);
+  border-color: var(--q-edge);
+}
+body.friendly-workspace .app-shell .nav-icon {
+  background: transparent;
+  box-shadow: none;
+}
+body.friendly-workspace
+  .app-shell
+  .content
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(
+        [type="file"]
+      ),
+    textarea,
+    select
+  ),
+body.friendly-workspace .luna-dialog :is(input, textarea, select) {
+  color: var(--q-text) !important;
+  background-color: var(--q-recess) !important;
+  border-color: var(--q-edge) !important;
+}
+body.friendly-workspace .app-shell .content select {
+  background-image: none !important;
+  color-scheme: inherit;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+body.friendly-workspace :is(input, select, textarea, .select-trigger) {
+  transition-property: border-color, box-shadow, transform;
+}
+body.friendly-workspace .app-shell #home-sheet-status[data-connection-state="connected"] {
+  color: var(--q-okay);
+}
+body.friendly-workspace .app-shell .content :is(input, textarea)[aria-invalid="true"],
+body.friendly-workspace .app-shell .manual-ad-grid label.is-missing :is(input, textarea, select) {
+  background-color: color-mix(in srgb, var(--u-error) 8%, var(--q-recess)) !important;
+  border-color: var(--u-error) !important;
+}
+body.friendly-workspace .app-shell :is(#queue-ai-result, #queue-note-message) {
+  color: var(--q-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+body.friendly-workspace .app-shell :is(.manual-ad-ai-disclosure p) {
+  color: var(--q-warning);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .ad-vendor,
+    #queue-ad-number,
+    .jenkins-totals dd,
+    #inventory-comparison-source,
+    .scraper-result-heading span
+  ) {
+  color: var(--q-link);
+}
+body.friendly-workspace .app-shell .scraper-last-send strong {
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell #auction-view :is(.auction-text-button, .auction-draft-link) {
+  color: var(--q-link) !important;
+}
+@media (forced-colors: active) {
+  html:has(body.friendly-workspace) {
+    background: Canvas;
+    scrollbar-color: auto;
+  }
+  body.friendly-workspace * {
+    scrollbar-color: auto;
+  }
+  body.friendly-workspace .app-shell .content :is(input, textarea, select),
+  body.friendly-workspace .luna-dialog :is(input, textarea, select) {
+    color: CanvasText !important;
+    background-color: Canvas !important;
+    border-color: ButtonText !important;
+  }
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .queue-live-verify,
+    .scraper-access-row span[data-access-state="enabled"],
+    .scraper-accepted-list span:first-of-type
+  ) {
+  color: var(--q-link);
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    .home-note-clear-vendor,
+    .home-note-remove,
+    .image-scraper-item-actions .is-remove,
+    .scraper-accepted-list span.scraper-missing-price
+  ) {
+  color: var(--u-error);
+}
+body.friendly-workspace .app-shell .image-scraper-item-label {
+  color: var(--q-text);
+}
+body.friendly-workspace .app-shell .queue-live-result:is(:hover, :focus-visible, .is-active) {
+  color: var(--q-text);
+  background: var(--q-lens);
+  box-shadow: inset 0 1px 1px var(--q-shine);
+}
+/* Semantic status colors apply equally to loaded, refreshing, and error states. */
+body.friendly-workspace
+  .app-shell
+  :is(
+    [data-kind="error"],
+    [data-status="error"],
+    [data-groq-state="error"],
+    [data-ayshei-state="error"],
+    [data-endpoint-state="error"],
+    [data-connection-state="error"],
+    [data-source="error"],
+    [data-queue-status="unlisted"],
+    [data-manual-state="error"],
+    [data-jenkins-state="error"]
+  ) {
+  color: var(--u-error) !important;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    [data-kind="warning"],
+    [data-status="warning"],
+    [data-connection-state="cached"],
+    [data-overall-state="attention"]
+  ) {
+  color: var(--q-warning) !important;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    [data-kind="success"],
+    [data-status="success"],
+    [data-groq-state="connected"],
+    [data-connection-state="connected"],
+    [data-ayshei-state="connected"],
+    [data-endpoint-state="configured"],
+    [data-permission-state="enabled"],
+    [data-access-state="enabled"],
+    [data-overall-state="available"],
+    [data-queue-state="active"],
+    [data-source="live"]
+  ) {
+  color: var(--q-okay) !important;
+}
+body.friendly-workspace
+  .app-shell
+  :is(
+    [data-groq-state="missing"],
+    [data-groq-state="saved"],
+    [data-connection-state="loading"],
+    [data-connection-state="refreshing"],
+    [data-ayshei-state="loading"],
+    [data-source="loading"],
+    [data-source="cached"],
+    [data-source="none"],
+    [data-endpoint-state="testing"],
+    [data-permission-state="loading"],
+    [data-permission-state="built-in"],
+    [data-queue-state="empty"]
+  ) {
+  color: var(--q-muted) !important;
+}

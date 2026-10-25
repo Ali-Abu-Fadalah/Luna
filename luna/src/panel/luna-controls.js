@@ -121,7 +121,12 @@
       const focusOwner = search || trigger;
       if (current) {
         focusOwner.setAttribute("aria-activedescendant", current.node.id);
-        current.node.scrollIntoView({ block: "nearest" });
+        // Scroll the options only. Moving the document can put the trigger under
+        // the dock or dismiss its popup while navigating on a short screen.
+        const item = current.node.getBoundingClientRect();
+        const viewport = list.getBoundingClientRect();
+        if (item.top < viewport.top) list.scrollTop -= viewport.top - item.top;
+        else if (item.bottom > viewport.bottom) list.scrollTop += item.bottom - viewport.bottom;
       } else focusOwner.removeAttribute("aria-activedescendant");
     }
 
@@ -159,19 +164,27 @@
 
     function position() {
       const bounds = trigger.getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const viewLeft = viewport?.offsetLeft || 0;
+      const viewTop = viewport?.offsetTop || 0;
+      const viewWidth = viewport?.width || window.innerWidth;
+      const viewHeight = viewport?.height || window.innerHeight;
+      const margin = 12;
       const gap = 8;
-      const roomBelow = window.innerHeight - bounds.bottom - 12 - gap;
-      const roomAbove = bounds.top - 12 - gap;
+      const roomBelow = Math.max(0, viewTop + viewHeight - bounds.bottom - margin - gap);
+      const roomAbove = Math.max(0, bounds.top - viewTop - margin - gap);
       const above = roomBelow < 180 && roomAbove > roomBelow;
       const height = Math.max(0, Math.min(320, above ? roomAbove : roomBelow));
+      const width = Math.max(0, Math.min(Math.max(178, bounds.width), viewWidth - margin * 2));
       popup.classList.toggle("open-on-top", above);
       popup.style.position = "fixed";
-      popup.style.width = `${Math.min(bounds.width, window.innerWidth - 24)}px`;
-      popup.style.left = `${Math.max(12, Math.min(bounds.left, window.innerWidth - popup.offsetWidth - 12))}px`;
+      popup.style.width = `${width}px`;
+      popup.style.left = `${Math.max(viewLeft + margin, Math.min(bounds.left, viewLeft + viewWidth - width - margin))}px`;
       popup.style.maxHeight = `${height}px`;
       list.style.maxHeight = `${Math.max(0, height - (search ? search.offsetHeight + 24 : 16))}px`;
       const renderedHeight = Math.min(popup.offsetHeight, height);
-      popup.style.top = `${above ? bounds.top - gap - renderedHeight : bounds.bottom + gap}px`;
+      const top = above ? bounds.top - gap - renderedHeight : bounds.bottom + gap;
+      popup.style.top = `${Math.max(viewTop + margin, Math.min(top, viewTop + viewHeight - margin - renderedHeight))}px`;
     }
 
     function close(restoreFocus = false) {

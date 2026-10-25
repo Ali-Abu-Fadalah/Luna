@@ -132,7 +132,8 @@ assert.deepEqual(
     "luna-controls.js",
     "luna-motion.js",
     "luna-ui.js",
-    "sidepanel.js"
+    "sidepanel.js",
+    "luna-friendly.js"
   ],
   "Panel script order must preserve dependencies."
 );
@@ -146,8 +147,8 @@ assert.deepEqual(
     "manual-ad-assistant.css",
     "jenkins-assistant.css",
     "auctions.css",
-    "luna-polish.css",
-    "luna-neumorphism.css"
+    "luna-friendly.css",
+    "public-edition.css"
   ],
   "Stylesheet order must preserve the design's cascade."
 );

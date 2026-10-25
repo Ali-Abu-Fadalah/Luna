@@ -11,11 +11,16 @@
     <link rel="stylesheet" href="src/features/manual-ad/manual-ad-assistant.css" />
     <link rel="stylesheet" href="src/features/jenkins/jenkins-assistant.css" />
     <link rel="stylesheet" href="src/features/auctions/auctions.css" />
-    <link rel="stylesheet" href="styles/luna-polish.css" />
-    <link rel="stylesheet" href="styles/luna-neumorphism.css" />
+    <link rel="stylesheet" href="styles/luna-friendly.css" />
+    <link rel="stylesheet" href="styles/public-edition.css" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   </head>
-  <body>
+  <body
+    class="public-edition friendly-workspace"
+    data-appearance="moonlight"
+    data-surface="glass"
+    data-depth="sculpted"
+  >
     <svg class="icon-sprite" aria-hidden="true">
       <symbol id="icon-home" viewbox="0 0 24 24">
         <path d="M4 11.5 12 5l8 6.5v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"></path>
@@ -91,9 +96,31 @@
               <circle class="luna-emblem-star" cx="38" cy="12" r="1.8"></circle>
             </svg>
           </div>
-          <span>Luna</span>
+          <span>luna<span class="friendly-brand-dot">.</span></span>
         </button>
         <div class="luna-header-actions">
+          <button
+            id="luna-jump-open"
+            class="friendly-jump"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="luna-command-dialog"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5"></circle>
+              <path d="m15.5 15.5 4 4"></path>
+            </svg>
+            <span>Jump to…</span><kbd id="luna-command-shortcut">Ctrl K</kbd>
+          </button>
+          <button
+            id="luna-appearance-toggle"
+            class="friendly-appearance"
+            type="button"
+            aria-label="Switch to Daylight appearance"
+          >
+            <span class="friendly-appearance-disc" aria-hidden="true"></span
+            ><span id="luna-appearance-label">Daylight</span>
+          </button>
           <div
             id="header-status"
             class="header-status"
@@ -127,32 +154,6 @@
         </div>
       </header>
 
-      <nav class="navigation luna-primary-nav" aria-label="Main navigation">
-        <button
-          class="nav-item luna-group-button"
-          type="button"
-          data-section="home"
-          aria-current="page"
-          data-group="home"
-        >
-          <span class="nav-icon" aria-hidden="true"
-            ><svg><use href="#icon-home"></use></svg
-          ></span>
-          <span>Home</span></button
-        ><button type="button" class="luna-group-button" data-group="work">Work</button
-        ><button type="button" class="luna-group-button" data-group="tools">Tools</button
-        ><button
-          class="nav-item luna-group-button"
-          type="button"
-          data-section="sheet-statistics"
-          data-group="insights"
-        >
-          <span class="nav-icon" aria-hidden="true"
-            ><svg><use href="#icon-sheet"></use></svg
-          ></span>
-          <span>Insights</span>
-        </button>
-      </nav>
       <nav class="luna-module-nav" aria-label="Tools sections" data-luna-group-nav="tools" hidden>
         <button class="nav-item" type="button" data-section="scraper-images">
           <span class="nav-icon" aria-hidden="true"
@@ -190,7 +191,63 @@
       </nav>
 
       <main class="content" aria-live="polite">
-        <h2 id="section-title" tabindex="-1">Home</h2>
+        <div class="content-header friendly-intro" id="luna-friendly-intro">
+          <div class="friendly-intro-copy">
+            <span class="friendly-overline">Your workspace</span>
+            <h2 id="section-title" class="friendly-title" tabindex="-1">Your workspace</h2>
+            <p id="luna-friendly-description">A little space to bring your work together.</p>
+          </div>
+          <button
+            id="luna-quick-open"
+            class="friendly-orb-trigger"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="luna-quick-menu"
+          >
+            <span class="friendly-orb" aria-hidden="true"
+              ><span class="friendly-orb-cut"></span><span class="friendly-orb-ring"></span
+            ></span>
+            <span class="friendly-orb-caption">Quick actions</span>
+          </button>
+          <div
+            id="luna-quick-menu"
+            class="friendly-quick-menu"
+            role="menu"
+            aria-label="Quick actions"
+            hidden
+          >
+            <button type="button" role="menuitem" data-friendly-action="workspace">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-queue"></use></svg
+              ><span>Open workspace</span>
+            </button>
+            <button type="button" role="menuitem" data-friendly-action="collection">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-inventory"></use></svg
+              ><span>Browse sections</span>
+            </button>
+            <button type="button" role="menuitem" data-friendly-action="focus">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"></path></svg
+              ><span>Focus workspace</span>
+            </button>
+            <button type="button" role="menuitem" data-friendly-action="surface">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="16" rx="5"></rect>
+                <path d="m7 12 5-5"></path></svg
+              ><span>Surface</span><span id="luna-surface-label">Glass</span>
+            </button>
+            <button type="button" role="menuitem" data-friendly-action="depth">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m3 8 9-5 9 5-9 5zM3 12l9 5 9-5M3 16l9 5 9-5"></path></svg
+              ><span>Depth</span><span id="luna-depth-label">Sculpted</span>
+            </button>
+            <button type="button" role="menuitem" data-friendly-action="atmosphere">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10Z"></path></svg
+              ><span>Change atmosphere</span>
+            </button>
+          </div>
+        </div>
         <section class="home-dashboard" aria-label="Home overview">
           <article class="welcome-card home-intro">
             <div class="welcome-copy">
@@ -2441,6 +2498,13 @@
             role="tabpanel"
             aria-labelledby="settings-connections-tab"
           >
+            <article class="settings-card public-edition-notice">
+              <h3>Public edition</h3>
+              <p>
+                Private connections and account integrations are not included. Local queues, notes,
+                parsing and review remain available.
+              </p>
+            </article>
             <div class="settings-card">
               <div class="settings-status-row">
                 <div>
@@ -2550,6 +2614,13 @@
             aria-labelledby="settings-ai-tab"
             hidden
           >
+            <article class="settings-card public-edition-notice">
+              <h3>Public edition</h3>
+              <p>
+                Private connections and account integrations are not included. Local queues, notes,
+                parsing and review remain available.
+              </p>
+            </article>
             <div class="settings-card">
               <div class="settings-status-row">
                 <div>
@@ -2805,9 +2876,84 @@
         </section>
       </main>
 
+      <nav class="navigation luna-primary-nav friendly-dock" aria-label="Main navigation">
+        <span id="luna-nav-indicator" aria-hidden="true"></span>
+        <button
+          class="nav-item luna-group-button"
+          type="button"
+          data-section="home"
+          aria-current="page"
+          data-group="home"
+        >
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-home"></use></svg></span
+          ><span>Home</span>
+        </button>
+        <button type="button" class="luna-group-button" data-group="work">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-queue"></use></svg></span
+          ><span>Work</span>
+        </button>
+        <button type="button" class="luna-group-button" data-group="tools">
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-inventory"></use></svg></span
+          ><span>Tools</span>
+        </button>
+        <button
+          class="nav-item luna-group-button"
+          type="button"
+          data-section="sheet-statistics"
+          data-group="insights"
+        >
+          <span class="nav-icon" aria-hidden="true"
+            ><svg><use href="#icon-sheet"></use></svg></span
+          ><span>Insights</span>
+        </button>
+      </nav>
+      <p id="luna-appearance-caption" class="friendly-appearance-caption">
+        Moonlight · Glass · Sculpted
+      </p>
       <footer>Luna 3.0</footer>
     </div>
 
+    <dialog
+      id="luna-command-dialog"
+      class="friendly-command-dialog"
+      aria-labelledby="luna-command-title"
+    >
+      <div class="friendly-command-heading">
+        <h3 id="luna-command-title">Where would you like to go?</h3>
+        <button
+          id="luna-command-close"
+          class="luna-icon-button"
+          type="button"
+          aria-label="Close search"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <label class="friendly-command-search"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5"></circle>
+          <path d="m15.5 15.5 4 4"></path></svg
+        ><input
+          id="luna-command-input"
+          type="search"
+          autocomplete="off"
+          aria-label="Find an action or a section"
+          placeholder="Find an action or a section…"
+      /></label>
+      <div
+        id="luna-command-results"
+        class="friendly-command-results"
+        role="group"
+        aria-label="Matching actions"
+      ></div>
+      <div class="friendly-command-footer">
+        <span id="luna-command-count" aria-live="polite"></span
+        ><span>↑ ↓ to move · Enter to open · Esc to close</span>
+      </div>
+    </dialog>
     <dialog id="luna-module-dialog" class="luna-dialog" aria-label="All Luna sections">
       <div class="luna-dialog-heading">
         <h3>Your workspace</h3>
@@ -2893,5 +3039,6 @@
     <script src="src/panel/luna-motion.js"></script>
     <script src="src/panel/luna-ui.js"></script>
     <script src="src/panel/sidepanel.js"></script>
+    <script src="src/panel/luna-friendly.js"></script>
   </body>
 </html>

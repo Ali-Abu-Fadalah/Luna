@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Friendly Workspace
+
+- Recreates the interface across all nine sections with Moonlight/Daylight themes, lunar quick actions, keyboard command search and a floating dock.
+- Adapts to laptop widths, short panels, touch targets and browser zoom; menus and options remain reachable.
+- Completes theme colors for native controls, scrollbars, AI/notes, populated results, previews and status states.
+- Keeps local workflows and saved-data formats intact. Private integrations, account transports, configuration, worksheets and work data remain excluded.
+
 ## 3.0 — Auction import and release reliability
 
 - Updated local auction parsing and exact-title plan validation with synthetic regression coverage.

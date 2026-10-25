@@ -2,7 +2,7 @@
 
 A calm Chrome side-panel assistant for vehicle-listing work.
 
-Luna brings queues, notes, listing review, image tools, inventory comparison and batch preparation into one workspace. Its Soft Eclipse interface uses pale surfaces, gentle depth and a quiet lunar identity.
+Luna brings queues, notes, listing review, image tools, inventory comparison and batch preparation into one workspace. Its Friendly Workspace interface offers Moonlight and Daylight appearances, soft surfaces, compact menus and a floating navigation dock.
 
 ## What's in this release
 
@@ -13,14 +13,15 @@ Luna brings queues, notes, listing review, image tools, inventory comparison and
 - Inventory comparison using pasted advertisement names and inventory text.
 - Batch parsing and separate field previews.
 - Statistics and spreadsheet-export logic, with Unlisted kept separate from total work.
-- A consistent light interface, accessible dropdowns and reduced-motion support.
+- Light and dark themes across forms, results, status messages and scrollbars.
+- Laptop layouts, touch targets, keyboard command search and reduced-motion support.
 - Auctions with separate previews, visible paste review, cropped headerless row import and optional local workbook import.
 
 This is the **public-safe edition of Luna 3.0**. Company spreadsheet connections, catalog endpoints, internal target sites, AI transport implementations and backend deployments are deliberately absent. Features that depend on those services are unavailable in this edition. This release does not connect to any organization's systems, provide access to work data, or include credentials.
 
 ## Install in Chrome
 
-1. Download `Luna-3.0.0-public.zip` from [Releases](https://github.com/Ali-Abu-Fadalah/Luna/releases), or build it from this checkout using the development instructions below.
+1. Download the [latest source ZIP](https://github.com/Ali-Abu-Fadalah/Luna/archive/refs/heads/main.zip) for the current Friendly Workspace update, or choose a numbered package from [Releases](https://github.com/Ali-Abu-Fadalah/Luna/releases).
 2. Extract the ZIP to a folder you can keep on your computer.
 3. Open `chrome://extensions` and turn on **Developer mode**.
 4. Choose **Load unpacked** and select the extracted `luna` folder—the folder containing `manifest.json`.

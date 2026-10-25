@@ -1,0 +1,14 @@
+/* Public edition omits private configuration and fill controls. */
+.public-edition #settings-ai-panel .settings-card:not(.public-edition-notice),
+.public-edition .settings-card:has(#settings-test-connection),
+.public-edition .settings-card:has(#settings-test-ayshei-endpoint),
+.public-edition .raw-data-settings,
+.public-edition .scraper-send-row,
+.public-edition #manual-ad-fill-ayshei,
+.public-edition #image-scraper-import,
+.public-edition #jenkins-fill,
+.public-edition #inventory-capture-page,
+.public-edition #queue-vehicle-ai-tools,
+.public-edition #queue-ai-result {
+  display: none !important;
+}
