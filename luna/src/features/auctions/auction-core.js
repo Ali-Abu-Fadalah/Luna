@@ -32,7 +32,7 @@ globalThis.LunaAuctionCore = (() => {
       return "";
     }
   };
-  const parseTSV = (text) => {
+  const parseTSV = (text, keepLastEmptyRow = false) => {
     const rows = [];
     let row = [],
       cell = "",
@@ -60,7 +60,7 @@ globalThis.LunaAuctionCore = (() => {
         "The pasted sheet has an unfinished quoted cell. Copy the complete rows again."
       );
     row.push(cell);
-    if (row.some((value) => clean(value))) rows.push(row);
+    if (row.some((value) => clean(value)) || (keepLastEmptyRow && row.length > 1)) rows.push(row);
     return rows;
   };
   const cellValue = (cell) => {
@@ -71,8 +71,11 @@ globalThis.LunaAuctionCore = (() => {
     if (link && safeUrl(link[2])) return { text: link[1], url: safeUrl(link[2]) };
     return { text, url: "" };
   };
-  const parseTable = (text) => {
-    const lines = String(text).trim().split(/\r?\n/);
+  const parseTable = (text, keepLastEmptyRow = false) => {
+    const lines = String(text)
+      .trim()
+      .split(/\r?\n/)
+      .filter((line) => line.trim());
     if (!text.includes("\t") && lines.every((line) => /^\s*\|.*\|\s*$/.test(line)))
       return lines
         .map((line) =>
@@ -86,7 +89,7 @@ globalThis.LunaAuctionCore = (() => {
             })
         )
         .filter((row) => !row.every((cell) => /^:?-+:?$/.test(cell)));
-    return parseTSV(text);
+    return parseTSV(text, keepLastEmptyRow);
   };
   const parseDate = (value, format = "strict", yearForMissing = new Date().getFullYear()) => {
     let text = clean(value).replace(/(\d)(?:st|nd|rd|th)\b/gi, "$1");
@@ -456,6 +459,7 @@ globalThis.LunaAuctionCore = (() => {
   const inferHeaders = (table, format, { layout, savedHeaders, year }) => {
     const populated = table.filter((row) => row.some((cell) => clean(cell.text) || cell.url));
     const width = Math.max(...table.map((row) => row.length));
+    if (!populated.length) return inferredColumns(Array(width).fill(""), "unrecognized");
     const usedWidth = Math.max(
       ...table.map((row) =>
         row.reduce((last, cell, index) => (clean(cell.text) || cell.url ? index + 1 : last), 0)
@@ -521,7 +525,11 @@ globalThis.LunaAuctionCore = (() => {
       (compatible(savedHeaders) || compatible(savedHeaders, true))
     )
       return inferredColumns([...savedHeaders], "saved-headers");
-    const candidates = [...Object.values(layouts), ...workbookLayouts].filter(fits);
+    // A sheet copy may stop at Duration. Keep every internal blank and trim
+    // only catalog columns beyond the copied right edge before comparing it.
+    const candidates = [...Object.values(layouts), ...workbookLayouts]
+      .map((headers) => (headers.length > width ? headers.slice(0, width) : headers))
+      .filter(fits);
     const unique = [
       ...new Map(
         candidates.map((headers) => [JSON.stringify(columnMap(headers)), headers])
@@ -662,12 +670,13 @@ globalThis.LunaAuctionCore = (() => {
       layout = "auto",
       savedHeaders = [],
       year = new Date().getFullYear(),
-      allowHeaderlessPhotoSource = false
+      allowHeaderlessPhotoSource = false,
+      keepUnrecognizedRows = false
     } = {}
   ) => {
-    const table = (typeof input === "string" ? parseTable(input) : input || []).map((row) =>
-      row.map(cellValue)
-    );
+    const table = (
+      typeof input === "string" ? parseTable(input, keepUnrecognizedRows) : input || []
+    ).map((row) => row.map(cellValue));
     if (!table.length || !table.some((row) => row.some((cell) => clean(cell.text) || cell.url)))
       throw new Error("Paste the auction rows first.");
     const textOf = (cell) => clean(cellValue(cell).text);
@@ -685,7 +694,7 @@ globalThis.LunaAuctionCore = (() => {
     const rows = [];
     for (let index = headerIndex + 1; index < table.length; index++) {
       const cells = table[index];
-      if (!cells.some((cell) => textOf(cell))) continue;
+      if (!cells.some((cell) => textOf(cell)) && !keepUnrecognizedRows) continue;
       let rowHeaders = headerCells;
       if (
         headerCells.perRow ||
@@ -696,7 +705,10 @@ globalThis.LunaAuctionCore = (() => {
       ) {
         const individual = inferHeaders([cells], format, { layout: "auto", savedHeaders, year });
         rowHeaders = individual.perRow ? anchorHeaders(cells, format, year) : individual;
-        if (!rowHeaders) continue;
+        if (!rowHeaders) {
+          if (!keepUnrecognizedRows) continue;
+          rowHeaders = inferredColumns(Array(cells.length).fill(""), "unrecognized");
+        }
       }
       const map = rowHeaders === headerCells ? commonMap : columnMap(rowHeaders);
       if (aliases.title.includes(key(textOf(cells[map.title])))) continue;
@@ -706,17 +718,15 @@ globalThis.LunaAuctionCore = (() => {
       };
       // Worksheet separators outside the listing fields are not auction rows.
       // Partial listings still import and expose their missing fields.
-      if (
-        !Object.keys(map)
-          .filter((field) => field !== "serial")
-          .some((field) =>
-            (Array.isArray(map[field]) ? map[field] : [map[field]]).some((column) => {
-              const cell = cells[column];
-              return cell && (!missing(cell.text) || cell.url);
-            })
-          )
-      )
-        continue;
+      const recognized = Object.keys(map)
+        .filter((field) => field !== "serial")
+        .some((field) =>
+          (Array.isArray(map[field]) ? map[field] : [map[field]]).some((column) => {
+            const cell = cells[column];
+            return cell && (!missing(cell.text) || cell.url);
+          })
+        );
+      if (!recognized && !keepUnrecognizedRows) continue;
       const descriptions = map.descriptionUrl
         .map((index) => cells[index])
         .filter((cell) => cell && (!missing(cell.text) || cell.url));
@@ -773,6 +783,10 @@ globalThis.LunaAuctionCore = (() => {
         sourceRow: index + 1,
         serial: get("serial"),
         title: get("title"),
+        sourceTitleHints: cells
+          .filter((cell) => cell.url && !safeUrl(cell.text) && /\p{L}/u.test(cell.text))
+          .map((cell) => clean(cell.text))
+          .slice(0, 8),
         brand: get("brand"),
         category: get("category"),
         condition: get("condition"),
@@ -796,6 +810,8 @@ globalThis.LunaAuctionCore = (() => {
         status: "pending",
         issues: []
       };
+      if (!recognized)
+        row.importError = "Could not read this row. Copy its column headers with the data.";
       if (!row.descriptionUrl && description && !missing(description.text)) {
         row.descriptionSource = description.text.trim();
         row.description = bulletize(row.descriptionSource);
@@ -826,7 +842,25 @@ globalThis.LunaAuctionCore = (() => {
       );
     const signatures = new Map();
     for (const row of rows) {
-      const signature = JSON.stringify([row.title, row.photosUrl, row.startDate, row.startPrice]);
+      // Unresolved rows have no reliable identity. Empty inferred fields must
+      // never make unrelated rows duplicates of one another.
+      if (
+        !clean(row.title) ||
+        !row.startDate ||
+        !row.endDate ||
+        missing(row.startPrice) ||
+        missing(row.reservePrice)
+      )
+        continue;
+      const signature = JSON.stringify([
+        clean(row.title).toLocaleLowerCase("en"),
+        row.photosUrl,
+        row.startDate,
+        row.endDate,
+        row.startPrice,
+        row.reservePrice,
+        row.tamara
+      ]);
       if (signatures.has(signature)) {
         row.issues.push(
           "Possible duplicate row. Compare it with the matching row before preparing another auction."

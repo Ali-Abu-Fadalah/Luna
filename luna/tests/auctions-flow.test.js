@@ -100,6 +100,14 @@ const create = async ({
     status: "complete"
   };
   const context = {
+    Date: class extends Date {
+      constructor(...args) {
+        super(...(args.length ? args : ["2026-10-24T08:00:00Z"]));
+      }
+      static now() {
+        return Date.parse("2026-10-24T08:00:00Z");
+      }
+    },
     URL,
     Intl,
     crypto: webcrypto,

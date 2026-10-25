@@ -687,6 +687,17 @@ test("quoted multiline cells retain alignment and duplicates are flagged", () =>
   assert.ok(core.validate(noPhoto).issues.some((issue) => issue.includes("Descale Photoes")));
   assert.ok(core.parseSheet([headers, [...data, "unexpected content"]])[0].importError);
 });
+test("Very good sheet values retain the exact supported condition", () => {
+  const row = parse();
+  for (const condition of ["very good", "Very good", " VERY  GOOD "]) {
+    row.condition = condition;
+    assert.equal(core.validate(row).plan.condition, "Very good");
+    assert.equal(core.validate(row).valid, true);
+  }
+  row.condition = "Very good with extras";
+  assert.equal(core.validate(row).valid, false);
+});
+
 test("conditions, Tamara values, missing photo links and lookalike hosts need review", () => {
   const row = parse();
   row.condition = "Used";

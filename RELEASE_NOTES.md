@@ -1,11 +1,13 @@
-# Luna 2.7 public edition
+# Luna 3.0 public edition
 
-Release date: 23 October 2026.
+Release date: 25 October 2026.
 
-Auctions now has independent Republish and New placement tabs. Pasted text stays visible until Review rows. Each reviewed paste replaces its preview; Clear, Remove, Select all and Select none make batches easier to manage. The compact republish preview exposes fields only when Edit is clicked and keeps earlier outcomes in collapsed History.
+Luna 3.0 brings the current local auction import and validation improvements into the public edition. Pasted rows retain their title, condition, prices, dates and source links, with editable fields where the source is ambiguous. Separate Republish and New placement previews, local workbook import, queues, notes, public listing capture and spreadsheet exports remain available.
 
-Cropped headerless rows can begin at Tag or Model - Title and end at Duration. The importer aligns structural column evidence, preserving the correct initial/reserve prices without confusing weight, listing IDs or thresholds. Uncertain values remain editable instead of being guessed.
+Sheet conditions such as Very good retain the exact supported choice. Cropped headerless rows preserve their initial/reserve columns without confusing weight, listing IDs or thresholds. Uncertain values remain editable.
 
-The public edition includes local previews, editing and workbook tools. Private account connections, admin/draft transports, backend deployments, credentials and work data are excluded. Account-connected filling and republishing are unavailable in this edition.
+Organization settings, authenticated account transports, background auction submission, account-bound photo recovery, backend deployment code, credentials and captured work data are excluded. Connected filling and republishing are unavailable in this edition.
 
-Chrome and package metadata use 2.7.0; the interface displays 2.7. Run `npm run package` inside `luna` to create `dist/Luna-2.7.0-public.zip` and its SHA-256 checksum. Reload Luna in chrome://extensions after updating the unpacked files.
+Download **Luna-3.0.0-public.zip**, extract it, and select its **luna** folder using **Load unpacked** at `chrome://extensions`. Enable Developer mode first. Chrome 116 or later is required; no build step is needed. Existing installations can replace their files and use **Reload** on the extension card.
+
+The matching **Luna-3.0.0-public.zip.sha256** file verifies the download. Chrome/package metadata uses 3.0.0; the panel displays 3.0. Source, tests and the public package pass the publication checks. See README, PRIVACY and SECURITY for capabilities and boundaries.

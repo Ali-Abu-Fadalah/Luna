@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Luna",
-  "version": "2.7.0",
+  "version": "3.0.0",
   "description": "A calm side-panel assistant for local vehicle-listing queues, notes, capture and review.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -32,5 +32,5 @@
   "side_panel": {
     "default_path": "sidepanel.html"
   },
-  "version_name": "2.7"
+  "version_name": "3.0"
 }

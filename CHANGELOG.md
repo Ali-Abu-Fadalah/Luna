@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0 — Auction import and release reliability
+
+- Updated local auction parsing and exact-title plan validation with synthetic regression coverage.
+- Sheet conditions such as Very good retain their exact supported choice.
+- Chrome/package metadata uses 3.0.0; the visible version is 3.0.
+- The public ZIP includes a SHA-256 checksum and passes publication checks.
+- Private account-connected filling, photo recovery, background republishing, deployment source, organization configuration and work data remain excluded.
+
 ## 2.7 — Simpler auction batches
 
 - Separate Republish and New placement previews; paste remains visible until Review rows.

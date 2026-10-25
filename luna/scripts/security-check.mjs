@@ -84,8 +84,14 @@ if (JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["http
   failures.push("Unexpected optional host access.");
 const background = readFileSync(path.join(extension, "src/background/background.js"), "utf8");
 const auctionFolder = path.join(extension, "src/features/auctions");
-if (readdirSync(auctionFolder).includes("auction-republish-page.js"))
-  failures.push("The authenticated admin page adapter is excluded from the public edition.");
+for (const name of [
+  "auction-republish-page.js",
+  "auction-republish-runner.js",
+  "auction-republish-link.js",
+  "auction-republish-archive.js"
+])
+  if (readdirSync(auctionFolder).includes(name))
+    failures.push(`${name}: private account/background implementation is excluded.`);
 const republishTransport = readFileSync(
   path.join(auctionFolder, "auction-republish-api.js"),
   "utf8"
@@ -96,6 +102,19 @@ if (
   )
 )
   failures.push("An authenticated admin transport was added to the public edition.");
+const previewContext = {};
+vm.runInNewContext(
+  readFileSync(path.join(auctionFolder, "auction-republish-core.js"), "utf8"),
+  previewContext
+);
+if (["payload", "audit", "choose"].some((name) => previewContext.LunaAuctionRepublishCore?.[name]))
+  failures.push("Private account payload/audit helpers must not enter the public preview.");
+if (
+  /resumeAuction|luna\.auctionPhotos\.v1/.test(
+    readFileSync(path.join(extension, "src/features/images/image-scraper-fill.js"), "utf8")
+  )
+)
+  failures.push("Account-bound auction photo recovery is excluded from the public edition.");
 if (
   /api\.groq\.com|generativelanguage\.googleapis\.com|openrouter\.ai\/api|\/api\/v\d+\/search/.test(
     background
